@@ -6,7 +6,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static(__public_dir_or_current_dir_if_needed)); // 静的ファイルの配信設定
+app.use(express.static(__dirname)); // 静的ファイルの配信設定
 
 io.on('connection', (socket) => {
   console.log('ユーザーが接続しました:', socket.id);
