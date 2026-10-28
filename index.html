@@ -125,8 +125,8 @@
       { id: 50, suit: "S", num: 13, title: "解剖", desc: "体温が1℃上昇するとき、代謝が増加する量（％）" },
       { id: 51, suit: "H", num: 13, title: "疾病", desc: "男性の貧血の定義（g/dl未満）" },
       { id: 52, suit: "D", num: 13, title: "外傷", desc: "成人男性、片側上肢全体III度熱傷と前胸部のみのII度熱傷、この人の熱傷指数（端数切捨て）" },
-      { id: 53, suit: "JOKER", num: 0, title: "心室細動（VF）", desc: "即座に除細動が必要な致死性不整脈。持ち続けるとあがれません" },
-      { id: 54, suit: "JOKER", num: 0, title: "DC（電気ショック）", desc: "VFと組み合わせて使える。このカードとVFのカードを組み合わせて使える" },
+      { id: 53, suit: "JOKER", num: 0, title: "Cardio", desc: "即座に除細動が必要な致死性不整脈。持ち続けるとあがれません" },
+      { id: 54, suit: "JOKER", num: 0, title: "Shock", desc: "VFと組み合わせて使える。このカードとVFのカードを組み合わせて使える" },
 
       // GAME 02（廃用症候群・神経衰弱用）グループ1〜30 各2枚ずつ（計60枚）
       { id: 101, suit: "M", num: 1, title: "廃用基礎", desc: "絶対安静による1日あたりの筋力低下率（％）の目安" },
@@ -404,9 +404,9 @@
         <!-- プレイヤー名札リング -->
         <div id="table-players-ring" class="w-full max-w-5xl flex flex-wrap items-center justify-center gap-2 mb-3 px-2"></div>
 
-        <!-- シンプルで頑丈なゲーム盤面（背景の机をすっきりさせ、グリッドが絶対に崩れない構造） -->
+        <!-- 盤面（カードが小さく、すっきり収まるように最適化） -->
         <div class="w-full max-w-5xl flex-1 bg-slate-900 border-2 border-slate-800 rounded-3xl p-6 shadow-2xl relative min-h-[480px] flex items-center justify-center overflow-y-auto">
-          <div id="memory-cards-grid" class="w-full max-w-4xl grid grid-cols-4 sm:grid-cols-6 gap-3 p-2 z-10"></div>
+          <div id="memory-cards-grid" class="w-full max-w-4xl grid grid-cols-4 sm:grid-cols-6 gap-2.5 p-2 z-10"></div>
         </div>
       </section>
 
@@ -512,7 +512,7 @@
       <input id="input-join-code" type="text" maxlength="6" placeholder="123456" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-center text-xl text-white font-mono mb-4 focus:outline-none focus:border-cyan-500 tracking-widest">
       <div class="flex gap-2">
         <button onclick="app.closeJoinModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl transition">キャンセル</button>
-        <button onclick="app.executeJoin()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-3 rounded-xl font-bold transition shadow-[0_0_10px_rgba(8,145,178,0.4)]">合流する</button>
+        <button onclick="app.executeJoin()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-3 rounded-xl font-bold transition shadow-[0_0_10px_rgba(8,145,178,0.4)]">合流する系</button>
       </div>
     </div>
   </div>
@@ -592,7 +592,7 @@
                 <option value="memory">GAME 02: 廃用症候群用 (グループ1〜30)</option>
                 <option value="jinuki">GAME 03: ジジ抜き用</option>
               </select>
-              <button onclick="app.addNewCardPrompt()" class="text-xs bg-cyan-700 hover:bg-cyan-600 text-white px-3 py-1.5 rounded-lg transition font-bold">＋カード追加</button>
+              <button onclick="app.addNewCardPrompt()" class="text-xs bg-cyan-700 hover:bg-cyan-600 text-white px-3 py-1.5 rounded-lg transition font-bold">＋カード追加</li>
               <button onclick="app.resetDB()" class="text-xs bg-rose-900/60 hover:bg-rose-800 text-rose-300 border border-rose-800 px-3 py-1.5 rounded-lg transition">初期化</button>
             </div>
           </div>
@@ -954,7 +954,7 @@
 
         state.memoryState.cards.forEach((card, idx) => {
           if (card.isMatched) {
-            grid.innerHTML += `<div class="aspect-[3/4] w-full rounded-2xl border border-dashed border-slate-700/20 opacity-10 pointer-events-none flex-shrink-0"></div>`;
+            grid.innerHTML += `<div class="aspect-[3/4] w-full rounded-xl border border-dashed border-slate-700/20 opacity-10 pointer-events-none flex-shrink-0"></div>`;
             return;
           }
           const isFlipped = card.isFlipped;
@@ -962,33 +962,32 @@
 
           const ecgCardBackHtml = `
             <div class="m-auto flex flex-col items-center justify-center w-full px-1">
-              <div class="w-full flex items-center justify-between text-[9px] text-cyan-400 font-mono mb-1 px-1">
-                <span class="font-bold flex items-center gap-0.5"><span>⚡</span> ECG</span>
+              <div class="w-full flex items-center justify-between text-[8px] text-cyan-400 font-mono mb-0.5 px-1">
+                <span class="font-bold">⚡ ECG</span>
               </div>
-              <div class="w-full h-8 bg-slate-950/90 rounded-lg border border-cyan-500/40 flex items-center justify-center overflow-hidden shadow-inner">
+              <div class="w-full h-6 bg-slate-950/90 rounded border border-cyan-500/40 flex items-center justify-center overflow-hidden shadow-inner">
                 <svg class="w-full h-full opacity-90" viewBox="0 0 100 30" preserveAspectRatio="none">
                   <path d="M 0 15 L 18 15 L 23 5 L 28 25 L 33 15 L 55 15 L 60 3 L 65 27 L 70 15 L 100 15" fill="none" stroke="#22d3ee" stroke-width="2.5"/>
                 </svg>
               </div>
-              <div class="text-[8px] text-slate-400 font-mono mt-1 tracking-wider">EMS MONITOR</div>
             </div>
           `;
 
-          // カード枠内できれいに収まるように設計された表面HTML
+          // 小型化したカード表面
           const cardFrontHtml = `
-            <div class="flex items-center justify-between text-[11px] px-1 font-bold">
-              <span class="${SUIT_COLORS[card.suit]||''} text-sm">${SUIT_ICONS[card.suit]||'♠'}</span>
-              <span class="font-mono bg-cyan-100 text-cyan-900 px-1.5 py-0.5 rounded text-[10px] font-black">Gr.${card.num}</span>
+            <div class="flex items-center justify-between text-[10px] px-0.5 font-bold">
+              <span class="${SUIT_COLORS[card.suit]||''} text-xs">${SUIT_ICONS[card.suit]||'♠'}</span>
+              <span class="font-mono bg-cyan-100 text-cyan-900 px-1 rounded text-[9px] font-black">Gr.${card.num}</span>
             </div>
-            <div class="text-center my-auto px-1 py-1 bg-white/90 rounded-xl border border-slate-300 shadow-inner overflow-hidden">
-              <div class="text-xs font-black text-slate-900 mb-1 truncate">${utils.escapeHtml(card.title)}</div>
-              <div class="text-[10px] font-bold text-slate-800 leading-tight line-clamp-3">${utils.escapeHtml(card.desc)}</div>
+            <div class="text-center my-auto px-0.5 py-0.5 bg-white/90 rounded-lg border border-slate-300 shadow-inner overflow-hidden">
+              <div class="text-[11px] font-black text-slate-900 mb-0.5 truncate">${utils.escapeHtml(card.title)}</div>
+              <div class="text-[9px] font-bold text-slate-800 leading-tight line-clamp-3">${utils.escapeHtml(card.desc)}</div>
             </div>
-            <div class="text-[9px] text-slate-500 text-right font-mono pr-1">ID:${card.id}</div>
+            <div class="text-[8px] text-slate-500 text-right font-mono pr-0.5">ID:${card.id}</div>
           `;
 
           grid.innerHTML += `
-            <div onclick="app.handleMemoryCardClick(${idx})" class="aspect-[3/4] w-full rounded-2xl border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between p-2.5 shadow-[0_10px_20px_rgba(0,0,0,0.6)] select-none relative flex-shrink-0 overflow-hidden ${isFlipped ? 'bg-slate-100 text-slate-900 border-indigo-500 z-20 shadow-[0_0_20px_rgba(99,102,241,0.5)]' : `bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 ${guideClass} hover:scale-105 z-10 text-slate-100'}`}>
+            <div onclick="app.handleMemoryCardClick(${idx})" class="aspect-[3/4] w-full rounded-xl border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between p-1.5 shadow-[0_5px_15px_rgba(0,0,0,0.5)] select-none relative flex-shrink-0 overflow-hidden text-[10px] ${isFlipped ? 'bg-slate-100 text-slate-900 border-indigo-500 z-20 shadow-[0_0_15px_rgba(99,102,241,0.5)]' : `bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 ${guideClass} hover:scale-105 z-10 text-slate-100'}`}>
               ${isFlipped ? cardFrontHtml : ecgCardBackHtml}
             </div>
           `;
