@@ -72,6 +72,7 @@
 <body class="min-h-screen bg-slate-950 flex flex-col items-center justify-start text-slate-100 overflow-x-hidden">
 
   <script>
+    // GAME 01, 03, 04 用マスターデータ
     const DEFAULT_EMS_CARDS = [
       { id: 1, suit: "C", num: 1, title: "外傷", desc: "ジェファーソン骨折起こす頸椎（何番目）" },
       { id: 2, suit: "S", num: 1, title: "処置", desc: "アドレナリンIVにおける1回あたりの投与量（mg）" },
@@ -126,74 +127,52 @@
       { id: 51, suit: "H", num: 13, title: "疾病", desc: "男性の貧血の定義（g/dl未満）" },
       { id: 52, suit: "D", num: 13, title: "外傷", desc: "成人男性、片側上肢全体III度熱傷と前胸部のみのII度熱傷、この人の熱傷指数（端数切捨て）" },
       { id: 53, suit: "JOKER", num: 0, title: "Cardio", desc: "即座に除細動が必要な致死性不整脈。持ち続けるとあがれません" },
-      { id: 54, suit: "JOKER", num: 0, title: "Shock", desc: "VFと組み合わせて使える。このカードとVFのカードを組み合わせて使える" },
-
-      // GAME 02（廃用症候群・神経衰弱用）グループ1〜30 各2枚ずつ（計60枚）
-      { id: 101, suit: "M", num: 1, title: "廃用基礎", desc: "絶対安静による1日あたりの筋力低下率（％）の目安" },
-      { id: 102, suit: "M", num: 1, title: "廃用基礎", desc: "寝たきり高齢者に最も起こりやすい関節拘縮の好発位" },
-      { id: 103, suit: "M", num: 2, title: "筋萎縮", desc: "安静開始から筋萎縮が顕著に現れ始めるまでの日数" },
-      { id: 104, suit: "M", num: 2, title: "筋萎縮", desc: "速筋線維と遅筋線維のどちらが廃用性萎縮を起こしやすいか" },
-      { id: 105, suit: "M", num: 3, title: "骨粗鬆症", desc: "不活動性骨粗鬆症でカルシウムが最も流出しやすい部位" },
-      { id: 106, suit: "M", num: 3, title: "骨粗鬆症", desc: "骨萎縮を防ぐために必要な最低限の負荷（荷重）の種類" },
-      { id: 107, suit: "M", num: 4, title: "関節拘縮", desc: "長期臥床で最も変形を起こしやすい足関節の肢位" },
-      { id: 108, suit: "M", num: 4, title: "関節拘縮", desc: "拘縮予防のための受動関節運動（ROMex）の基本原則" },
-      { id: 109, suit: "M", num: 5, title: "深部静脈血栓", desc: "DVT（エコノミークラス症候群）の三大要因（ヴィルヒョウの三徴）の一つ" },
-      { id: 110, suit: "M", num: 5, title: "深部静脈血栓", desc: "下肢静脈血栓が詰まると最も危険な重要臓器" },
-      { id: 111, suit: "M", num: 6, title: "起立性低血圧", desc: "急な起き上がりで血圧が低下する際の収縮期血圧の低下基準（mmHg）" },
-      { id: 112, suit: "M", num: 6, title: "起立性低血圧", desc: "起立性低血圧を防ぐための段階的な離床ステップ" },
-      { id: 113, suit: "M", num: 7, title: "褥瘡（床ずれ）", desc: "圧迫による血流障害で好発する仙骨部の体位" },
-      { id: 114, suit: "M", num: 7, title: "褥瘡（床ずれ）", desc: "体位変換を行う標準的な時間間隔（時間）" },
-      { id: 115, suit: "M", num: 8, title: "誤嚥性肺炎", desc: "不活発や臥床によって低下する嚥下反射の神経メカニズム" },
-      { id: 116, suit: "M", num: 8, title: "誤嚥性肺炎", desc: "食事摂取時の最も安全なベッドアップ角度（度）" },
-      { id: 117, suit: "M", num: 9, title: "便秘・腸閉塞", desc: "腹圧低下と運動不足による腸蠕動運動の低下対策" },
-      { id: 118, suit: "M", num: 9, title: "便秘・腸閉塞", desc: "水分・食物繊維摂取とともに行う腹部マッサージの方向" },
-      { id: 119, suit: "M", num: 10, title: "尿路感染症", desc: "カテーテル留置や排泄障害による残尿が引き起こす感染リスク" },
-      { id: 120, suit: "M", num: 10, title: "尿路感染症", desc: "排泄ケアにおける清潔保持と水分摂取の重要性" },
-      { id: 121, suit: "M", num: 11, title: "認知機能低下", desc: "感覚刺激の減少や環境変化によるせん妄・認知機能低下" },
-      { id: 122, suit: "M", num: 11, title: "認知機能低下", desc: "見当識を保つためにベッドサイドに置くべきもの" },
-      { id: 123, suit: "M", num: 12, title: "心機能低下", desc: "臥床により1回拍出量が低下した際に見られる代償性の心拍数変化" },
-      { id: 124, suit: "M", num: 12, title: "心機能低下", desc: "心予備能低下による離床時のモニタリング項目" },
-      { id: 125, suit: "M", num: 13, title: "呼吸機能低下", desc: "臥位による胸郭の動き制限と換気量低下のメカニズム" },
-      { id: 126, suit: "M", num: 13, title: "呼吸機能低下", desc: "痰の排出を促すための体位ドレナージの基本" },
-      { id: 127, suit: "M", num: 14, title: "代謝異常", desc: "糖代謝低下による耐糖能異常（インスリン抵抗性）" },
-      { id: 128, suit: "M", num: 14, title: "代謝異常", desc: "不活動による基礎代謝量の変化傾向" },
-      { id: 129, suit: "M", num: 15, title: "精神心理的影響", desc: "無気力や抑うつ状態を引き起こす心理的メカニズム" },
-      { id: 130, suit: "M", num: 15, title: "精神心理的影響", desc: "早期離床がもたらす精神的リハビリテーション効果" },
-      { id: 131, suit: "M", num: 16, title: "バランス障害", desc: "前庭器官や固有受容器の刺激低下による平衡機能低下" },
-      { id: 132, suit: "M", num: 16, title: "バランス障害", desc: "立位保持訓練における安全確保のポイント" },
-      { id: 133, suit: "M", num: 17, title: "栄養・低栄養", desc: "食欲低下と代謝低下による低アルブミン血症のリスク" },
-      { id: 134, suit: "M", num: 17, title: "栄養・低栄養", desc: "栄養状態改善のための高タンパク・高カロリー食の意義" },
-      { id: 135, suit: "M", num: 18, title: "皮膚湿潤", desc: "発汗や尿失禁によるスキントラブルの発生機序" },
-      { id: 136, suit: "M", num: 18, title: "皮膚湿潤", desc: "スキンケアと清拭における保湿の重要性" },
-      { id: 137, suit: "M", num: 19, title: "足底浮腫", desc: "筋ポンプ作用の消失による下肢の水分貯留" },
-      { id: 138, suit: "M", num: 19, title: "足底浮腫", desc: "弾性ストッキングや自動・他動運動の効果" },
-      { id: 139, suit: "M", num: 20, title: "体温調節障害", desc: "自律神経機能低下による発汗・体温コントロール不良" },
-      { id: 140, suit: "M", num: 20, title: "体温調節障害", desc: "室温管理と衣類調整による環境整備" },
-      { id: 141, suit: "M", num: 21, title: "免疫力低下", desc: "ストレスホルモン増加と血流低下による免疫機能の減退" },
-      { id: 142, suit: "M", num: 21, title: "免疫力低下", desc: "院内感染防止のための手指衛生と環境消毒" },
-      { id: 143, suit: "M", num: 22, title: "睡眠障害", desc: "昼夜逆転や活動量不足による睡眠の質の低下" },
-      { id: 144, suit: "M", num: 22, title: "睡眠障害", desc: "日中の離床と自然光照射による体内時計の調整" },
-      { id: 145, suit: "M", num: 23, title: "言語・コミュニケーション", desc: "発話機会の減少による言語表現力の低下" },
-      { id: 146, suit: "M", num: 23, title: "言語・コミュニケーション", desc: "積極的な声かけと対話の機会確保" },
-      { id: 147, suit: "M", num: 24, title: "ADL低下", desc: "基本的日常生活動作（起居・移乗・歩行）の自立度低下" },
-      { id: 148, suit: "M", num: 24, title: "ADL低下", desc: "残存機能の維持と生活動作訓練の導入時期" },
-      { id: 149, suit: "M", num: 25, title: "転倒・転落", desc: "筋力低下と筋緊張低下が招く移動時の転倒リスク" },
-      { id: 150, suit: "M", num: 25, title: "転倒・転落", desc: "環境整備とセンサーマットの活用" },
-      { id: 151, suit: "M", num: 26, title: "廃用症候群予防", desc: "早期離床リハビリテーションの最大の目的" },
-      { id: 152, suit: "M", num: 26, title: "廃用症候群予防", desc: "多職種チーム（医師・看護師・救命士・PT）による連携" },
-      { id: 153, suit: "M", num: 27, title: "リハビリテーション評価", desc: "FIM（機能的自立度評価法）によるADL評価の活用" },
-      { id: 154, suit: "M", num: 27, title: "リハビリテーション評価", desc: "ブルンストロームステージによる麻痺の評価" },
-      { id: 155, suit: "M", num: 28, title: "環境調整", desc: "バリアフリー化と福祉用具（歩行器・車椅子）の選定" },
-      { id: 156, suit: "M", num: 28, title: "環境調整", desc: "自宅退院に向けた家屋調査の重要性" },
-      { id: 157, suit: "M", num: 29, title: "レスパイトケア", desc: "介護者の負担軽減を目的とした一時入所・支援" },
-      { id: 158, suit: "M", num: 29, title: "レスパイトケア", desc: "地域包括ケアシステムにおける連携体制" },
-      { id: 159, suit: "M", num: 30, title: "総合まとめ", desc: "救急現場から回復期・在宅へ繋ぐ廃用予防のトータルケア" },
-      { id: 160, suit: "M", num: 30, title: "総合まとめ", desc: "患者のQOL（生活の質）向上を目指した多職種アプローチ" }
+      { id: 54, suit: "JOKER", num: 0, title: "Shock", desc: "VFと組み合わせて使える。このカードとVFのカードを組み合わせて使える" }
     ];
 
-    const SUIT_ICONS = { C: '♣', S: '♠', H: '♥', D: '♦', M: '🧠', JOKER: '⚡' };
-    const SUIT_COLORS = { C: 'text-emerald-400', S: 'text-indigo-400', H: 'text-rose-400', D: 'text-amber-400', M: 'text-cyan-400', JOKER: 'text-amber-300' };
-    const BOT_NAME_POOL = ['救急隊員α', '救急隊員β', '救急隊員γ', '指導救命士', '機関員', '通信指令員'];
+    // GAME 02（救急神経衰弱専用）全40グループの正確なエクセルデータ（他ゲームとは完全分離）
+    const MEMORY_EXCEL_GROUPS = [
+      { group: 1, disease: "急性心筋梗塞", q1: "心電図、標準誘導等でII、IIIでST上昇", q2: "突然20分以上の胸痛・呼吸困難、ショック" },
+      { id: 2, group: 2, disease: "急性大動脈解離", q1: "突然発症する強い胸痛・背部痛、移動する痛み", q2: "失神や麻痺、左右の脈拍・血圧の差、ショック徴候" },
+      { id: 3, group: 3, disease: "肺血栓塞栓症", q1: "突然の呼吸困難、胸痛、頻呼吸、片側下肢の腫脹", q2: "長期臥床、手術歴、悪性腫瘍の後に発症リスク高め" },
+      { id: 4, group: 4, disease: "急性心不全", q1: "呼吸困難、起坐呼吸、湿性咳嗽、冷汗", q2: "頸静脈怒張、下肢浮腫、慢性心不全の既往。" },
+      { id: 5, group: 5, disease: "致死性不整脈", q1: "動悸、胸部不快感、失神、意識障害、心停止", q2: "心疾患の既往、WPW症候群やBrugada症候群など" },
+      { id: 6, group: 6, disease: "気管支喘息発作", q1: "呼気性喘鳴、呼気延長、息苦しさ、咳嗽、重症では会話困難", q2: "喘息の既往、アレルゲンへの曝露" },
+      { id: 7, group: 7, disease: "COPD急性増悪", q1: "慢性的な咳嗽・喀痰・呼吸困難の増悪", q2: "喫煙歴、るい痩、痰の増加、CO2ナルコーシス" },
+      { id: 8, group: 8, disease: "気胸", q1: "突然の胸痛、呼吸困難、左右の呼吸音の差、胸郭運動", q2: "若年でやせ型の男性、好発部は肺尖部" },
+      { id: 9, group: 9, disease: "肺炎", q1: "発熱、咳嗽、膿性痰、全身倦怠感、食欲不振、水泡音", q2: "2023年時点我が国の死因5位" },
+      { id: 10, group: 10, disease: "急性咽頭蓋炎", q1: "強い咽頭痛、嚥下困難、流涎、嗄声、吸気性喘鳴", q2: "インフルエンザ杆菌b型が起因菌、医療機関では重症例で気管切開" },
+      { id: 11, group: 11, disease: "脳梗塞", q1: "突然の片麻痺、顔面の左右差、構音障害、失語", q2: "FAST、CPSS、ELVOスクリーン、KPSS" },
+      { id: 12, group: 12, disease: "クモ膜下出血", q1: "突然の激しい頭痛、嘔吐、項部硬直", q2: "脳動脈瘤（ウイルス動脈輪）、ST-T変化、不整脈" },
+      { id: 13, group: 13, disease: "てんかん発作", q1: "全身のけいれん、意識消失、トッド麻痺", q2: "HIV、マラリア、トキソプラズマ、神経嚢虫症を機に発症リスク有り" },
+      { id: 14, group: 14, disease: "低血糖", q1: "空腹感、冷汗、振戦、動悸、異常行動、頭痛、麻痺、昏睡", q2: "糖尿病歴、インスリン・血糖降下薬の使用、食事摂取不足" },
+      { id: 15, group: 15, disease: "急性虫垂炎", q1: "心窩部や臍周周囲の痛み、右下腹部に移動する", q2: "青少年に好発、ランツ点" },
+      { id: 16, group: 16, disease: "急性膵炎", q1: "上腹部痛、背部痛、悪心・嘔吐", q2: "飲酒歴、胆石歴、腹膜刺激症状" },
+      { id: 17, group: 17, disease: "上部消化管穿孔", q1: "突然の強い上腹部痛、食事前後の疼痛、腹膜刺激症状", q2: "ピロリ菌、NSAIDsでリスク、幽門狭窄" },
+      { id: 18, group: 18, disease: "腸閉塞", q1: "腹痛、腹部膨満、嘔吐、排便・排ガスの停止。", q2: "手術歴、鼠径部嵌頓ヘルニアで発症リスク" },
+      { id: 19, group: 19, disease: "敗血症", q1: "意識変容、頻呼吸、頻脈、低血圧低下、熱感、重症では低体温", q2: "Sequential Organ Failure Assessment" },
+      { id: 20, group: 20, disease: "アナフィラキシー", q1: "蕁麻疹、血管性浮腫、喘鳴、呼吸困難、低血圧低下、消化器症状", q2: "食物・薬剤・蜂刺傷などへの曝露、アニサキス、運動でも発症" },
+      { id: 21, group: 21, disease: "糖尿病性ケトアシドーシス", q1: "脱水、悪心・嘔吐、腹痛、深くて大きな呼吸、意識障害", q2: "脂肪酸の分解、HCO3-低下" },
+      { id: 22, group: 22, disease: "急性腎盂腎炎", q1: "高熱、悪寒・戦慄、排尿痛、頻尿、CVA陽性", q2: "女性に好発、DM・ステロイドで重症化リスク" },
+      { id: 23, group: 23, disease: "急性硬膜外血腫", q1: "意識清明期、クッシング、骨折の併発が多い", q2: "凸レンズ型の血腫、スワールサイン" },
+      { id: 24, group: 24, disease: "急性硬膜下血腫", q1: "架橋静脈・脳表動脈の破綻、脳ヘルニア、脳挫傷", q2: "三日月形のCT断面図" },
+      { id: 25, group: 25, disease: "頸髄損傷", q1: "四肢麻痺、対麻痺、呼吸停止", q2: "小児では斜めに回転している頸部・後頭部痛・頸部痛を訴えることもある" },
+      { id: 26, group: 26, disease: "熱中症", q1: "めまい、筋肉痛、頭痛、けいれん、肝障害・腎障害", q2: "死亡例では高齢者が8割、5-9月好発" },
+      { id: 27, group: 27, disease: "一酸化炭素中毒", q1: "頭痛、悪心・嘔吐、皮膚紅潮、めまい、けいれん", q2: "（構造式：C≡O）" },
+      { id: 28, group: 28, disease: "オピオイド中毒", q1: "鎮静・鎮痛、著しい縮瞳、呼吸抑制、意識低下、精神・身体依存高め", q2: "拮抗薬はナロキソン" },
+      { id: 29, group: 29, disease: "HELLP症候群", q1: "Hemolysis, Elevated liver enzymes, Low platelet", q2: "上腹部痛、倦怠感、悪心・嘔吐、妊娠歴、妊娠高血圧症候群の既往" },
+      { id: 30, group: 30, disease: "麻疹", q1: "1〜2週間の潜伏期後38℃代の熱、結膜充血、コブリック斑、落屑", q2: "重症例で亜急性硬化性全脳炎（SSPE）を発症" },
+      { id: 31, group: 31, disease: "川崎病", q1: "発熱、眼球結膜の充血、口唇の発赤、イチゴ舌、頸部リンパ腫大", q2: "冠動脈付近の頸部に動脈瘤を形成しAMIで死亡した例がある" },
+      { id: 32, group: 32, disease: "横紋筋融解症", q1: "過激な運動、虚血、薬物、過剰アルコール、電解質などで発症", q2: "筋痛、筋力低下、ショック、ミオグロビン尿" },
+      { id: 33, group: 33, disease: "急性胆道感染症", q1: "右上腹部痛、発熱、黄疸", q2: "マーフィー徴候、シャルコー3徴候、" },
+      { id: 34, group: 34, disease: "ノロウイルス感染症", q1: "悪心・嘔吐、水様性下痢、倦怠感", q2: "塵埃感染・消毒には次亜塩素酸ナトリウム、食中毒患者数最多" },
+      { id: 35, group: 35, disease: "破傷風", q1: "偏性嫌気性菌（クロストリジウム）が起因菌", q2: "肩こり、開口障害、嚥下困難、四肢の筋硬直、呼吸不全" },
+      { id: 36, group: 36, disease: "常位胎盤早期剥離", q1: "腹痛、子宮への圧痛、板状硬", q2: "妊娠高血圧症候群の既往、外傷、前期破水が危険因子" },
+      { id: 37, group: 37, disease: "心膜炎", q1: "胸痛、体動（咳、仰臥位）で増悪、蒸気機関車様摩擦音", q2: "下に凸のST上昇、心タンポナーデ" },
+      { id: 38, group: 38, disease: "感染性心内膜炎", q1: "心室中隔欠損症、大動脈弁逆流症、人工弁置換術後に好発", q2: "発熱、心雑音、自然治癒しない" },
+      { id: 39, group: 39, disease: "髄膜炎", q1: "中耳炎や副鼻腔炎から波及することもある。ウイルス性はエンテロウイルスが", q2: "発熱、頭痛、悪心・嘔吐、けいれん、羞明、項部硬直" },
+      { id: 40, group: 40, disease: "統合失調症", q1: "治療薬の過量内服で悪性症候群の発症リスク", q2: "妄想、異常行動、無関心、注意散漫、幻覚" }
+    ];
 
     function loadDB() { try { const s = localStorage.getItem('ems_db'); if(s) return JSON.parse(s); } catch(e){} return JSON.parse(JSON.stringify(DEFAULT_EMS_CARDS)); }
     function saveDB(data) { localStorage.setItem('ems_db', JSON.stringify(data)); }
@@ -268,15 +247,16 @@
               </div>
             </div>
 
-            <!-- 神経衰弱・廃用症候群専用設定（GAME 02用） -->
+            <!-- 神経衰弱・救急疾患専用設定（GAME 02用） -->
             <div id="memory-only-config" class="hidden pt-3 border-t border-slate-800/80 space-y-3">
               <div>
-                <label class="block text-[11px] font-semibold text-cyan-300 mb-1">神経衰弱 全体ペア数（カード総数）</label>
+                <label class="block text-[11px] font-semibold text-cyan-300 mb-1">神経衰弱 全体ペア数（エクセル全40グループからランダム抽選）</label>
                 <select id="config-memory-pairs" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white">
                   <option value="12">12 ペア (24枚)</option>
-                  <option value="18" selected>18 ペア (36枚 / 標準)</option>
+                  <option value="18">18 ペア (36枚 / 標準)</option>
                   <option value="24">24 ペア (48枚)</option>
                   <option value="30">30 ペア (60枚 / 最大)</option>
+                  <option value="40" selected>40 ペア (80枚 / 全グループ制覇)</option>
                 </select>
               </div>
               <div>
@@ -387,7 +367,7 @@
             <button onclick="app.toggleMemoryBoardModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-[0_0_15px_rgba(37,99,235,0.4)] flex items-center gap-1.5">
               <i data-lucide="layout-grid" class="w-4 h-4"></i><span>自陣ボードを確認</span>
             </button>
-            <span id="memory-timer-display" class="text-xs font-mono font-bold text-amber-400 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">残り 60秒</span>
+            <span id="memory-timer-display" class="text-xs font-mono font-bold text-amber-400 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">残り 90秒</span>
           </div>
         </div>
 
@@ -395,7 +375,7 @@
         <div onclick="app.toggleMemoryBoardModal()" class="w-full max-w-5xl bg-slate-950/80 border border-slate-800 hover:border-blue-500/60 rounded-2xl p-2.5 mb-3 cursor-pointer transition flex items-center justify-between group shadow-inner">
           <div class="flex items-center gap-2">
             <div class="w-3 h-3 rounded-full animate-ping" id="mini-board-color-dot" style="background-color: #38bdf8;"></div>
-            <span class="text-xs font-bold text-slate-300 group-hover:text-white">自陣ボード状況 (クリックで拡大・配置)</span>
+            <span class="text-xs font-bold text-slate-300 group-hover:text-white">自陣疾患ボード状況 (クリックで拡大・配置)</span>
           </div>
           <div id="mini-board-preview-grid" class="grid grid-cols-6 gap-1 opacity-80"></div>
           <span class="text-[11px] text-cyan-400 font-bold">拡大 ↗</span>
@@ -404,9 +384,9 @@
         <!-- プレイヤー名札リング -->
         <div id="table-players-ring" class="w-full max-w-5xl flex flex-wrap items-center justify-center gap-2 mb-3 px-2"></div>
 
-        <!-- 盤面（カードが小さく、すっきり収まるように最適化） -->
-        <div class="w-full max-w-5xl flex-1 bg-slate-900 border-2 border-slate-800 rounded-3xl p-6 shadow-2xl relative min-h-[480px] flex items-center justify-center overflow-y-auto">
-          <div id="memory-cards-grid" class="w-full max-w-4xl grid grid-cols-4 sm:grid-cols-6 gap-2.5 p-2 z-10"></div>
+        <!-- 盤面（カードが干渉しない最適化サイズ） -->
+        <div class="w-full max-w-5xl flex-1 bg-slate-900 border-2 border-slate-800 rounded-3xl p-4 md:p-6 shadow-2xl relative min-h-[480px] flex items-center justify-center overflow-y-auto">
+          <div id="memory-cards-grid" class="w-full max-w-5xl grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 p-1 z-10"></div>
         </div>
       </section>
 
@@ -438,13 +418,13 @@
   <div id="modal-memory-board" class="fixed inset-0 z-50 bg-black/90 hidden flex items-center justify-center p-4 backdrop-blur-md">
     <div class="w-full max-w-4xl bg-slate-900 border-2 border-blue-500 rounded-3xl p-6 shadow-[0_0_50px_rgba(59,130,246,0.3)] flex flex-col max-h-[95vh]">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2"><i data-lucide="layout-grid" class="w-5 h-5 text-blue-400"></i> 救急疾患ボード（一人称視点 / 自陣）</h3>
+        <h3 class="text-lg font-bold text-white flex items-center gap-2"><i data-lucide="layout-grid" class="w-5 h-5 text-blue-400"></i> ランダム抽選 救急疾患ボード（自陣）</h3>
         <button onclick="app.toggleMemoryBoardModal()" class="p-2 bg-slate-800 text-slate-400 rounded-xl hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-      <p class="text-xs text-slate-400 mb-4" id="memory-board-guide-text">ペアが揃ったカードを選択し、ボード上の正しい疾患スロットにはめてください。</p>
+      <p class="text-xs text-slate-400 mb-4">ペアが揃ったカードを選択し、ボード上の正しい疾患スロットにはめてください。</p>
       
       <div class="flex-1 overflow-y-auto custom-scrollbar pr-1">
-        <div id="full-memory-board-grid" class="grid grid-cols-3 gap-3"></div>
+        <div id="full-memory-board-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
       </div>
 
       <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center">
@@ -584,15 +564,15 @@
         
         <div class="w-full flex-1 flex flex-col min-h-[300px] mt-2">
           <div class="flex flex-wrap items-center justify-between mb-3 border-b border-slate-700 pb-2">
-            <h4 class="text-sm font-bold text-white flex items-center gap-2"><i data-lucide="database" class="w-4 h-4"></i>問題カード データベース管理 (無制限拡張対応)</h4>
+            <h4 class="text-sm font-bold text-white flex items-center gap-2"><i data-lucide="database" class="w-4 h-4"></i>問題カード データベース管理 (全40グループ完全同期)</h4>
             <div class="flex items-center gap-3">
               <select id="admin-deck-selector" onchange="app.renderAdminCards()" class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
                 <option value="all">マスターデータ (全カード)</option>
                 <option value="babanuki">GAME 01: ババ抜き用</option>
-                <option value="memory">GAME 02: 廃用症候群用 (グループ1〜30)</option>
+                <option value="memory">GAME 02: 救急疾患用 (グループ1〜40)</option>
                 <option value="jinuki">GAME 03: ジジ抜き用</option>
               </select>
-              <button onclick="app.addNewCardPrompt()" class="text-xs bg-cyan-700 hover:bg-cyan-600 text-white px-3 py-1.5 rounded-lg transition font-bold">＋カード追加</li>
+              <button onclick="app.addNewCardPrompt()" class="text-xs bg-cyan-700 hover:bg-cyan-600 text-white px-3 py-1.5 rounded-lg transition font-bold">＋カード追加</button>
               <button onclick="app.resetDB()" class="text-xs bg-rose-900/60 hover:bg-rose-800 text-rose-300 border border-rose-800 px-3 py-1.5 rounded-lg transition">初期化</button>
             </div>
           </div>
@@ -629,7 +609,7 @@
       mode: 'babanuki',
       phase: 'idle',
       room: { code: '', isHost: false, isSolo: false },
-      config: { maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 18, teamMode: 'solo' },
+      config: { maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo' },
       me: { id: 'p_' + Math.random().toString(36).substring(2, 9), name: '救急隊員' },
       players: [],
       turnIdx: 0,
@@ -646,7 +626,7 @@
         matchedStock: [],
         boardSlots: [],
         playerBoards: {},
-        timeLeft: 60,
+        timeLeft: 90,
         isProcessingTurn: false
       }
     };
@@ -670,6 +650,22 @@
         document.getElementById('btn-end-turn')?.classList.add('hidden');
       }
       app.renderTable();
+    });
+
+    socket.on('sync_db', (newDB) => {
+      currentCardDB = newDB;
+      saveDB(currentCardDB);
+      utils.showToast('📡 管理者によりカードデータが更新されました');
+      if(document.getElementById('modal-admin') && !document.getElementById('modal-admin').classList.contains('hidden')) {
+        app.renderAdminCards();
+      }
+    });
+
+    socket.on('sync_access', (newAccess) => {
+      currentGameAccess = newAccess;
+      saveAccess(currentGameAccess);
+      app.renderPortal();
+      utils.showToast('📡 管理者により出動権限が更新されました');
     });
 
     const app = {
@@ -704,7 +700,7 @@
         c.innerHTML = '';
         const games = [
           { id: 'game1', code: 'babanuki', lbl: 'GAME 01', title: '致死性不整脈を回避せよ！', icon: 'activity', desc: '【救急ババ抜き】除細動が不可欠な「心室細動（VF）」を最後まで抱え持っていた者が敗北！', col: 'rose' },
-          { id: 'game2', code: 'memory', lbl: 'GAME 02', title: '救急神経衰弱バトル', icon: 'brain', desc: '【救急神経衰弱】ECG背面のカードをテーブルに配置し、全員でペアを揃えろ！', col: 'blue' },
+          { id: 'game2', code: 'memory', lbl: 'GAME 02', title: '救急神経衰弱バトル', icon: 'brain', desc: '【救急神経衰弱】エクセル完全連動！全40疾患グループからランダム抽選で神経衰弱！', col: 'blue' },
           { id: 'game3', code: 'jinuki', lbl: 'GAME 03', title: '救急 隠れたものを当てろ', icon: 'search', desc: '【救急ジジ抜き＋VF/DCペア】全54枚から1枚が事前封印！孤立カードから病態を推理せよ！', col: 'amber' },
           { id: 'game4', code: 'jack', lbl: 'GAME 04', title: '99ジャック', icon: 'crosshair', desc: '【SpO2＆血圧コントロール】合計点「99」を目指す救急版ブラックジャック。', col: 'teal' }
         ];
@@ -765,7 +761,7 @@
         state.config.maxPlayers = parseInt(document.getElementById('config-max-players')?.value || 4, 10);
         state.config.turnTimeLimit = parseInt(document.getElementById('config-turn-time')?.value || 20, 10);
         state.config.autoFillAI = document.getElementById('config-auto-fill-ai')?.checked ?? true;
-        state.config.memoryPairs = parseInt(document.getElementById('config-memory-pairs')?.value || 18, 10);
+        state.config.memoryPairs = parseInt(document.getElementById('config-memory-pairs')?.value || 40, 10);
         state.config.teamMode = document.getElementById('config-team-mode')?.value || 'solo';
         state.me.name = document.getElementById('input-player-name')?.value.trim() || '救急隊員';
       },
@@ -862,44 +858,64 @@
         else app.startStandardCardGameSession();
       },
 
-      // --- GAME 02: 救急神経衰弱 ---
+      // --- GAME 02: 救急神経衰弱（エクセルデータ完全連動・ランダム抽選・同期） ---
       startMemoryGameSession: () => {
         state.phase = 'memory_playing';
         state.turnIdx = 0;
         app.showScreen('view-memory-game');
 
-        const pairCount = state.config.memoryPairs;
-        let availablePairs = [];
-        for(let i=1; i<=30; i++) {
-          const items = currentCardDB.filter(c => c.num === i);
-          if(items.length >= 2) availablePairs.push({ num: i, cards: [items[0], items[1]] });
-        }
-        while(availablePairs.length < pairCount) {
-          const base = currentCardDB[Math.floor(Math.random() * currentCardDB.length)];
-          if(!availablePairs.some(p => p.num === base.num)) {
-            availablePairs.push({ num: base.num, cards: [base, {...base, id: base.id + 1000}] });
-          } else { break; }
-        }
-        availablePairs.sort(() => Math.random() - 0.5);
-        const selectedPairs = availablePairs.slice(0, pairCount);
+        // 1. 全40グループから指定ペア数をランダムに抽選
+        let allGroups = JSON.parse(JSON.stringify(MEMORY_EXCEL_GROUPS));
+        allGroups.sort(() => Math.random() - 0.5);
+        const pairCount = Math.min(state.config.memoryPairs, allGroups.length);
+        const selectedGroups = allGroups.slice(0, pairCount);
 
+        // 2. 抽選された各グループにつき「問題文1」と「問題文2」の2枚をカードとして作成
         let deck = [];
-        selectedPairs.forEach(p => {
-          deck.push({ ...p.cards[0], uniqueKey: Math.random(), isFlipped: false, isMatched: false });
-          deck.push({ ...p.cards[1], uniqueKey: Math.random(), isFlipped: false, isMatched: false });
+        let slots = [];
+
+        selectedGroups.forEach(g => {
+          // カード1（問題文1）
+          deck.push({
+            id: g.group * 10 + 1,
+            group: g.group,
+            disease: g.disease,
+            suit: "M",
+            num: g.group,
+            title: g.disease,
+            desc: g.q1,
+            uniqueKey: Math.random(),
+            isFlipped: false,
+            isMatched: false
+          });
+          // カード2（問題文2）
+          deck.push({
+            id: g.group * 10 + 2,
+            group: g.group,
+            disease: g.disease,
+            suit: "M",
+            num: g.group,
+            title: g.disease,
+            desc: g.q2,
+            uniqueKey: Math.random(),
+            isFlipped: false,
+            isMatched: false
+          });
+
+          // ボード用のスロット（同じグループの疾患が2枚分）
+          slots.push({ group: g.group, title: g.disease, filled: false, ownerId: null });
+          slots.push({ group: g.group, title: g.disease, filled: false, ownerId: null });
         });
+
+        // 3. テーブル上のカード配置をランダム化
         deck.sort(() => Math.random() - 0.5);
         state.memoryState.cards = deck;
         state.memoryState.selectedCardIndices = [];
         state.memoryState.matchedStock = [];
-        state.memoryState.timeLeft = 60;
+        state.memoryState.timeLeft = 90;
         state.memoryState.isProcessingTurn = false;
 
-        let slots = [];
-        selectedPairs.forEach(p => {
-          slots.push({ num: p.num, title: p.cards[0].title, filled: false, ownerId: null });
-          slots.push({ num: p.num, title: p.cards[0].title, filled: false, ownerId: null });
-        });
+        // 4. ボードのスロットもランダム化
         slots.sort(() => Math.random() - 0.5);
         state.memoryState.boardSlots = slots;
 
@@ -909,7 +925,7 @@
 
         app.renderMemoryGameTable();
         app.startMemoryTimer();
-        app.addLogMessage('救急神経衰弱バトルが開始されました。');
+        app.addLogMessage(`救急神経衰弱バトルが開始されました（抽出ペア数: ${pairCount}）`);
       },
 
       startMemoryTimer: () => {
@@ -965,7 +981,7 @@
               <div class="w-full flex items-center justify-between text-[8px] text-cyan-400 font-mono mb-0.5 px-1">
                 <span class="font-bold">⚡ ECG</span>
               </div>
-              <div class="w-full h-6 bg-slate-950/90 rounded border border-cyan-500/40 flex items-center justify-center overflow-hidden shadow-inner">
+              <div class="w-full h-5 bg-slate-950/90 rounded border border-cyan-500/40 flex items-center justify-center overflow-hidden shadow-inner">
                 <svg class="w-full h-full opacity-90" viewBox="0 0 100 30" preserveAspectRatio="none">
                   <path d="M 0 15 L 18 15 L 23 5 L 28 25 L 33 15 L 55 15 L 60 3 L 65 27 L 70 15 L 100 15" fill="none" stroke="#22d3ee" stroke-width="2.5"/>
                 </svg>
@@ -973,21 +989,20 @@
             </div>
           `;
 
-          // 小型化したカード表面
           const cardFrontHtml = `
-            <div class="flex items-center justify-between text-[10px] px-0.5 font-bold">
-              <span class="${SUIT_COLORS[card.suit]||''} text-xs">${SUIT_ICONS[card.suit]||'♠'}</span>
-              <span class="font-mono bg-cyan-100 text-cyan-900 px-1 rounded text-[9px] font-black">Gr.${card.num}</span>
+            <div class="flex items-center justify-between text-[9px] px-0.5 font-bold">
+              <span class="text-cyan-400 text-xs">🧠</span>
+              <span class="font-mono bg-cyan-100 text-cyan-900 px-1 rounded text-[8px] font-black">Gr.${card.group}</span>
             </div>
             <div class="text-center my-auto px-0.5 py-0.5 bg-white/90 rounded-lg border border-slate-300 shadow-inner overflow-hidden">
-              <div class="text-[11px] font-black text-slate-900 mb-0.5 truncate">${utils.escapeHtml(card.title)}</div>
-              <div class="text-[9px] font-bold text-slate-800 leading-tight line-clamp-3">${utils.escapeHtml(card.desc)}</div>
+              <div class="text-[10px] font-black text-slate-900 mb-0.5 truncate">${utils.escapeHtml(card.title)}</div>
+              <div class="text-[8px] font-bold text-slate-800 leading-tight line-clamp-3">${utils.escapeHtml(card.desc)}</div>
             </div>
-            <div class="text-[8px] text-slate-500 text-right font-mono pr-0.5">ID:${card.id}</div>
+            <div class="text-[7px] text-slate-500 text-right font-mono pr-0.5">ID:${card.id}</div>
           `;
 
           grid.innerHTML += `
-            <div onclick="app.handleMemoryCardClick(${idx})" class="aspect-[3/4] w-full rounded-xl border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between p-1.5 shadow-[0_5px_15px_rgba(0,0,0,0.5)] select-none relative flex-shrink-0 overflow-hidden text-[10px] ${isFlipped ? 'bg-slate-100 text-slate-900 border-indigo-500 z-20 shadow-[0_0_15px_rgba(99,102,241,0.5)]' : `bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 ${guideClass} hover:scale-105 z-10 text-slate-100'}`}>
+            <div onclick="app.handleMemoryCardClick(${idx})" class="aspect-[3/4] w-full rounded-xl border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between p-1 shadow-[0_4px_12px_rgba(0,0,0,0.5)] select-none relative flex-shrink-0 overflow-hidden text-[9px] ${isFlipped ? 'bg-slate-100 text-slate-900 border-indigo-500 z-20 shadow-[0_0_15px_rgba(99,102,241,0.5)]' : `bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 ${guideClass} hover:scale-105 z-10 text-slate-100'}`}>
               ${isFlipped ? cardFrontHtml : ecgCardBackHtml}
             </div>
           `;
@@ -1048,9 +1063,12 @@
         if(header) header.textContent = `${actorP ? actorP.name : 'プレイヤー'} が選択したカード`;
         if(content) {
           content.innerHTML = `
-            <div class="w-36 aspect-[3/4] bg-slate-100 text-slate-900 border-4 border-indigo-400 rounded-2xl p-3 flex flex-col justify-between shadow-2xl text-left overflow-hidden">
-              <div class="flex items-center justify-between text-[11px] font-bold"><span class="${SUIT_COLORS[card.suit]||''} text-base">${SUIT_ICONS[card.suit]||'♠'}</span><span class="font-mono bg-cyan-200 text-cyan-900 px-1.5 py-0.5 rounded text-[10px] font-black">Gr.${card.num}</span></div>
-              <div class="my-auto py-1 px-1 bg-white rounded-xl border border-slate-300 shadow-inner text-center">
+            <div class="w-44 h-60 bg-slate-100 text-slate-900 border-4 border-indigo-400 rounded-2xl p-3 flex flex-col justify-between shadow-2xl text-left overflow-hidden mx-auto">
+              <div class="flex items-center justify-between text-xs font-bold">
+                <span class="text-cyan-600 text-base">🧠</span>
+                <span class="font-mono bg-cyan-200 text-cyan-900 px-1.5 py-0.5 rounded text-[10px] font-black">Gr.${card.group}</span>
+              </div>
+              <div class="my-auto py-1.5 px-1.5 bg-white rounded-xl border border-slate-300 shadow-inner text-center">
                 <div class="text-xs font-black text-slate-900 mb-1 truncate">${utils.escapeHtml(card.title)}</div>
                 <div class="text-[10px] font-bold text-slate-800 leading-tight line-clamp-3">${utils.escapeHtml(card.desc)}</div>
               </div>
@@ -1074,7 +1092,8 @@
         const c2 = state.memoryState.cards[i2];
         const currentP = actorP || state.players[state.turnIdx];
 
-        const isMatch = (c1.num === c2.num);
+        // グループ番号（num）が一致していればペア成立
+        const isMatch = (c1.group === c2.group);
         if(isMatch) {
           c1.isMatched = true; c2.isMatched = true;
           state.memoryState.matchedStock.push(c1, c2);
@@ -1110,12 +1129,12 @@
           content.innerHTML = `
             <div class="flex flex-col items-center w-full">
               <div class="flex justify-center gap-3 mb-3 w-full">
-                <div class="w-32 aspect-[3/4] bg-slate-100 text-slate-900 border-2 border-indigo-400 rounded-2xl p-2.5 flex flex-col justify-between shadow-xl text-left overflow-hidden">
-                  <div class="flex items-center justify-between text-[10px] font-bold"><span class="${SUIT_COLORS[c1.suit]||''}">${SUIT_ICONS[c1.suit]||'♠'}</span><span class="font-mono text-cyan-900 bg-cyan-200 px-1 rounded text-[9px] font-black">Gr.${c1.num}</span></div>
+                <div class="w-32 h-44 bg-slate-100 text-slate-900 border-2 border-indigo-400 rounded-2xl p-2 flex flex-col justify-between shadow-xl text-left overflow-hidden">
+                  <div class="flex items-center justify-between text-[10px] font-bold"><span class="text-cyan-600">🧠</span><span class="font-mono text-cyan-900 bg-cyan-200 px-1 rounded text-[9px] font-black">Gr.${c1.group}</span></div>
                   <div class="my-auto py-1 px-1 bg-white rounded-lg text-center"><div class="text-[10px] font-black text-slate-900 truncate">${utils.escapeHtml(c1.title)}</div><div class="text-[9px] font-bold text-slate-800 line-clamp-2">${utils.escapeHtml(c1.desc)}</div></div>
                 </div>
-                <div class="w-32 aspect-[3/4] bg-slate-100 text-slate-900 border-2 border-indigo-400 rounded-2xl p-2.5 flex flex-col justify-between shadow-xl text-left overflow-hidden">
-                  <div class="flex items-center justify-between text-[10px] font-bold"><span class="${SUIT_COLORS[c2.suit]||''}">${SUIT_ICONS[c2.suit]||'♠'}</span><span class="font-mono text-cyan-900 bg-cyan-200 px-1 rounded text-[9px] font-black">Gr.${c2.num}</span></div>
+                <div class="w-32 h-44 bg-slate-100 text-slate-900 border-2 border-indigo-400 rounded-2xl p-2 flex flex-col justify-between shadow-xl text-left overflow-hidden">
+                  <div class="flex items-center justify-between text-[10px] font-bold"><span class="text-cyan-600">🧠</span><span class="font-mono text-cyan-900 bg-cyan-200 px-1 rounded text-[9px] font-black">Gr.${c2.group}</span></div>
                   <div class="my-auto py-1 px-1 bg-white rounded-lg text-center"><div class="text-[10px] font-black text-slate-900 truncate">${utils.escapeHtml(c2.title)}</div><div class="text-[9px] font-bold text-slate-800 line-clamp-2">${utils.escapeHtml(c2.desc)}</div></div>
                 </div>
               </div>
@@ -1211,7 +1230,7 @@
           grid.innerHTML += `
             <div class="p-3 rounded-2xl border ${isFilled ? 'border-cyan-500 bg-slate-950' : 'border-slate-700 bg-slate-800/80 hover:border-cyan-400 cursor-pointer'} flex flex-col justify-between transition shadow-md" ${!isFilled && myStockCount > 0 ? `onclick="app.placeCardToBoardSlot(${sIdx})"` : ''}>
               <div class="flex justify-between items-center mb-1">
-                <span class="text-xs font-bold text-cyan-300">Gr.${slot.num} : ${utils.escapeHtml(slot.title)}</span>
+                <span class="text-xs font-bold text-cyan-300">Gr.${slot.group} : ${utils.escapeHtml(slot.title)}</span>
                 <span class="text-[10px] px-2 py-0.5 rounded-full ${isFilled ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-900 text-slate-400'}">${isFilled ? '埋設完了' : '空き枠'}</span>
               </div>
               <div class="h-10 rounded-xl flex items-center justify-center text-xs font-bold text-slate-300 border border-slate-700/60" style="background-color: ${isFilled ? color : '#0f172a'}">
@@ -1229,6 +1248,7 @@
         const myBoard = state.memoryState.playerBoards[state.me.id];
         if(myBoard[sIdx]?.filled) return utils.showToast('すでに埋まっています');
 
+        // ストックから2枚消費
         state.memoryState.matchedStock.pop();
         state.memoryState.matchedStock.pop();
 
@@ -1776,7 +1796,11 @@
         currentGameAccess.game2 = document.getElementById('toggle-game2')?.checked ?? true;
         currentGameAccess.game3 = document.getElementById('toggle-game3')?.checked ?? true;
         currentGameAccess.game4 = document.getElementById('toggle-game4')?.checked ?? false;
-        saveAccess(currentGameAccess); app.renderPortal(); utils.showToast('<i data-lucide="save" class="w-4 h-4 inline mr-1"></i>設定を反映しました'); if(window.lucide) lucide.createIcons();
+        saveAccess(currentGameAccess); 
+        socket.emit('admin_sync_access', currentGameAccess);
+        app.renderPortal(); 
+        utils.showToast('<i data-lucide="save" class="w-4 h-4 inline mr-1"></i>設定を全プレイヤーに同期しました'); 
+        if(window.lucide) lucide.createIcons();
       },
       renderAdminCards: () => {
         const tb = document.getElementById('admin-card-table-body'); 
@@ -1786,7 +1810,7 @@
         const f = selector ? selector.value : 'all';
         let d = currentCardDB;
         if(f==='babanuki') d = currentCardDB.filter(c=>c.id!==54 && c.suit!=='M');
-        else if(f==='memory') d = currentCardDB.filter(c=>c.suit==='M');
+        else if(f==='memory') d = MEMORY_EXCEL_GROUPS.map(g => ({ id: g.group, suit: 'M', num: g.group, title: g.disease, desc: `${g.q1} / ${g.q2}` }));
         else if(f==='jinuki') d = currentCardDB.filter(c=>c.suit!=='M'); 
         
         d.forEach(c => {
@@ -1814,24 +1838,38 @@
       },
       saveCard: (id) => {
         const t = document.getElementById(`te-${id}`)?.value || '', d = document.getElementById(`de-${id}`)?.value || '';
-        const c = currentCardDB.find(x=>x.id===id); if(c){ c.title=t; c.desc=d; } saveDB(currentCardDB); app.renderAdminCards(); utils.showToast('<i data-lucide="check" class="w-4 h-4 inline mr-1"></i>保存しました'); if(window.lucide) lucide.createIcons();
+        const c = currentCardDB.find(x=>x.id===id); if(c){ c.title=t; c.desc=d; } 
+        saveDB(currentCardDB); 
+        socket.emit('admin_sync_db', currentCardDB);
+        app.renderAdminCards(); 
+        utils.showToast('<i data-lucide="check" class="w-4 h-4 inline mr-1"></i>保存して全プレイヤーに同期しました'); 
+        if(window.lucide) lucide.createIcons();
       },
       addNewCardPrompt: () => {
         const newId = currentCardDB.length > 0 ? Math.max(...currentCardDB.map(c => c.id)) + 1 : 1;
-        const newCard = { id: newId, suit: "M", num: 1, title: "新規廃用項目", desc: "ここに問題文を入力してください" };
+        const newCard = { id: newId, suit: "C", num: 1, title: "新規項目", desc: "ここに問題文を入力" };
         currentCardDB.push(newCard);
         saveDB(currentCardDB);
+        socket.emit('admin_sync_db', currentCardDB);
         app.renderAdminCards();
-        utils.showToast('新規カードを追加しました。内容を編集してください。');
+        utils.showToast('新規カードを追加し、全プレイヤーに同期しました。');
       },
       deleteCard: (id) => {
         if(currentCardDB.length <= 10) return utils.showToast('これ以上削除できません');
         currentCardDB = currentCardDB.filter(c => c.id !== id);
         saveDB(currentCardDB);
+        socket.emit('admin_sync_db', currentCardDB);
         app.renderAdminCards();
-        utils.showToast('カードを削除しました');
+        utils.showToast('カードを削除し、全プレイヤーに同期しました');
       },
-      resetDB: () => { currentCardDB = JSON.parse(JSON.stringify(DEFAULT_EMS_CARDS)); saveDB(currentCardDB); app.renderAdminCards(); utils.showToast('<i data-lucide="rotate-ccw" class="w-4 h-4 inline mr-1"></i>初期化完了'); if(window.lucide) lucide.createIcons(); }
+      resetDB: () => { 
+        currentCardDB = JSON.parse(JSON.stringify(DEFAULT_EMS_CARDS)); 
+        saveDB(currentCardDB); 
+        socket.emit('admin_sync_db', currentCardDB);
+        app.renderAdminCards(); 
+        utils.showToast('<i data-lucide="rotate-ccw" class="w-4 h-4 inline mr-1"></i>初期化して全プレイヤーに同期しました'); 
+        if(window.lucide) lucide.createIcons(); 
+      }
     };
 
     document.getElementById('secret-admin-trigger')?.addEventListener('click', () => {
