@@ -1851,9 +1851,12 @@
         currentGameAccess.game4 = document.getElementById('toggle-game4')?.checked ?? false;
         saveAccess(currentGameAccess);
         
+        // サーバーを通じて他のプレイヤーに即時反映
         socket.emit('admin_update_access', currentGameAccess);
 
+        // 🆕 追加：自分自身の画面（ポータル）も即座に更新してロック/アンロックを反映させる
         app.renderPortal(); 
+
         utils.showToast('<i data-lucide="save" class="w-4 h-4 inline mr-1"></i>設定を全プレイヤーに即時反映しました'); 
         if(window.lucide) lucide.createIcons();
       },
