@@ -57,17 +57,17 @@ io.on('connection', (socket) => {
   });
 
   // 修正：ゲーム内アクション（自分を含むルーム全員に同期を徹底）
+  // ゲーム内アクション
   socket.on('game_action', (data) => {
-    const { roomCode, players, discardPile, turnIdx } = data;
+    const { roomCode, type, players, discardPile, turnIdx, hasDrawnThisTurn } = data;
     if (rooms[roomCode]) {
       if (players) rooms[roomCode].players = players;
       if (discardPile) rooms[roomCode].discardPile = discardPile;
       if (turnIdx !== undefined) rooms[roomCode].turnIdx = turnIdx;
     }
-    // socket.to ではなく io.to にすることで、操作した本人も含めて全員の画面が完全に同期します
+    // ルーム全員（自分含む）に最新の状態を確実に同期
     io.to(roomCode).emit('game_action', data);
   });
-
   // 管理者によるアクセス権限の即時全体反映
   socket.on('admin_update_access', (accessData) => {
     io.emit('update_access', accessData);
