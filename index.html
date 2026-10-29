@@ -215,10 +215,6 @@
     const SUIT_COLORS = { C: 'text-emerald-400', S: 'text-indigo-400', H: 'text-rose-400', D: 'text-amber-400', M: 'text-cyan-400', JOKER: 'text-amber-300' };
     const BOT_NAME_POOL = ['救急隊員α', '救急隊員β', '救急隊員γ', '指導救命士', '機関員', '通信指令員'];
 
- <script>
-    // ---------------------------------------------------------
-    // データベース・アクセス権限の読み込み (構文エラー防止版)
-    // ---------------------------------------------------------
     function loadDB() { 
       try { 
         const s = localStorage.getItem('ems_db'); 
@@ -228,45 +224,19 @@
             return parsed;
           }
         }
-      } catch(e) {
-        console.error("DB Load Error:", e);
-      } 
+      } catch(e){} 
       const defaultFull = JSON.parse(JSON.stringify(DEFAULT_EMS_CARDS));
       saveDB(defaultFull);
       return defaultFull;
     }
-
-    function saveDB(data) { 
-      try {
-        localStorage.setItem('ems_db', JSON.stringify(data)); 
-      } catch(e) {
-        console.error("DB Save Error:", e);
-      }
-    }
-
-    function loadAccess() { 
-      try { 
-        const s = localStorage.getItem('ems_acc'); 
-        if(s) return JSON.parse(s); 
-      } catch(e) {
-        console.error("Access Load Error:", e);
-      } 
-      return { game1: true, game2: true, game3: true, game4: false }; 
-    }
-
-    function saveAccess(data) { 
-      try {
-        localStorage.setItem('ems_acc', JSON.stringify(data)); 
-      } catch(e) {
-        console.error("Access Save Error:", e);
-      }
-    }
+    function saveDB(data) { localStorage.setItem('ems_db', JSON.stringify(data)); }
+    function loadAccess() { try { const s = localStorage.getItem('ems_acc'); if(s) return JSON.parse(s); } catch(e){} return { game1: true, game2: true, game3: true, game4: false }; }
+    function saveAccess(data) { localStorage.setItem('ems_acc', JSON.stringify(data)); }
 
     let currentCardDB = loadDB();
     let currentGameAccess = loadAccess();
   </script>
 
-  <!-- 以下UI構造（ご提示いただいた最終データ構造を完全維持） -->
   <div id="main-content-wrapper" class="w-full flex-1 flex flex-col items-center">
     <header class="w-full max-w-5xl px-4 py-3 border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40 flex items-center justify-between">
       <div class="flex items-center space-x-3">
@@ -331,7 +301,7 @@
               </div>
             </div>
 
-            <!-- 神経衰弱用設定（GAME 02用） -->
+            <!-- 神経衰弱専用設定（GAME 02用） -->
             <div id="memory-only-config" class="hidden pt-3 border-t border-slate-800/80 space-y-3">
               <div>
                 <label class="block text-[11px] font-semibold text-cyan-300 mb-1">神経衰弱 全体ペア数（最大40グループ）</label>
@@ -358,45 +328,6 @@
                   <input id="config-memory-show-disease" type="checkbox" checked class="sr-only peer">
                   <div class="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between pt-2 border-t border-slate-800/60">
-              <span class="text-xs font-bold text-slate-200">不足枠の救急AI自動補充</span>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input id="config-auto-fill-ai" type="checkbox" checked class="sr-only peer">
-                <div class="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-600"></div>
-              </label>
-            </div>
-          </div>
-
-            <!-- 神経衰弱用設定（GAME 02用：最大40ペア対応） -->
-            <div id="memory-only-config" class="hidden pt-3 border-t border-slate-800/80 space-y-3">
-              <div>
-                <label class="block text-[11px] font-semibold text-cyan-300 mb-1">神経衰弱 全体ペア数（最大40グループ）</label>
-                <select id="config-memory-pairs" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white">
-                  <option value="12">12 ペア (24枚)</option>
-                  <option value="18">18 ペア (36枚)</option>
-                  <option value="24">24 ペア (48枚)</option>
-                  <option value="30">30 ペア (60枚)</option>
-                  <option value="40" selected>40 ペア (80枚 / 全グループ制覇)</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-amber-300 mb-1">対戦形式・チーム編成</label>
-                <select id="config-team-mode" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white">
-                  <option value="solo">個人戦 (全員対抗)</option>
-                  <option value="team2">2チーム対抗 (各チーム半数)</option>
-                  <option value="team3">3チーム対抗 (3人×2 or 2人×3)</option>
-<!-- 🆕 追加：ホスト用 疾患名表示のオンオフ切替スイッチ -->
-              <div class="flex items-center justify-between pt-2 border-t border-slate-800/60">
-                <span class="text-xs font-bold text-slate-200">カード表面に疾患名を記載する</span>
-                <label class="relative inline-flex items-center cursor-pointer">
-                  <input id="config-memory-show-disease" type="checkbox" checked class="sr-only peer">
-                  <div class="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
-                </label>
-              </div>
-                </select>
               </div>
             </div>
 
@@ -444,7 +375,7 @@
         </div>
       </section>
 
-      <!-- VIEW 4: GAME TABLE (Babanuki / Jinuki) -->
+      <!-- VIEW 4: GAME TABLE -->
       <section id="view-game" class="w-full flex-1 flex flex-col items-center justify-between hidden">
         <div class="w-full max-w-4xl bg-slate-900/90 border border-slate-800 rounded-2xl p-3 mb-3 flex flex-wrap items-center justify-between gap-3 shadow-lg">
           <div class="flex items-center gap-3">
@@ -487,7 +418,7 @@
         </div>
       </section>
 
-      <!-- VIEW 4-2: MEMORY GAME TABLE (GAME 02: 救急神経衰弱) -->
+      <!-- VIEW 4-2: MEMORY GAME TABLE -->
       <section id="view-memory-game" class="w-full flex-1 flex flex-col items-center justify-start hidden animate-fade-in">
         <div class="w-full max-w-5xl bg-slate-900/95 border border-blue-500/50 rounded-2xl p-3 mb-3 flex items-center justify-between shadow-lg">
           <div class="flex items-center gap-3">
@@ -502,7 +433,6 @@
           </div>
         </div>
 
-        <!-- ミニボードプレビュー -->
         <div onclick="app.toggleMemoryBoardModal()" class="w-full max-w-5xl bg-slate-950/80 border border-slate-800 hover:border-blue-500/60 rounded-2xl p-2.5 mb-3 cursor-pointer transition flex items-center justify-between group shadow-inner">
           <div class="flex items-center gap-2">
             <div class="w-3 h-3 rounded-full animate-ping" id="mini-board-color-dot" style="background-color: #38bdf8;"></div>
@@ -512,10 +442,8 @@
           <span class="text-[11px] text-cyan-400 font-bold">拡大 ↗</span>
         </div>
 
-        <!-- プレイヤー名札リング -->
         <div id="table-players-ring" class="w-full max-w-5xl flex flex-wrap items-center justify-center gap-2 mb-3 px-2"></div>
 
-        <!-- 盤面 -->
         <div class="w-full max-w-5xl flex-1 bg-gradient-to-br from-[#5c3a21] via-[#432514] to-[#2a160b] border-4 border-[#1a0d06] rounded-3xl p-6 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] relative min-h-[480px] flex items-center justify-center overflow-y-auto">
           <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
           <div id="memory-cards-grid" class="w-full max-w-5xl grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 p-1 z-10"></div>
@@ -550,7 +478,7 @@
   <div id="modal-memory-board" class="fixed inset-0 z-50 bg-black/90 hidden flex items-center justify-center p-4 backdrop-blur-md">
     <div class="w-full max-w-4xl bg-slate-900 border-2 border-blue-500 rounded-3xl p-6 shadow-[0_0_50px_rgba(59,130,246,0.3)] flex flex-col max-h-[95vh]">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2"><i data-lucide="layout-grid" class="w-5 h-5 text-blue-400"></i> ランダム抽選 救急疾患ボード（自陣）</h3>
+        <h3 class="text-lg font-bold text-white flex items-center gap-2"><i data-lucide="layout-grid" class="w-5 h-5 text-blue-400"></i> 救急疾患ボード（自陣）</h3>
         <button onclick="app.toggleMemoryBoardModal()" class="p-2 bg-slate-800 text-slate-400 rounded-xl hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <p class="text-xs text-slate-400 mb-4" id="memory-board-guide-text">ペアが揃ったカードを選択し、ボード上の正しい疾患スロットにはめてください。</p>
@@ -741,7 +669,7 @@
       mode: 'babanuki',
       phase: 'idle',
       room: { code: '', isHost: false, isSolo: false },
-      config: { maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo' },
+      config: { maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true },
       me: { id: 'p_' + Math.random().toString(36).substring(2, 9), name: '救急隊員' },
       players: [],
       turnIdx: 0,
@@ -879,7 +807,6 @@
         state.config.autoFillAI = document.getElementById('config-auto-fill-ai')?.checked ?? true;
         state.config.memoryPairs = parseInt(document.getElementById('config-memory-pairs')?.value || 40, 10);
         state.config.teamMode = document.getElementById('config-team-mode')?.value || 'solo';
-        // 🆕 追加：疾患名表示設定の読み込み
         state.config.showMemoryDisease = document.getElementById('config-memory-show-disease')?.checked ?? true;
         state.me.name = document.getElementById('input-player-name')?.value.trim() || '救急隊員';
       },
@@ -973,7 +900,7 @@
         else app.startStandardCardGameSession();
       },
 
-      // --- GAME 02: 救急神経衰弱（40グループ完全対応） ---
+      // --- GAME 02: 救急神経衰弱 ---
       startMemoryGameSession: () => {
         state.phase = 'memory_playing';
         state.turnIdx = 0;
@@ -1011,7 +938,7 @@
 
         app.renderMemoryGameTable();
         app.startMemoryTimer();
-        app.addLogMessage('救急神経衰弱バトル（全40グループ対応）が開始されました。');
+        app.addLogMessage('救急神経衰弱バトルが開始されました。');
       },
 
       startMemoryTimer: () => {
@@ -1076,7 +1003,6 @@
             </div>
           `;
 
-          // 修正：showMemoryDisease の設定によって疾患名（title）の表示を切り替え
           const showDisease = state.config.showMemoryDisease ?? true;
           const cardFrontHtml = `
             <div class="flex items-center justify-between text-[11px] px-1 font-bold">
@@ -1150,12 +1076,13 @@
         const content = document.getElementById('memory-popup-content');
 
         if(header) header.textContent = `${actorP ? actorP.name : 'プレイヤー'} が選択したカード`;
+        const showDisease = state.config.showMemoryDisease ?? true;
         if(content) {
           content.innerHTML = `
             <div class="w-36 aspect-[3/4] bg-slate-100 text-slate-900 border-4 border-indigo-400 rounded-2xl p-3 flex flex-col justify-between shadow-2xl text-left">
               <div class="flex items-center justify-between text-[11px] font-bold"><span class="${SUIT_COLORS[card.suit]||''} text-base">${SUIT_ICONS[card.suit]||'♠'}</span><span class="font-mono bg-cyan-200 text-cyan-900 px-1.5 py-0.5 rounded text-[10px] font-black">Gr.${card.num}</span></div>
               <div class="my-auto py-1 px-1 bg-white rounded-xl border border-slate-300 shadow-inner text-center">
-                <div class="text-xs font-black text-slate-900 mb-1">${utils.escapeHtml(card.title)}</div>
+                ${showDisease ? `<div class="text-xs font-black text-slate-900 mb-1">${utils.escapeHtml(card.title)}</div>` : ''}
                 <div class="text-[11px] font-bold text-slate-800 leading-tight line-clamp-3">${utils.escapeHtml(card.desc)}</div>
               </div>
               <div class="text-[9px] text-slate-500 text-right font-mono">ID:${card.id}</div>
@@ -1209,6 +1136,7 @@
         if(header) header.textContent = isMatch ? '✨ ペア成立！' : '❌ 不一致...';
         
         const isActorMe = (actorP && actorP.id === state.me.id && !actorP.isAI);
+        const showDisease = state.config.showMemoryDisease ?? true;
 
         if(content) {
           content.innerHTML = `
@@ -1216,11 +1144,11 @@
               <div class="flex justify-center gap-3 mb-3 w-full">
                 <div class="w-32 aspect-[3/4] bg-slate-100 text-slate-900 border-2 border-indigo-400 rounded-2xl p-2.5 flex flex-col justify-between shadow-xl text-left">
                   <div class="flex items-center justify-between text-[10px] font-bold"><span class="${SUIT_COLORS[c1.suit]||''}">${SUIT_ICONS[c1.suit]||'♠'}</span><span class="font-mono text-cyan-900 bg-cyan-200 px-1 rounded text-[9px] font-black">Gr.${c1.num}</span></div>
-                  <div class="my-auto py-1 px-1 bg-white rounded-lg text-center"><div class="text-[10px] font-black text-slate-900">${utils.escapeHtml(c1.title)}</div><div class="text-[9px] font-bold text-slate-800 line-clamp-2">${utils.escapeHtml(c1.desc)}</div></div>
+                  <div class="my-auto py-1 px-1 bg-white rounded-lg text-center">${showDisease ? `<div class="text-[10px] font-black text-slate-900">${utils.escapeHtml(c1.title)}</div>` : ''}<div class="text-[9px] font-bold text-slate-800 line-clamp-2">${utils.escapeHtml(c1.desc)}</div></div>
                 </div>
                 <div class="w-32 aspect-[3/4] bg-slate-100 text-slate-900 border-2 border-indigo-400 rounded-2xl p-2.5 flex flex-col justify-between shadow-xl text-left">
                   <div class="flex items-center justify-between text-[10px] font-bold"><span class="${SUIT_COLORS[c2.suit]||''}">${SUIT_ICONS[c2.suit]||'♠'}</span><span class="font-mono text-cyan-900 bg-cyan-200 px-1 rounded text-[9px] font-black">Gr.${c2.num}</span></div>
-                  <div class="my-auto py-1 px-1 bg-white rounded-lg text-center"><div class="text-[10px] font-black text-slate-900">${utils.escapeHtml(c2.title)}</div><div class="text-[9px] font-bold text-slate-800 line-clamp-2">${utils.escapeHtml(c2.desc)}</div></div>
+                  <div class="my-auto py-1 px-1 bg-white rounded-lg text-center">${showDisease ? `<div class="text-[10px] font-black text-slate-900">${utils.escapeHtml(c2.title)}</div>` : ''}<div class="text-[9px] font-bold text-slate-800 line-clamp-2">${utils.escapeHtml(c2.desc)}</div></div>
                 </div>
               </div>
               ${isActorMe ? '<button id="btn-skip-memory-result" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md">次のプレイヤーへ (スキップ)</button>' : '<div class="text-xs text-slate-400 italic">判定確認中...</div>'}
@@ -1815,7 +1743,7 @@
         r.classList.remove('hidden');
         if(isCorrect){ r.className='text-sm font-bold p-3 rounded-xl mb-4 bg-emerald-950/80 text-emerald-300 border border-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.3)]'; r.innerHTML=`🎯 正解！ 封印は [${utils.escapeHtml(h.title)}]！`; if(window.confetti) confetti(); }
         else { r.className='text-sm font-bold p-3 rounded-xl mb-4 bg-rose-950/80 text-rose-300 border border-rose-600 shadow-[0_0_15px_rgba(225,29,72,0.3)]'; r.innerHTML=`❌ 不正解... 実際は [${utils.escapeHtml(h.title)}] でした！`; }
-        document.getElementById('btn-close-jinuki-quiz')?.classList.remove('hidden');
+        document.getElementById('btn-close-jinuki-quiz')?.classList.add('hidden');
       },
 
       showResults: () => {
