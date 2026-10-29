@@ -512,7 +512,6 @@
     </div>
   </div>
 
-  <!-- チャットモーダル -->
   <div id="modal-chat" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl flex flex-col h-[480px]">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
@@ -545,7 +544,10 @@
 
   <div id="modal-jinuki-quiz" class="fixed inset-0 z-50 bg-black/95 hidden flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="w-full max-w-lg bg-slate-900 border-2 border-amber-500 rounded-3xl p-6 text-center shadow-[0_0_40px_rgba(245,158,11,0.3)]">
-      <h3 class="text-xl font-black text-white mb-4 flex items-center justify-center gap-2"><i data-lucide="help-circle" class="w-6 h-6 text-amber-400"></i>【事後検証】隠れカード特定クイズ！</h3>
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-xl font-black text-white flex items-center gap-2"><i data-lucide="help-circle" class="w-6 h-6 text-amber-400"></i>【事後検証】隠れカード特定クイズ！</h3>
+        <span id="jinuki-quiz-timer" class="text-xs font-mono font-bold text-amber-400 bg-slate-950 px-3 py-1 rounded-full border border-slate-800">制限 60秒</span>
+      </div>
       <p class="text-xs text-slate-400 mb-4">最後に残った孤立カードの「本来のペア」は何グループだった？</p>
       <div id="jinuki-quiz-options" class="grid grid-cols-4 sm:grid-cols-7 gap-2 mb-6"></div>
       <div id="jinuki-quiz-result" class="hidden text-sm font-bold p-3 rounded-xl mb-4 transition-all"></div>
@@ -571,7 +573,6 @@
     </div>
   </div>
 
-  <!-- 管理者用画面（CMSモダル） -->
   <div id="modal-admin" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="w-full max-w-4xl bg-slate-900 border border-rose-500/50 rounded-3xl p-6 flex flex-col max-h-[95vh] shadow-[0_0_50px_rgba(225,29,72,0.2)]">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
@@ -685,7 +686,9 @@
       lastDrawnId: null,
       selectedMyCards: [], 
       ranks: [],
-      timers: { turn: null, aiDelay: null, memoryTimer: null, popupTimer: null, matchTimer: null },
+      quizResultCorrect: false,
+      quizAnswered: false,
+      timers: { turn: null, aiDelay: null, memoryTimer: null, popupTimer: null, matchTimer: null, quizTimer: null, quizAutoClose: null },
       
       memoryState: {
         cards: [],
@@ -705,7 +708,6 @@
         currentGameAccess = data;
         saveAccess(currentGameAccess);
         app.renderPortal();
-        
         const adminModal = document.getElementById('modal-admin');
         if (adminModal && !adminModal.classList.contains('hidden')) {
           const g1 = document.getElementById('toggle-game1'); if(g1) g1.checked = currentGameAccess.game1;
@@ -713,7 +715,6 @@
           const g3 = document.getElementById('toggle-game3'); if(g3) g3.checked = currentGameAccess.game3;
           const g4 = document.getElementById('toggle-game4'); if(g4) g4.checked = currentGameAccess.game4;
         }
-
         utils.showToast('<i data-lucide="shield-alert" class="w-4 h-4 inline mr-1 text-cyan-400"></i>管理システムにより出動権限が更新されました');
         if(window.lucide) lucide.createIcons();
       }
@@ -732,7 +733,6 @@
       }
     });
 
-    // 🆕 リアルタイムチャット受信イベント
     socket.on('receive_chat', (data) => {
       const chatContent = document.getElementById('tab-content-chat');
       const badgeDot = document.getElementById('chat-badge-dot');
@@ -764,6 +764,10 @@
         document.getElementById('btn-end-turn')?.classList.add('hidden');
       }
       app.renderTable();
+      // もしプレイ中であれば、現在のターン処理を再評価する
+      if(state.phase === 'playing') {
+        app.processTurn();
+      }
     });
 
     const app = {
@@ -775,12 +779,10 @@
         } catch (err) { console.error("Init error:", err); }
       },
 
-      // 🆕 チャットメッセージ送信関数
       sendChatMsg: () => {
         const input = document.getElementById('game-chat-input');
         const msg = input ? input.value.trim() : '';
         if(!msg) return;
-
         socket.emit('send_chat', {
           roomCode: state.room.code || 'GENERAL',
           name: state.me.name,
@@ -1387,7 +1389,7 @@
 
         state.players.forEach(p => { if(p.isAI) app.autoDiscard(p); });
         
-        socket.emit('game_action', { roomCode: state.room.code, type: 'start', players: state.players, discardPile: state.discardPile });
+        socket.emit('game_action', { roomCode: state.room.code, type: 'start', players: state.players, discardPile: state.discardPile, turnIdx: state.turnIdx });
 
         app.showScreen('view-game');
         document.getElementById('btn-initial-ready')?.classList.remove('hidden');
@@ -1410,6 +1412,14 @@
         } else {
             state.turnIdx = 0;
         }
+
+        socket.emit('game_action', {
+          roomCode: state.room.code,
+          type: 'ready',
+          players: state.players,
+          discardPile: state.discardPile,
+          turnIdx: state.turnIdx
+        });
         
         app.renderTable();
         setTimeout(app.processTurn, 1500);
@@ -1428,8 +1438,8 @@
         const banner = document.getElementById('game-announcement-banner');
         const subTimer = document.getElementById('game-sub-timer');
 
-        if (currentP.id === state.me.id) {
-          if(banner) banner.innerHTML = `<span class="text-cyan-400 font-bold">${utils.escapeHtml(targetP.name)}</span> からカードを引いてください`;
+        if (currentP && currentP.id === state.me.id) {
+          if(banner) banner.innerHTML = `<span class="text-cyan-400 font-bold">${utils.escapeHtml(targetP?.name || '')}</span> からカードを引いてください`;
           let timeLeft = state.config.turnTimeLimit;
           const displayTime = () => { if(subTimer) subTimer.textContent = timeLeft >= 900 ? '無制限' : `残り ${timeLeft} 秒`; };
           displayTime();
@@ -1437,16 +1447,16 @@
           if(timeLeft < 900) {
             state.timers.turn = setInterval(() => {
               timeLeft--; displayTime();
-              if(timeLeft <= 0) { clearInterval(state.timers.turn); app.drawCardFrom(targetP.id, Math.floor(Math.random() * targetP.hand.length)); }
+              if(timeLeft <= 0) { clearInterval(state.timers.turn); if(targetP) app.drawCardFrom(targetP.id, Math.floor(Math.random() * targetP.hand.length)); }
             }, 1000);
           }
         } else {
-          if(banner) banner.innerHTML = `<span class="text-cyan-400 font-bold">${utils.escapeHtml(targetP.name)}</span> から引いています...`;
+          if(banner) banner.innerHTML = `<span class="text-cyan-400 font-bold">${utils.escapeHtml(currentP?.name || '')}</span> の手番です（待機中...）`;
           if(subTimer) subTimer.textContent = '待機中...';
           
-          if (currentP.isAI) {
+          if (currentP && currentP.isAI) {
             state.timers.aiDelay = setTimeout(() => {
-              app.drawCardFrom(targetP.id, Math.floor(Math.random() * targetP.hand.length));
+              if(targetP) app.drawCardFrom(targetP.id, Math.floor(Math.random() * targetP.hand.length));
             }, 1500); 
           }
         }
@@ -1487,8 +1497,10 @@
           if(app.checkClears()) return;
           app.nextTurn();
         } else {
-          if(banner) banner.innerHTML = `ペアを確認して破棄し、右上の<span class="text-amber-400 font-bold">ターン終了</span>を押してください`;
-          endTurnBtn?.classList.remove('hidden');
+          if (currentP.id === state.me.id) {
+            if(banner) banner.innerHTML = `ペアを確認して破棄し、右上の<span class="text-amber-400 font-bold">ターン終了</span>を押してください`;
+            endTurnBtn?.classList.remove('hidden');
+          }
           app.renderTable();
           
           let timeLeft = state.config.turnTimeLimit;
@@ -1516,6 +1528,16 @@
       nextTurn: () => {
         if(state.phase === 'ended') return;
         state.turnIdx = app.getNextActiveIdx(state.turnIdx + 1);
+        
+        // 🆕 修正：ターンが変わったことをサーバー・他プレイヤーに即座に同期する
+        socket.emit('game_action', {
+          roomCode: state.room.code,
+          type: 'next_turn',
+          players: state.players,
+          discardPile: state.discardPile,
+          turnIdx: state.turnIdx
+        });
+
         app.processTurn();
       },
 
@@ -1632,6 +1654,8 @@
         if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
         if(state.timers.popupTimer) clearTimeout(state.timers.popupTimer);
         if(state.timers.matchTimer) clearTimeout(state.timers.matchTimer);
+        if(state.timers.quizTimer) clearInterval(state.timers.quizTimer);
+        if(state.timers.quizAutoClose) clearTimeout(state.timers.quizAutoClose);
       },
 
       playDefibAnimation: () => {
@@ -1813,26 +1837,81 @@
       closeTracker: () => document.getElementById('modal-jinuki-tracker')?.classList.add('hidden'),
       
       showJinukiQuiz: () => {
+        state.quizAnswered = false;
+        state.quizResultCorrect = false;
+
         const o = document.getElementById('jinuki-quiz-options'); 
         if(!o) return;
         o.innerHTML = '';
         for (let g=1; g<=13; g++) o.innerHTML += `<button onclick="app.submitQuiz(${g})" class="p-2 bg-slate-800 border border-slate-700 hover:bg-amber-600 hover:border-amber-500 text-white font-mono text-xs rounded-xl transition shadow-sm">Gr.${g}</button>`;
         o.innerHTML += `<button onclick="app.submitQuiz('joker')" class="p-2 bg-slate-800 border border-slate-700 hover:bg-rose-600 hover:border-rose-500 text-rose-300 font-bold text-xs rounded-xl transition shadow-sm">⚡</button>`;
-        document.getElementById('jinuki-quiz-result')?.classList.add('hidden'); 
-        document.getElementById('btn-close-jinuki-quiz')?.classList.add('hidden');
+        
+        const r = document.getElementById('jinuki-quiz-result');
+        if(r) r.classList.add('hidden');
+        const btnClose = document.getElementById('btn-close-jinuki-quiz');
+        if(btnClose) btnClose.classList.add('hidden');
+
         document.getElementById('modal-jinuki-quiz')?.classList.remove('hidden');
+
+        let timeLeft = 60;
+        const timerBadge = document.getElementById('jinuki-quiz-timer');
+        if(timerBadge) timerBadge.textContent = `制限 ${timeLeft}秒`;
+
+        if(state.timers.quizTimer) clearInterval(state.timers.quizTimer);
+        state.timers.quizTimer = setInterval(() => {
+          timeLeft--;
+          if(timerBadge) timerBadge.textContent = `制限 ${timeLeft}秒`;
+          if(timeLeft <= 0) {
+            clearInterval(state.timers.quizTimer);
+            if(!state.quizAnswered) {
+              app.submitQuiz(null);
+            }
+          }
+        }, 1000);
       },
+
       submitQuiz: (guess) => {
-        const h = state.hiddenCard; const r = document.getElementById('jinuki-quiz-result');
+        if(state.quizAnswered) return;
+        state.quizAnswered = true;
+        if(state.timers.quizTimer) clearInterval(state.timers.quizTimer);
+
+        const h = state.hiddenCard; 
+        const r = document.getElementById('jinuki-quiz-result');
         if(!r) return;
-        const isCorrect = guess === 'joker' ? (h.id === 53 || h.id === 54) : (h.num === guess);
+
+        const isCorrect = guess !== null && (guess === 'joker' ? (h.id === 53 || h.id === 54) : (h.num === guess));
+        state.quizResultCorrect = isCorrect;
+
         r.classList.remove('hidden');
-        if(isCorrect){ r.className='text-sm font-bold p-3 rounded-xl mb-4 bg-emerald-950/80 text-emerald-300 border border-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.3)]'; r.innerHTML=`🎯 正解！ 封印は [${utils.escapeHtml(h.title)}]！`; if(window.confetti) confetti(); }
-        else { r.className='text-sm font-bold p-3 rounded-xl mb-4 bg-rose-950/80 text-rose-300 border border-rose-600 shadow-[0_0_15px_rgba(225,29,72,0.3)]'; r.innerHTML=`❌ 不正解... 実際は [${utils.escapeHtml(h.title)}] でした！`; }
-        document.getElementById('btn-close-jinuki-quiz')?.classList.add('hidden');
+        if(guess === null) {
+          r.className = 'text-sm font-bold p-3 rounded-xl mb-4 bg-slate-800 text-slate-300 border border-slate-700';
+          r.innerHTML = `⏱ 制限時間切れです！ 正解は [${utils.escapeHtml(h.title)}] でした（加点なし）。`;
+        } else if(isCorrect){ 
+          r.className = 'text-sm font-bold p-3 rounded-xl mb-4 bg-emerald-950/80 text-emerald-300 border border-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.3)]'; 
+          r.innerHTML = `🎯 正解！ 封印は [${utils.escapeHtml(h.title)}]！（特別表彰・加点対象）`; 
+          if(window.confetti) confetti(); 
+        } else { 
+          r.className = 'text-sm font-bold p-3 rounded-xl mb-4 bg-rose-950/80 text-rose-300 border border-rose-600 shadow-[0_0_15px_rgba(225,29,72,0.3)]'; 
+          r.innerHTML = `❌ 不正解... 実際は [${utils.escapeHtml(h.title)}] でした（加点なし）。`; 
+        }
+
+        const buttons = document.querySelectorAll('#jinuki-quiz-options button');
+        buttons.forEach(btn => btn.disabled = true);
+
+        const btnClose = document.getElementById('btn-close-jinuki-quiz');
+        if(btnClose) {
+          btnClose.classList.remove('hidden');
+          btnClose.textContent = '10秒後に自動でリザルトへ移動します...';
+        }
+
+        if(state.timers.quizAutoClose) clearTimeout(state.timers.quizAutoClose);
+        state.timers.quizAutoClose = setTimeout(() => {
+          app.showResults();
+        }, 10000);
       },
 
       showResults: () => {
+        app.clearAllTimers();
         document.getElementById('modal-jinuki-quiz')?.classList.add('hidden');
         const myP = state.players.find(p=>p.id===state.me.id);
         const iconBox = document.getElementById('result-icon-container'), badge = document.getElementById('result-badge-label'), title = document.getElementById('result-title');
@@ -1855,16 +1934,30 @@
         const list = document.getElementById('result-ranking-list'); 
         if(list) {
           list.innerHTML = '';
+          list.innerHTML += `<div class="text-xs font-bold text-slate-400 mb-1 border-b border-slate-800 pb-1">🏆 あがり順位表彰</div>`;
           state.ranks.forEach((pId, idx) => {
             const p = state.players.find(x=>x.id===pId); if(!p) return;
-            list.innerHTML += `<div class="flex items-center justify-between p-3 rounded-xl border ${p.id===state.me.id?'bg-cyan-950/40 border-cyan-500/60':'bg-slate-900 border-slate-800'}"><div class="flex items-center gap-3"><span class="text-xl w-6 text-center">${['🥇','🥈','🥉','🏅','🏅','⚡'][idx]||`${idx+1}`}</span><span class="text-sm font-bold text-white">${utils.escapeHtml(p.name)}</span></div><span class="text-xs font-mono font-bold ${idx===0?'text-amber-400':'text-slate-400'}">${idx===0?'WINNER':'CLEAR'}</span></div>`;
+            list.innerHTML += `<div class="flex items-center justify-between p-2.5 rounded-xl border ${p.id===state.me.id?'bg-cyan-950/40 border-cyan-500/60':'bg-slate-900 border-slate-800'}"><div class="flex items-center gap-2"><span class="text-lg w-6 text-center">${['🥇','🥈','🥉','🏅','🏅','⚡'][idx]||`${idx+1}`}</span><span class="text-xs font-bold text-white">${utils.escapeHtml(p.name)}</span></div><span class="text-[11px] font-mono font-bold ${idx===0?'text-amber-400':'text-slate-400'}">${idx===0?'WINNER':'CLEAR'}</span></div>`;
           });
+
+          if (state.mode === 'jinuki') {
+            list.innerHTML += `<div class="text-xs font-bold text-amber-300 mt-4 mb-1 border-b border-slate-800 pb-1 flex items-center gap-1.5"><i data-lucide="star" class="w-3.5 h-3.5"></i><span>隠しカード推理 特別表彰</span></div>`;
+            if (state.quizAnswered && state.quizResultCorrect) {
+              list.innerHTML += `<div class="flex items-center justify-between p-2.5 rounded-xl bg-amber-950/40 border border-amber-500/60"><div class="flex items-center gap-2"><span class="text-base">🌟</span><span class="text-xs font-bold text-white">${utils.escapeHtml(myP?.name || 'プレイヤー')} (あなた)</span></div><span class="text-[11px] font-mono font-bold text-amber-400">+100pt 加点・的中表彰</span></div>`;
+            } else {
+              list.innerHTML += `<div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-xs italic">的中者なし（または不正解/時間切れ）</div>`;
+            }
+
+            if (state.hiddenCard) {
+              list.innerHTML += `<div class="mt-2 text-[11px] text-slate-400 bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-center font-mono">封印されていた隠しカード: <strong class="text-amber-400">${utils.escapeHtml(state.hiddenCard.title)}</strong></div>`;
+            }
+          }
         }
         app.showScreen('view-result');
+        if(window.lucide) lucide.createIcons();
       },
       rematch: () => state.room.isSolo ? app.startSoloAI() : app.returnToPortal(),
 
-      // 管理者用画面 (CMS)
       adminClicks: 0, adminTimer: null,
       openAdmin: () => { 
         document.getElementById('admin-auth-box')?.classList.remove('hidden'); 
