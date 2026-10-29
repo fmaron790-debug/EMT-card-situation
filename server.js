@@ -8,12 +8,14 @@ const io = new Server(server);
 
 const path = require('path');
 
-// 静的ファイルの公開設定
-app.use(express.static(path.join(__dirname, 'public')));
+const path = require('path');
 
-// 万が一静的ファイルが見つからない場合のフォールバック（ルートへのアクセス）
+// publicフォルダではなく、server.jsと同じ階層（__dirname）を公開する設定にする
+app.use(express.static(__dirname));
+
+// ルートへのアクセスのフォールバック
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.use(express.static('public')); // 静的ファイルのパス
