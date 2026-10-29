@@ -1463,6 +1463,9 @@
       },
 
       drawCardFrom: async (targetId, cIdx) => {
+        // 🆕 【追加】すでにこの手番でカードを引いている場合は、重複して引かせないようにガード
+        if(state.lastDrawnId) return;
+
         app.clearAllTimers();
         const currentP = state.players[state.turnIdx];
         const targetP = state.players.find(p => p.id === targetId);
@@ -1471,12 +1474,21 @@
         
         const drawn = targetP.hand.splice(cIdx, 1)[0];
         currentP.hand.unshift(drawn);
-        state.lastDrawnId = drawn.id;
+        state.lastDrawnId = drawn.id; // 🔒 ここで「このターンはもう引いた」というロックをかける
         
         app.addLogMessage(`${currentP.name} が ${targetP.name} からカードを引いた`);
         if (currentP.id === state.me.id) utils.showToast(`カード獲得`);
         
-        socket.emit('game_action', { roomCode: state.room.code, type: 'draw', players: state.players, discardPile: state.discardPile, turnIdx: state.turnIdx });
+        socket.emit('game_action', { 
+          roomCode: state.room.code, 
+          type: 'draw', 
+          players: state.players, 
+          discardPile: state.discardPile, 
+          turnIdx: state.turnIdx, 
+          lastDrawnId: state.lastDrawnId // 🆕 送信データにも追加
+        });
+
+        // （以降の処理はそのまま）
 
         if(app.checkClears()) return; 
         
@@ -1527,15 +1539,18 @@
 
       nextTurn: () => {
         if(state.phase === 'ended') return;
+        state.selectedMyCards = []; 
+        state.lastDrawnId = null; // 🔓 【追加】次の人のターンになったら確実にロックを解除する
+        
         state.turnIdx = app.getNextActiveIdx(state.turnIdx + 1);
         
-        // 🆕 修正：ターンが変わったことをサーバー・他プレイヤーに即座に同期する
         socket.emit('game_action', {
           roomCode: state.room.code,
           type: 'next_turn',
           players: state.players,
           discardPile: state.discardPile,
-          turnIdx: state.turnIdx
+          turnIdx: state.turnIdx,
+          lastDrawnId: null // 🆕 同期
         });
 
         app.processTurn();
