@@ -573,6 +573,7 @@
     </div>
   </div>
 
+  <!-- 管理者用画面（CMSモダル） -->
   <div id="modal-admin" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="w-full max-w-4xl bg-slate-900 border border-rose-500/50 rounded-3xl p-6 flex flex-col max-h-[95vh] shadow-[0_0_50px_rgba(225,29,72,0.2)]">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
@@ -684,6 +685,7 @@
       discardPile: [],
       hiddenCard: null,
       lastDrawnId: null,
+      hasDrawnThisTurn: false, // 🆕 追加：1ターン1枚制限の厳格なフラグ
       selectedMyCards: [], 
       ranks: [],
       quizResultCorrect: false,
@@ -757,6 +759,8 @@
       if(actionData.players) state.players = actionData.players;
       if(actionData.discardPile) state.discardPile = actionData.discardPile;
       if(actionData.turnIdx !== undefined) state.turnIdx = actionData.turnIdx;
+      if(actionData.hasDrawnThisTurn !== undefined) state.hasDrawnThisTurn = actionData.hasDrawnThisTurn;
+      
       if(actionData.type === 'start') {
         state.phase = 'initial_discard';
         app.showScreen('view-game');
@@ -764,7 +768,6 @@
         document.getElementById('btn-end-turn')?.classList.add('hidden');
       }
       app.renderTable();
-      // もしプレイ中であれば、現在のターン処理を再評価する
       if(state.phase === 'playing') {
         app.processTurn();
       }
@@ -1378,7 +1381,7 @@
       },
 
       startStandardCardGameSession: () => {
-        state.phase = 'initial_discard'; state.discardPile = []; state.ranks = []; state.hiddenCard = null; state.selectedMyCards = []; state.lastDrawnId = null;
+        state.phase = 'initial_discard'; state.discardPile = []; state.ranks = []; state.hiddenCard = null; state.selectedMyCards = []; state.lastDrawnId = null; state.hasDrawnThisTurn = false;
         
         let deck = state.mode === 'babanuki' ? currentCardDB.filter(c => c.id !== 54 && c.suit !== 'M') : currentCardDB.filter(c => c.suit !== 'M');
         deck.sort(() => Math.random() - 0.5);
@@ -1389,7 +1392,7 @@
 
         state.players.forEach(p => { if(p.isAI) app.autoDiscard(p); });
         
-        socket.emit('game_action', { roomCode: state.room.code, type: 'start', players: state.players, discardPile: state.discardPile, turnIdx: state.turnIdx });
+        socket.emit('game_action', { roomCode: state.room.code, type: 'start', players: state.players, discardPile: state.discardPile, turnIdx: state.turnIdx, hasDrawnThisTurn: false });
 
         app.showScreen('view-game');
         document.getElementById('btn-initial-ready')?.classList.remove('hidden');
@@ -1418,7 +1421,8 @@
           type: 'ready',
           players: state.players,
           discardPile: state.discardPile,
-          turnIdx: state.turnIdx
+          turnIdx: state.turnIdx,
+          hasDrawnThisTurn: false
         });
         
         app.renderTable();
@@ -1429,7 +1433,10 @@
         app.clearAllTimers();
         if(app.checkClears()) return; 
 
-        state.lastDrawnId = null; state.selectedMyCards = [];
+        state.lastDrawnId = null; 
+        state.hasDrawnThisTurn = false; // 🆕 ターン開始時に確実にリセット
+        state.selectedMyCards = [];
+        
         const currentP = state.players[state.turnIdx];
         const targetIdx = app.getTargetIdx(state.turnIdx);
         const targetP = state.players[targetIdx];
@@ -1463,8 +1470,8 @@
       },
 
       drawCardFrom: async (targetId, cIdx) => {
-        // 🆕 【追加】すでにこの手番でカードを引いている場合は、重複して引かせないようにガード
-        if(state.lastDrawnId) return;
+        // 🆕 1ターン1枚制限の厳格なガード
+        if (state.hasDrawnThisTurn) return;
 
         app.clearAllTimers();
         const currentP = state.players[state.turnIdx];
@@ -1474,7 +1481,8 @@
         
         const drawn = targetP.hand.splice(cIdx, 1)[0];
         currentP.hand.unshift(drawn);
-        state.lastDrawnId = drawn.id; // 🔒 ここで「このターンはもう引いた」というロックをかける
+        state.lastDrawnId = drawn.id;
+        state.hasDrawnThisTurn = true; // 🔒 このターン中はもう引けないようロック
         
         app.addLogMessage(`${currentP.name} が ${targetP.name} からカードを引いた`);
         if (currentP.id === state.me.id) utils.showToast(`カード獲得`);
@@ -1485,10 +1493,8 @@
           players: state.players, 
           discardPile: state.discardPile, 
           turnIdx: state.turnIdx, 
-          lastDrawnId: state.lastDrawnId // 🆕 送信データにも追加
+          hasDrawnThisTurn: true 
         });
-
-        // （以降の処理はそのまま）
 
         if(app.checkClears()) return; 
         
@@ -1533,16 +1539,15 @@
 
       humanEndTurn: () => {
         document.getElementById('btn-end-turn')?.classList.add('hidden');
-        state.selectedMyCards = []; state.lastDrawnId = null;
+        state.selectedMyCards = []; state.lastDrawnId = null; state.hasDrawnThisTurn = false;
         app.nextTurn();
       },
 
       nextTurn: () => {
         if(state.phase === 'ended') return;
-        state.selectedMyCards = []; 
-        state.lastDrawnId = null; // 🔓 【追加】次の人のターンになったら確実にロックを解除する
-        
         state.turnIdx = app.getNextActiveIdx(state.turnIdx + 1);
+        state.lastDrawnId = null;
+        state.hasDrawnThisTurn = false; // 🔓 ターン交代時に確実にロック解除
         
         socket.emit('game_action', {
           roomCode: state.room.code,
@@ -1550,7 +1555,7 @@
           players: state.players,
           discardPile: state.discardPile,
           turnIdx: state.turnIdx,
-          lastDrawnId: null // 🆕 同期
+          hasDrawnThisTurn: false
         });
 
         app.processTurn();
@@ -1615,7 +1620,8 @@
                   type: 'discard', 
                   players: state.players, 
                   discardPile: state.discardPile, 
-                  turnIdx: state.turnIdx 
+                  turnIdx: state.turnIdx,
+                  hasDrawnThisTurn: state.hasDrawnThisTurn
               });
 
               app.renderTable();
@@ -1737,7 +1743,8 @@
           else {
             h += '<div class="flex flex-wrap gap-1 mt-2">';
             p.hand.forEach((_, cIdx) => { 
-              if(isTgt && !state.lastDrawnId && state.phase === 'playing') h += `<button onclick="app.drawCardFrom('${p.id}', ${cIdx})" class="w-6 h-9 bg-amber-700 border-2 border-amber-300 rounded-lg text-white font-bold text-[10px] shadow hover:scale-110 active:scale-95 transition">?</button>`;
+              // 🆕 まだこのターンで引いていない場合のみボタンを有効化
+              if(isTgt && !state.hasDrawnThisTurn && state.phase === 'playing') h += `<button onclick="app.drawCardFrom('${p.id}', ${cIdx})" class="w-6 h-9 bg-amber-700 border-2 border-amber-300 rounded-lg text-white font-bold text-[10px] shadow hover:scale-110 active:scale-95 transition">?</button>`;
               else h += `<div class="w-5 h-8 bg-slate-800 border border-slate-700 rounded-md"></div>`;
             });
             h += '</div>';
