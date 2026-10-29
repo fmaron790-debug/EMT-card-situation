@@ -222,7 +222,7 @@
           const parsed = JSON.parse(s);
           // 神経衰弱用のカード（suit === 'M'）が含まれているかチェック
           const hasMemoryCards = parsed.some(c => c.suit === 'M');
-          if(hasMemoryCards) {
+    
             return parsed;
           }
         }
@@ -323,6 +323,14 @@
                   <option value="solo">個人戦 (全員対抗)</option>
                   <option value="team2">2チーム対抗 (各チーム半数)</option>
                   <option value="team3">3チーム対抗 (3人×2 or 2人×3)</option>
+<!-- 🆕 追加：ホスト用 疾患名表示のオンオフ切替スイッチ -->
+              <div class="flex items-center justify-between pt-2 border-t border-slate-800/60">
+                <span class="text-xs font-bold text-slate-200">カード表面に疾患名を記載する</span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input id="config-memory-show-disease" type="checkbox" checked class="sr-only peer">
+                  <div class="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
                 </select>
               </div>
             </div>
@@ -806,6 +814,8 @@
         state.config.autoFillAI = document.getElementById('config-auto-fill-ai')?.checked ?? true;
         state.config.memoryPairs = parseInt(document.getElementById('config-memory-pairs')?.value || 40, 10);
         state.config.teamMode = document.getElementById('config-team-mode')?.value || 'solo';
+        // 🆕 追加：疾患名表示設定の読み込み
+        state.config.showMemoryDisease = document.getElementById('config-memory-show-disease')?.checked ?? true;
         state.me.name = document.getElementById('input-player-name')?.value.trim() || '救急隊員';
       },
 
@@ -1001,13 +1011,15 @@
             </div>
           `;
 
+          // 修正：showMemoryDisease の設定によって疾患名（title）の表示を切り替え
+          const showDisease = state.config.showMemoryDisease ?? true;
           const cardFrontHtml = `
             <div class="flex items-center justify-between text-[11px] px-1 font-bold">
               <span class="${SUIT_COLORS[card.suit]||''} text-sm">${SUIT_ICONS[card.suit]||'♠'}</span>
               <span class="font-mono bg-cyan-100 text-cyan-900 px-1.5 py-0.5 rounded text-[10px] font-black">Gr.${card.num}</span>
             </div>
             <div class="text-center my-auto px-1 py-1 bg-white/90 rounded-xl border border-slate-300 shadow-inner">
-              <div class="text-xs font-black text-slate-900 mb-1">${utils.escapeHtml(card.title)}</div>
+              ${showDisease ? `<div class="text-xs font-black text-slate-900 mb-1">${utils.escapeHtml(card.title)}</div>` : ''}
               <div class="text-[11px] font-bold text-slate-800 leading-tight line-clamp-3">${utils.escapeHtml(card.desc)}</div>
             </div>
             <div class="text-[9px] text-slate-500 text-right font-mono pr-1">ID:${card.id}</div>
