@@ -220,9 +220,7 @@
         const s = localStorage.getItem('ems_db'); 
         if(s) {
           const parsed = JSON.parse(s);
-          if(parsed.some(c => c.suit === 'M')) {
-            return parsed;
-          }
+          if(parsed.some(c => c.suit === 'M')) return parsed;
         }
       } catch(e){} 
       const defaultFull = JSON.parse(JSON.stringify(DEFAULT_EMS_CARDS));
@@ -294,14 +292,14 @@
                 </select>
               </div>
               <div>
-                <label class="block text-[11px] font-semibold text-slate-400 mb-1">思考制限時間</label>
+                <label class="block text-[11px] font-semibold text-slate-400 mb-1">思考制限時間 (手番ごと)</label>
                 <select id="config-turn-time" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white">
                   <option value="10">10 秒</option><option value="15">15 秒</option><option value="20" selected>20 秒</option><option value="30">30 秒</option><option value="60">60 秒</option><option value="999">無制限</option>
                 </select>
               </div>
             </div>
 
-            <!-- 神経衰弱専用設定（GAME 02用） -->
+            <!-- 神経衰弱用設定 -->
             <div id="memory-only-config" class="hidden pt-3 border-t border-slate-800/80 space-y-3">
               <div>
                 <label class="block text-[11px] font-semibold text-cyan-300 mb-1">神経衰弱 全体ペア数（最大40グループ）</label>
@@ -429,7 +427,7 @@
             <button onclick="app.toggleMemoryBoardModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-[0_0_15px_rgba(37,99,235,0.4)] flex items-center gap-1.5">
               <i data-lucide="layout-grid" class="w-4 h-4"></i><span>自陣ボードを確認</span>
             </button>
-            <span id="memory-timer-display" class="text-xs font-mono font-bold text-amber-400 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">残り 90秒</span>
+            <span id="memory-timer-display" class="text-xs font-mono font-bold text-amber-400 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">手番制限 無制限</span>
           </div>
         </div>
 
@@ -686,12 +684,24 @@
         matchedStock: [],
         boardSlots: [],
         playerBoards: {},
-        timeLeft: 90,
+        timeLeft: 20,
         isProcessingTurn: false
       }
     };
 
     socket.on('connect', () => { state.me.id = socket.id; });
+    
+    // 【修正点2】管理ルームの権限変更をリアルタイムで全プレイヤーに即時反映するイベントリスナー
+    socket.on('update_access', (data) => {
+      if(data) {
+        currentGameAccess = data;
+        saveAccess(currentGameAccess);
+        app.renderPortal();
+        utils.showToast('<i data-lucide="shield-alert" class="w-4 h-4 inline mr-1 text-cyan-400"></i>管理システムにより出動権限が更新されました');
+        if(window.lucide) lucide.createIcons();
+      }
+    });
+
     socket.on('update_room', (data) => {
       if(data.players) state.players = data.players;
       if(data.discardPile) state.discardPile = data.discardPile;
@@ -816,7 +826,7 @@
         const timerEl = document.getElementById('room-summary-timer');
         const aiEl = document.getElementById('room-summary-ai');
         if(maxEl) maxEl.innerHTML = `最大: <strong class="text-cyan-400">${state.config.maxPlayers}名</strong>`;
-        if(timerEl) timerEl.innerHTML = `思考: <strong class="text-amber-400">${state.config.turnTimeLimit>=900?'無制限':state.config.turnTimeLimit+'秒'}</strong>`;
+        if(timerEl) timerEl.innerHTML = `手番制限: <strong class="text-amber-400">${state.config.turnTimeLimit>=900?'無制限':state.config.turnTimeLimit+'秒'}</strong>`;
         if(aiEl) aiEl.innerHTML = `AI自動: <strong class="text-emerald-400">${state.config.autoFillAI?'オン':'オフ'}</strong>`;
         
         const list = document.getElementById('room-members-list'); 
@@ -851,17 +861,24 @@
 
       showJoinModal: () => document.getElementById('modal-join-room')?.classList.remove('hidden'),
       closeJoinModal: () => document.getElementById('modal-join-room')?.classList.add('hidden'),
+      
+      // 【修正点1】ルームID（コード）で確実に合流できるように修正
       executeJoin: () => {
         const codeInput = document.getElementById('input-join-code');
         const code = codeInput ? codeInput.value.trim() : ''; 
-        if(code.length < 4) return utils.showToast('コードが無効です');
-        app.readConfig(); state.room = { code, isHost: false, isSolo: false };
+        if(code.length < 4) return utils.showToast('ルームコード（6桁）を入力してください');
+        app.readConfig(); 
+        state.room = { code: code, isHost: false, isSolo: false };
         const codeDisplay = document.getElementById('room-code-display');
         if(codeDisplay) codeDisplay.textContent = state.room.code;
+        
         socket.emit('join_room', { roomCode: code, playerName: state.me.name, config: state.config });
+        
         document.getElementById('btn-start-game')?.classList.add('hidden');
         document.getElementById('host-ai-controls')?.classList.add('hidden');
-        app.closeJoinModal(); app.updateRoomUI(); app.showScreen('view-room');
+        app.closeJoinModal(); 
+        app.updateRoomUI(); 
+        app.showScreen('view-room');
         utils.showToast(`ルーム [${code}] に合流しました！`);
         app.addLogMessage(`ルーム ${code} に参加しました`);
       },
@@ -929,7 +946,6 @@
         state.memoryState.boardSlots = slots;
         state.memoryState.selectedCardIndices = [];
         state.memoryState.matchedStock = [];
-        state.memoryState.timeLeft = 90;
         state.memoryState.isProcessingTurn = false;
 
         state.players.forEach(p => {
@@ -937,33 +953,35 @@
         });
 
         app.renderMemoryGameTable();
-        app.startMemoryTimer();
         app.addLogMessage('救急神経衰弱バトルが開始されました。');
       },
 
-      // 神経衰弱：各プレイヤーの手番ごとの制限時間タイマー
+      // 各手番ごとの持ち時間タイマー（ゲーム全体は無制限）
       startMemoryTimer: () => {
         if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
         
-        const limit = state.config.turnTimeLimit; // ロビーで設定した秒数
-        if (limit >= 900) return; // 無制限の場合はタイマーなし
+        const limit = state.config.turnTimeLimit;
+        const timerEl = document.getElementById('memory-timer-display');
+        
+        if (limit >= 900) {
+          if(timerEl) timerEl.textContent = `手番制限: 無制限`;
+          return;
+        }
 
         state.memoryState.timeLeft = limit;
-        const timerEl = document.getElementById('memory-timer-display');
-        if(timerEl) timerEl.textContent = `手番制限 ${state.memoryState.timeLeft}秒`;
+        if(timerEl) timerEl.textContent = `手番残り ${state.memoryState.timeLeft}秒`;
 
         state.timers.memoryTimer = setInterval(() => {
-          if(state.memoryState.isProcessingTurn) return; // カード判定中などは停止
+          if(state.memoryState.isProcessingTurn) return;
           
           state.memoryState.timeLeft--;
-          if(timerEl) timerEl.textContent = `手番制限 ${state.memoryState.timeLeft}秒`;
+          if(timerEl) timerEl.textContent = `手番残り ${state.memoryState.timeLeft}秒`;
 
           if(state.memoryState.timeLeft <= 0) {
             clearInterval(state.timers.memoryTimer);
-            utils.showToast('⏱ 制限時間切れ！手番終了です');
+            utils.showToast('⏱ 手番の制限時間切れです！');
             app.addLogMessage(`${state.players[state.turnIdx].name} の手番が制限時間切れになりました。`);
             
-            // 選択中のカードがあれば裏に戻す
             state.memoryState.cards.forEach(c => {
               if(!c.isMatched && c.isFlipped) c.isFlipped = false;
             });
@@ -971,7 +989,6 @@
             state.memoryState.isProcessingTurn = false;
             app.renderMemoryGameTable();
 
-            // 次のプレイヤーの手番へ回す
             app.advanceMemoryTurnCounterclockwise();
           }
         }, 1000);
@@ -984,13 +1001,12 @@
         if(!grid) return;
 
         const currentP = state.players[state.turnIdx];
+        const isMyTurn = (currentP && !currentP.isAI && currentP.id === state.me.id && !state.memoryState.isProcessingTurn);
+        if(turnInfo) turnInfo.textContent = `現在の手番: ${currentP ? currentP.name : ''} ${isMyTurn ? '(あなた)' : ''}`;
 
-        // 🆕 追加：プレイヤーの手番が切り替わるたびに制限時間タイマーをリセットして再スタート
         if (state.phase === 'memory_playing') {
           app.startMemoryTimer();
         }
-        const isMyTurn = (currentP && !currentP.isAI && currentP.id === state.me.id && !state.memoryState.isProcessingTurn);
-        if(turnInfo) turnInfo.textContent = `現在の手番: ${currentP ? currentP.name : ''} ${isMyTurn ? '(あなた)' : ''}`;
 
         if(ring) {
           ring.innerHTML = '';
@@ -1836,7 +1852,14 @@
         currentGameAccess.game2 = document.getElementById('toggle-game2')?.checked ?? true;
         currentGameAccess.game3 = document.getElementById('toggle-game3')?.checked ?? true;
         currentGameAccess.game4 = document.getElementById('toggle-game4')?.checked ?? false;
-        saveAccess(currentGameAccess); app.renderPortal(); utils.showToast('<i data-lucide="save" class="w-4 h-4 inline mr-1"></i>設定を反映しました'); if(window.lucide) lucide.createIcons();
+        saveAccess(currentGameAccess);
+        
+        // 【修正点2】変更内容をサーバー経由で全プレイヤーに即時同期
+        socket.emit('admin_update_access', currentGameAccess);
+
+        app.renderPortal(); 
+        utils.showToast('<i data-lucide="save" class="w-4 h-4 inline mr-1"></i>設定を全プレイヤーに即時反映しました'); 
+        if(window.lucide) lucide.createIcons();
       },
       renderAdminCards: () => {
         const tb = document.getElementById('admin-card-table-body'); 
