@@ -776,6 +776,19 @@
           badge.className = 'text-xs px-2 py-0.5 rounded-full bg-cyan-900/60 text-cyan-300 border border-cyan-700';
         }
       },
+sendChatMsg: () => {
+        const input = document.getElementById('game-chat-input');
+        const msg = input ? input.value.trim() : '';
+        if(!msg) return;
+        
+        const chatContent = document.getElementById('tab-content-chat');
+        if(chatContent) {
+          if(chatContent.querySelector('.italic')) chatContent.innerHTML = '';
+          chatContent.innerHTML += `<div class="p-2 rounded-xl bg-slate-900 border border-slate-800 mb-1"><span class="text-cyan-400 font-bold mr-2">${utils.escapeHtml(state.me.name)}:</span><span class="text-slate-200">${utils.escapeHtml(msg)}</span></div>`;
+          chatContent.scrollTop = chatContent.scrollHeight;
+        }
+        input.value = '';
+      },
       
       renderPortal: () => {
         const c = document.getElementById('portal-games-container'); 
