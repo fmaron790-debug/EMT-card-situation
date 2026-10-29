@@ -29,6 +29,7 @@ io.on('connection', (socket) => {
       rooms[roomCode] = {
         players: [],
         discardPile: [],
+        turnIdx: 0,
         config: config || {}
       };
     }
@@ -55,14 +56,16 @@ io.on('connection', (socket) => {
     });
   });
 
-  // ゲーム内アクション
+  // 修正：ゲーム内アクション（自分を含むルーム全員に同期を徹底）
   socket.on('game_action', (data) => {
     const { roomCode, players, discardPile, turnIdx } = data;
     if (rooms[roomCode]) {
       if (players) rooms[roomCode].players = players;
       if (discardPile) rooms[roomCode].discardPile = discardPile;
+      if (turnIdx !== undefined) rooms[roomCode].turnIdx = turnIdx;
     }
-    socket.to(roomCode).emit('game_action', data);
+    // socket.to ではなく io.to にすることで、操作した本人も含めて全員の画面が完全に同期します
+    io.to(roomCode).emit('game_action', data);
   });
 
   // 管理者によるアクセス権限の即時全体反映
@@ -75,19 +78,31 @@ io.on('connection', (socket) => {
     io.emit('update_cards', dbData);
   });
 
-  // 🆕 ルーム内リアルタイムチャットの送受信
+  // ルーム内リアルタイムチャットの送受信
   socket.on('send_chat', (data) => {
     const { roomCode, name, message } = data;
     if (roomCode && rooms[roomCode]) {
       io.to(roomCode).emit('receive_chat', { name, message });
     } else {
-      // ルーム未参加や全体チャットの場合
       io.emit('receive_chat', { name, message });
     }
   });
 
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
+    // 参加していたルームから切断された場合の処理（必要に応じてルーム内プレイヤー管理）
+    for (const roomCode in rooms) {
+      const room = rooms[roomCode];
+      const idx = room.players.findIndex(p => p.id === socket.id);
+      if (idx !== -1) {
+        room.players.splice(idx, 1);
+        io.to(roomCode).emit('update_room', {
+          players: room.players,
+          discardPile: room.discardPile,
+          config: room.config
+        });
+      }
+    }
   });
 });
 
