@@ -759,8 +759,16 @@
       if(actionData.players) state.players = actionData.players;
       if(actionData.discardPile) state.discardPile = actionData.discardPile;
       if(actionData.turnIdx !== undefined) state.turnIdx = actionData.turnIdx;
-      if(actionData.hasDrawnThisTurn !== undefined) state.hasDrawnThisTurn = actionData.hasDrawnThisTurn;
       
+      // 🆕 自分のターンであれば、現在の自分のドロー状態を再評価
+      const currentP = state.players[state.turnIdx];
+      if (currentP && currentP.id === state.me.id) {
+        // 自分のターンに切り替わったばかりのときは、まだ引いていない状態にする
+        if (actionData.type === 'next_turn' || actionData.type === 'ready') {
+          state.hasDrawnThisTurn = false;
+        }
+      }
+
       if(actionData.type === 'start') {
         state.phase = 'initial_discard';
         app.showScreen('view-game');
@@ -1434,12 +1442,14 @@
         if(app.checkClears()) return; 
 
         state.lastDrawnId = null; 
-        state.hasDrawnThisTurn = false; // 🆕 ターン開始時に確実にリセット
+        state.hasDrawnThisTurn = false; // 🆕 自分の手番が処理されるときに確実にリセット！
         state.selectedMyCards = [];
         
         const currentP = state.players[state.turnIdx];
         const targetIdx = app.getTargetIdx(state.turnIdx);
         const targetP = state.players[targetIdx];
+        
+        // （以下続く...）
 
         app.renderTable();
         const banner = document.getElementById('game-announcement-banner');
