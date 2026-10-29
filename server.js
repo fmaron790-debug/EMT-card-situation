@@ -7,10 +7,10 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// 静的ファイルの公開設定（同じ階層の index.html を公開）
+// 静的ファイルの公開設定
 app.use(express.static(__dirname));
 
-// ルートへのアクセスのフォールバック
+// ルート（/）へのアクセスのフォールバック
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -73,6 +73,17 @@ io.on('connection', (socket) => {
   // 管理者によるカードデータベースの即時全体同期
   socket.on('admin_update_cards', (dbData) => {
     io.emit('update_cards', dbData);
+  });
+
+  // 🆕 ルーム内リアルタイムチャットの送受信
+  socket.on('send_chat', (data) => {
+    const { roomCode, name, message } = data;
+    if (roomCode && rooms[roomCode]) {
+      io.to(roomCode).emit('receive_chat', { name, message });
+    } else {
+      // ルーム未参加や全体チャットの場合
+      io.emit('receive_chat', { name, message });
+    }
   });
 
   socket.on('disconnect', () => {
