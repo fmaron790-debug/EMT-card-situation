@@ -941,15 +941,38 @@
         app.addLogMessage('救急神経衰弱バトルが開始されました。');
       },
 
+      // 神経衰弱：各プレイヤーの手番ごとの制限時間タイマー
       startMemoryTimer: () => {
         if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
+        
+        const limit = state.config.turnTimeLimit; // ロビーで設定した秒数
+        if (limit >= 900) return; // 無制限の場合はタイマーなし
+
+        state.memoryState.timeLeft = limit;
+        const timerEl = document.getElementById('memory-timer-display');
+        if(timerEl) timerEl.textContent = `手番制限 ${state.memoryState.timeLeft}秒`;
+
         state.timers.memoryTimer = setInterval(() => {
+          if(state.memoryState.isProcessingTurn) return; // カード判定中などは停止
+          
           state.memoryState.timeLeft--;
-          const timerEl = document.getElementById('memory-timer-display');
-          if(timerEl) timerEl.textContent = `残り ${state.memoryState.timeLeft}秒`;
+          if(timerEl) timerEl.textContent = `手番制限 ${state.memoryState.timeLeft}秒`;
+
           if(state.memoryState.timeLeft <= 0) {
             clearInterval(state.timers.memoryTimer);
-            app.endMemoryGame();
+            utils.showToast('⏱ 制限時間切れ！手番終了です');
+            app.addLogMessage(`${state.players[state.turnIdx].name} の手番が制限時間切れになりました。`);
+            
+            // 選択中のカードがあれば裏に戻す
+            state.memoryState.cards.forEach(c => {
+              if(!c.isMatched && c.isFlipped) c.isFlipped = false;
+            });
+            state.memoryState.selectedCardIndices = [];
+            state.memoryState.isProcessingTurn = false;
+            app.renderMemoryGameTable();
+
+            // 次のプレイヤーの手番へ回す
+            app.advanceMemoryTurnCounterclockwise();
           }
         }, 1000);
       },
@@ -961,6 +984,11 @@
         if(!grid) return;
 
         const currentP = state.players[state.turnIdx];
+
+        // 🆕 追加：プレイヤーの手番が切り替わるたびに制限時間タイマーをリセットして再スタート
+        if (state.phase === 'memory_playing') {
+          app.startMemoryTimer();
+        }
         const isMyTurn = (currentP && !currentP.isAI && currentP.id === state.me.id && !state.memoryState.isProcessingTurn);
         if(turnInfo) turnInfo.textContent = `現在の手番: ${currentP ? currentP.name : ''} ${isMyTurn ? '(あなた)' : ''}`;
 
