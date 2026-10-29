@@ -696,6 +696,16 @@
         currentGameAccess = data;
         saveAccess(currentGameAccess);
         app.renderPortal();
+        
+        // 🆕 追加：他の端末で管理画面を開いている場合、チェックボックスの状態も同期させる
+        const adminModal = document.getElementById('modal-admin');
+        if (adminModal && !adminModal.classList.contains('hidden')) {
+          const g1 = document.getElementById('toggle-game1'); if(g1) g1.checked = currentGameAccess.game1;
+          const g2 = document.getElementById('toggle-game2'); if(g2) g2.checked = currentGameAccess.game2;
+          const g3 = document.getElementById('toggle-game3'); if(g3) g3.checked = currentGameAccess.game3;
+          const g4 = document.getElementById('toggle-game4'); if(g4) g4.checked = currentGameAccess.game4;
+        }
+
         utils.showToast('<i data-lucide="shield-alert" class="w-4 h-4 inline mr-1 text-cyan-400"></i>管理システムにより出動権限が更新されました');
         if(window.lucide) lucide.createIcons();
       }
