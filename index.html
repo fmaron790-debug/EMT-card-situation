@@ -691,7 +691,6 @@
 
     socket.on('connect', () => { state.me.id = socket.id; });
     
-    // 【修正点2】管理ルームの権限変更をリアルタイムで全プレイヤーに即時反映するイベントリスナー
     socket.on('update_access', (data) => {
       if(data) {
         currentGameAccess = data;
@@ -862,7 +861,6 @@
       showJoinModal: () => document.getElementById('modal-join-room')?.classList.remove('hidden'),
       closeJoinModal: () => document.getElementById('modal-join-room')?.classList.add('hidden'),
       
-      // 【修正点1】ルームID（コード）で確実に合流できるように修正
       executeJoin: () => {
         const codeInput = document.getElementById('input-join-code');
         const code = codeInput ? codeInput.value.trim() : ''; 
@@ -956,7 +954,6 @@
         app.addLogMessage('救急神経衰弱バトルが開始されました。');
       },
 
-      // 各手番ごとの持ち時間タイマー（ゲーム全体は無制限）
       startMemoryTimer: () => {
         if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
         
@@ -1854,7 +1851,6 @@
         currentGameAccess.game4 = document.getElementById('toggle-game4')?.checked ?? false;
         saveAccess(currentGameAccess);
         
-        // 【修正点2】変更内容をサーバー経由で全プレイヤーに即時同期
         socket.emit('admin_update_access', currentGameAccess);
 
         app.renderPortal(); 
