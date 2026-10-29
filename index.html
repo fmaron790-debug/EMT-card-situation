@@ -128,67 +128,87 @@
       { id: 53, suit: "JOKER", num: 0, title: "心室細動（VF）", desc: "即座に除細動が必要な致死性不整脈。持ち続けるとあがれません" },
       { id: 54, suit: "JOKER", num: 0, title: "DC（電気ショック）", desc: "VFと組み合わせて使える。このカードとVFのカードを組み合わせて使える" },
 
-      // GAME 02（廃用症候群・神経衰弱用）グループ1〜30 各2枚ずつ（計60枚）
-      { id: 101, suit: "M", num: 1, title: "廃用基礎", desc: "絶対安静による1日あたりの筋力低下率（％）の目安" },
-      { id: 102, suit: "M", num: 1, title: "廃用基礎", desc: "寝たきり高齢者に最も起こりやすい関節拘縮の好発位" },
-      { id: 103, suit: "M", num: 2, title: "筋萎縮", desc: "安静開始から筋萎縮が顕著に現れ始めるまでの日数" },
-      { id: 104, suit: "M", num: 2, title: "筋萎縮", desc: "速筋線維と遅筋線維のどちらが廃用性萎縮を起こしやすいか" },
-      { id: 105, suit: "M", num: 3, title: "骨粗鬆症", desc: "不活動性骨粗鬆症でカルシウムが最も流出しやすい部位" },
-      { id: 106, suit: "M", num: 3, title: "骨粗鬆症", desc: "骨萎縮を防ぐために必要な最低限の負荷（荷重）の種類" },
-      { id: 107, suit: "M", num: 4, title: "関節拘縮", desc: "長期臥床で最も変形を起こしやすい足関節の肢位" },
-      { id: 108, suit: "M", num: 4, title: "関節拘縮", desc: "拘縮予防のための受動関節運動（ROMex）の基本原則" },
-      { id: 109, suit: "M", num: 5, title: "深部静脈血栓", desc: "DVT（エコノミークラス症候群）の三大要因（ヴィルヒョウの三徴）の一つ" },
-      { id: 110, suit: "M", num: 5, title: "深部静脈血栓", desc: "下肢静脈血栓が詰まると最も危険な重要臓器" },
-      { id: 111, suit: "M", num: 6, title: "起立性低血圧", desc: "急な起き上がりで血圧が低下する際の収縮期血圧の低下基準（mmHg）" },
-      { id: 112, suit: "M", num: 6, title: "起立性低血圧", desc: "起立性低血圧を防ぐための段階的な離床ステップ" },
-      { id: 113, suit: "M", num: 7, title: "褥瘡（床ずれ）", desc: "圧迫による血流障害で好発する仙骨部の体位" },
-      { id: 114, suit: "M", num: 7, title: "褥瘡（床ずれ）", desc: "体位変換を行う標準的な時間間隔（時間）" },
-      { id: 115, suit: "M", num: 8, title: "誤嚥性肺炎", desc: "不活発や臥床によって低下する嚥下反射の神経メカニズム" },
-      { id: 116, suit: "M", num: 8, title: "誤嚥性肺炎", desc: "食事摂取時の最も安全なベッドアップ角度（度）" },
-      { id: 117, suit: "M", num: 9, title: "便秘・腸閉塞", desc: "腹圧低下と運動不足による腸蠕動運動の低下対策" },
-      { id: 118, suit: "M", num: 9, title: "便秘・腸閉塞", desc: "水分・食物繊維摂取とともに行う腹部マッサージの方向" },
-      { id: 119, suit: "M", num: 10, title: "尿路感染症", desc: "カテーテル留置や排泄障害による残尿が引き起こす感染リスク" },
-      { id: 120, suit: "M", num: 10, title: "尿路感染症", desc: "排泄ケアにおける清潔保持と水分摂取の重要性" },
-      { id: 121, suit: "M", num: 11, title: "認知機能低下", desc: "感覚刺激の減少や環境変化によるせん妄・認知機能低下" },
-      { id: 122, suit: "M", num: 11, title: "認知機能低下", desc: "見当識を保つためにベッドサイドに置くべきもの" },
-      { id: 123, suit: "M", num: 12, title: "心機能低下", desc: "臥床により1回拍出量が低下した際に見られる代償性の心拍数変化" },
-      { id: 124, suit: "M", num: 12, title: "心機能低下", desc: "心予備能低下による離床時のモニタリング項目" },
-      { id: 125, suit: "M", num: 13, title: "呼吸機能低下", desc: "臥位による胸郭の動き制限と換気量低下のメカニズム" },
-      { id: 126, suit: "M", num: 13, title: "呼吸機能低下", desc: "痰の排出を促すための体位ドレナージの基本" },
-      { id: 127, suit: "M", num: 14, title: "代謝異常", desc: "糖代謝低下による耐糖能異常（インスリン抵抗性）" },
-      { id: 128, suit: "M", num: 14, title: "代謝異常", desc: "不活動による基礎代謝量の変化傾向" },
-      { id: 129, suit: "M", num: 15, title: "精神心理的影響", desc: "無気力や抑うつ状態を引き起こす心理的メカニズム" },
-      { id: 130, suit: "M", num: 15, title: "精神心理的影響", desc: "早期離床がもたらす精神的リハビリテーション効果" },
-      { id: 131, suit: "M", num: 16, title: "バランス障害", desc: "前庭器官や固有受容器の刺激低下による平衡機能低下" },
-      { id: 132, suit: "M", num: 16, title: "バランス障害", desc: "立位保持訓練における安全確保のポイント" },
-      { id: 133, suit: "M", num: 17, title: "栄養・低栄養", desc: "食欲低下と代謝低下による低アルブミン血症のリスク" },
-      { id: 134, suit: "M", num: 17, title: "栄養・低栄養", desc: "栄養状態改善のための高タンパク・高カロリー食の意義" },
-      { id: 135, suit: "M", num: 18, title: "皮膚湿潤", desc: "発汗や尿失禁によるスキントラブルの発生機序" },
-      { id: 136, suit: "M", num: 18, title: "皮膚湿潤", desc: "スキンケアと清拭における保湿の重要性" },
-      { id: 137, suit: "M", num: 19, title: "足底浮腫", desc: "筋ポンプ作用の消失による下肢の水分貯留" },
-      { id: 138, suit: "M", num: 19, title: "足底浮腫", desc: "弾性ストッキングや自動・他動運動の効果" },
-      { id: 139, suit: "M", num: 20, title: "体温調節障害", desc: "自律神経機能低下による発汗・体温コントロール不良" },
-      { id: 140, suit: "M", num: 20, title: "体温調節障害", desc: "室温管理と衣類調整による環境整備" },
-      { id: 141, suit: "M", num: 21, title: "免疫力低下", desc: "ストレスホルモン増加と血流低下による免疫機能の減退" },
-      { id: 142, suit: "M", num: 21, title: "免疫力低下", desc: "院内感染防止のための手指衛生と環境消毒" },
-      { id: 143, suit: "M", num: 22, title: "睡眠障害", desc: "昼夜逆転や活動量不足による睡眠の質の低下" },
-      { id: 144, suit: "M", num: 22, title: "睡眠障害", desc: "日中の離床と自然光照射による体内時計の調整" },
-      { id: 145, suit: "M", num: 23, title: "言語・コミュニケーション", desc: "発話機会の減少による言語表現力の低下" },
-      { id: 146, suit: "M", num: 23, title: "言語・コミュニケーション", desc: "積極的な声かけと対話の機会確保" },
-      { id: 147, suit: "M", num: 24, title: "ADL低下", desc: "基本的日常生活動作（起居・移乗・歩行）の自立度低下" },
-      { id: 148, suit: "M", num: 24, title: "ADL低下", desc: "残存機能の維持と生活動作訓練の導入時期" },
-      { id: 149, suit: "M", num: 25, title: "転倒・転落", desc: "筋力低下と筋緊張低下が招く移動時の転倒リスク" },
-      { id: 150, suit: "M", num: 25, title: "転倒・転落", desc: "環境整備とセンサーマットの活用" },
-      { id: 151, suit: "M", num: 26, title: "廃用症候群予防", desc: "早期離床リハビリテーションの最大の目的" },
-      { id: 152, suit: "M", num: 26, title: "廃用症候群予防", desc: "多職種チーム（医師・看護師・救命士・PT）による連携" },
-      { id: 153, suit: "M", num: 27, title: "リハビリテーション評価", desc: "FIM（機能的自立度評価法）によるADL評価の活用" },
-      { id: 154, suit: "M", num: 27, title: "リハビリテーション評価", desc: "ブルンストロームステージによる麻痺の評価" },
-      { id: 155, suit: "M", num: 28, title: "環境調整", desc: "バリアフリー化と福祉用具（歩行器・車椅子）の選定" },
-      { id: 156, suit: "M", num: 28, title: "環境調整", desc: "自宅退院に向けた家屋調査の重要性" },
-      { id: 157, suit: "M", num: 29, title: "レスパイトケア", desc: "介護者の負担軽減を目的とした一時入所・支援" },
-      { id: 158, suit: "M", num: 29, title: "レスパイトケア", desc: "地域包括ケアシステムにおける連携体制" },
-      { id: 159, suit: "M", num: 30, title: "総合まとめ", desc: "救急現場から回復期・在宅へ繋ぐ廃用予防のトータルケア" },
-      { id: 160, suit: "M", num: 30, title: "総合まとめ", desc: "患者のQOL（生活の質）向上を目指した多職種アプローチ" }
+      // GAME 02（救急神経衰弱用：全40グループ正式エクセルデータ）
+      { id: 101, suit: "M", num: 1, title: "急性心筋梗塞", desc: "心電図、標準誘導等でII、IIIでST上昇" },
+      { id: 102, suit: "M", num: 1, title: "急性心筋梗塞", desc: "突然20分以上の胸痛・呼吸困難、ショック" },
+      { id: 103, suit: "M", num: 2, title: "急性大動脈解離", desc: "突然発症する強い胸痛・背部痛、移動する痛み" },
+      { id: 104, suit: "M", num: 2, title: "急性大動脈解離", desc: "失神や麻痺、左右の脈拍・血圧の差、ショック徴候" },
+      { id: 105, suit: "M", num: 3, title: "肺血栓塞栓症", desc: "突然の呼吸困難、胸痛、頻呼吸、片側下肢の腫脹" },
+      { id: 106, suit: "M", num: 3, title: "肺血栓塞栓症", desc: "長期臥床、手術歴、悪性腫瘍の後に発症リスク高め" },
+      { id: 107, suit: "M", num: 4, title: "急性心不全", desc: "呼吸困難、起坐呼吸、湿性咳嗽、冷汗" },
+      { id: 108, suit: "M", num: 4, title: "急性心不全", desc: "頸静脈怒張、下肢浮腫、慢性心不全の既往。" },
+      { id: 109, suit: "M", num: 5, title: "致死性不整脈", desc: "動悸、胸部不快感、失神、意識障害、心停止" },
+      { id: 110, suit: "M", num: 5, title: "致死性不整脈", desc: "心疾患の既往、WPW症候群やBrugada症候群など" },
+      { id: 111, suit: "M", num: 6, title: "気管支喘息発作", desc: "呼気性喘鳴、呼気延長、息苦しさ、咳嗽、重症では会話困難" },
+      { id: 112, suit: "M", num: 6, title: "気管支喘息発作", desc: "喘息の既往、アレルゲンへの曝露" },
+      { id: 113, suit: "M", num: 7, title: "COPD急性増悪", desc: "慢性的な咳嗽・喀痰・呼吸困難の増悪" },
+      { id: 114, suit: "M", num: 7, title: "COPD急性増悪", desc: "喫煙歴、るい痩、痰の増加、CO2ナルコーシス" },
+      { id: 115, suit: "M", num: 8, title: "気胸", desc: "突然の胸痛、呼吸困難、左右の呼吸音の差、胸郭運動" },
+      { id: 116, suit: "M", num: 8, title: "気胸", desc: "若年でやせ型の男性、好発部は肺尖部" },
+      { id: 117, suit: "M", num: 9, title: "肺炎", desc: "発熱、咳嗽、膿性痰、全身倦怠感、食欲不振、水泡音" },
+      { id: 118, suit: "M", num: 9, title: "肺炎", desc: "2023年時点我が国の死因5位" },
+      { id: 119, suit: "M", num: 10, title: "急性咽頭蓋炎", desc: "強い咽頭痛、嚥下困難、流涎、嗄声、吸気性喘鳴" },
+      { id: 120, suit: "M", num: 10, title: "急性咽頭蓋炎", desc: "インフルエンザ杆菌b型が起因菌、医療機関では重症例で気管切開" },
+      { id: 121, suit: "M", num: 11, title: "脳梗塞", desc: "突然の片麻痺、顔面の左右差、構音障害、失語" },
+      { id: 122, suit: "M", num: 11, title: "脳梗塞", desc: "FAST、CPSS、ELVOスクリーン、KPSS" },
+      { id: 123, suit: "M", num: 12, title: "クモ膜下出血", desc: "突然の激しい頭痛、嘔吐、項部硬直" },
+      { id: 124, suit: "M", num: 12, title: "クモ膜下出血", desc: "脳動脈瘤（ウイルス動脈輪）、ST-T変化、不整脈" },
+      { id: 125, suit: "M", num: 13, title: "てんかん発作", desc: "全身のけいれん、意識消失、トッド麻痺" },
+      { id: 126, suit: "M", num: 13, title: "てんかん発作", desc: "HIV、マラリア、トキソプラズマ、神経嚢虫症を機に発症リスク有り" },
+      { id: 127, suit: "M", num: 14, title: "低血糖", desc: "空腹感、冷汗、振戦、動悸、異常行動、頭痛、麻痺、昏睡" },
+      { id: 128, suit: "M", num: 14, title: "低血糖", desc: "糖尿病歴、インスリン・血糖降下薬の使用、食事摂取不足" },
+      { id: 129, suit: "M", num: 15, title: "急性虫垂炎", desc: "心窩部や臍周周囲の痛み、右下腹部に移動する" },
+      { id: 130, suit: "M", num: 15, title: "急性虫垂炎", desc: "青少年に好発、ランツ点" },
+      { id: 131, suit: "M", num: 16, title: "急性膵炎", desc: "上腹部痛、背部痛、悪心・嘔吐" },
+      { id: 132, suit: "M", num: 16, title: "急性膵炎", desc: "飲酒歴、胆石歴、腹膜刺激症状" },
+      { id: 133, suit: "M", num: 17, title: "上部消化管穿孔", desc: "突然の強い上腹部痛、食事前後の疼痛、腹膜刺激症状" },
+      { id: 134, suit: "M", num: 17, title: "上部消化管穿孔", desc: "ピロリ菌、NSAIDsでリスク、幽門狭窄" },
+      { id: 135, suit: "M", num: 18, title: "腸閉塞", desc: "腹痛、腹部膨満、嘔吐、排便・排ガスの停止。" },
+      { id: 136, suit: "M", num: 18, title: "腸閉塞", desc: "手術歴、鼠径部嵌頓ヘルニアで発症リスク" },
+      { id: 137, suit: "M", num: 19, title: "敗血症", desc: "意識変容、頻呼吸、頻脈、低血圧低下、熱感、重症では低体温" },
+      { id: 138, suit: "M", num: 19, title: "敗血症", desc: "Sequential Organ Failure Assessment" },
+      { id: 139, suit: "M", num: 20, title: "アナフィラキシー", desc: "蕁麻疹、血管性浮腫、喘鳴、呼吸困難、低血圧低下、消化器症状" },
+      { id: 140, suit: "M", num: 20, title: "アナフィラキシー", desc: "食物・薬剤・蜂刺傷などへの曝露、アニサキス、運動でも発症" },
+      { id: 141, suit: "M", num: 21, title: "糖尿病性ケトアシドーシス", desc: "脱水、悪心・嘔吐、腹痛、深くて大きな呼吸、意識障害" },
+      { id: 142, suit: "M", num: 21, title: "糖尿病性ケトアシドーシス", desc: "脂肪酸の分解、HCO3-低下" },
+      { id: 143, suit: "M", num: 22, title: "急性腎盂腎炎", desc: "高熱、悪寒・戦慄、排尿痛、頻尿、CVA陽性" },
+      { id: 144, suit: "M", num: 22, title: "急性腎盂腎炎", desc: "女性に好発、DM・ステロイドで重症化リスク" },
+      { id: 145, suit: "M", num: 23, title: "急性硬膜外血腫", desc: "意識清明期、クッシング、骨折の併発が多い" },
+      { id: 146, suit: "M", num: 23, title: "急性硬膜外血腫", desc: "凸レンズ型の血腫、スワールサイン" },
+      { id: 147, suit: "M", num: 24, title: "急性硬膜下血腫", desc: "架橋静脈・脳表動脈の破綻、脳ヘルニア、脳挫傷" },
+      { id: 148, suit: "M", num: 24, title: "急性硬膜下血腫", desc: "三日月形のCT断面図" },
+      { id: 149, suit: "M", num: 25, title: "頸髄損傷", desc: "四肢麻痺、対麻痺、呼吸停止" },
+      { id: 150, suit: "M", num: 25, title: "頸髄損傷", desc: "小児では斜めに回転している頸部・後頭部痛・頸部痛を訴えることもある" },
+      { id: 151, suit: "M", num: 26, title: "熱中症", desc: "めまい、筋肉痛、頭痛、けいれん、肝障害・腎障害" },
+      { id: 152, suit: "M", num: 26, title: "熱中症", desc: "死亡例では高齢者が8割、5-9月好発" },
+      { id: 153, suit: "M", num: 27, title: "一酸化炭素中毒", desc: "頭痛、悪心・嘔吐、皮膚紅潮、めまい、けいれん" },
+      { id: 154, suit: "M", num: 27, title: "一酸化炭素中毒", desc: "（構造式：C≡O）" },
+      { id: 155, suit: "M", num: 28, title: "オピオイド中毒", desc: "鎮静・鎮痛、著しい縮瞳、呼吸抑制、意識低下、精神・身体依存高め" },
+      { id: 156, suit: "M", num: 28, title: "オピオイド中毒", desc: "拮抗薬はナロキソン" },
+      { id: 157, suit: "M", num: 29, title: "HELLP症候群", desc: "Hemolysis, Elevated liver enzymes, Low platelet" },
+      { id: 158, suit: "M", num: 29, title: "HELLP症候群", desc: "上腹部痛、倦怠感、悪心・嘔吐、妊娠歴、妊娠高血圧症候群の既往" },
+      { id: 159, suit: "M", num: 30, title: "麻疹", desc: "1〜2週間の潜伏期後38℃代の熱、結膜充血、コブリック斑、落屑" },
+      { id: 160, suit: "M", num: 30, title: "麻疹", desc: "重症例で亜急性硬化性全脳炎（SSPE）を発症" },
+      { id: 161, suit: "M", num: 31, title: "川崎病", desc: "発熱、眼球結膜の充血、口唇の発赤、イチゴ舌、頸部リンパ腫大" },
+      { id: 162, suit: "M", num: 31, title: "川崎病", desc: "冠動脈付近の頸部に動脈瘤を形成しAMIで死亡した例がある" },
+      { id: 163, suit: "M", num: 32, title: "横紋筋融解症", desc: "過激な運動、虚血、薬物、過剰アルコール、電解質などで発症" },
+      { id: 164, suit: "M", num: 32, title: "横紋筋融解症", desc: "筋痛、筋力低下、ショック、ミオグロビン尿" },
+      { id: 165, suit: "M", num: 33, title: "急性胆道感染症", desc: "右上腹部痛、発熱、黄疸" },
+      { id: 166, suit: "M", num: 33, title: "急性胆道感染症", desc: "マーフィー徴候、シャルコー3徴候、" },
+      { id: 167, suit: "M", num: 34, title: "ノロウイルス感染症", desc: "悪心・嘔吐、水様性下痢、倦怠感" },
+      { id: 168, suit: "M", num: 34, title: "ノロウイルス感染症", desc: "塵埃感染・消毒には次亜塩素酸ナトリウム、食中毒患者数最多" },
+      { id: 169, suit: "M", num: 35, title: "破傷風", desc: "偏性嫌気性菌（クロストリジウム）が起因菌" },
+      { id: 170, suit: "M", num: 35, title: "破傷風", desc: "肩こり、開口障害、嚥下困難、四肢の筋硬直、呼吸不全" },
+      { id: 171, suit: "M", num: 36, title: "常位胎盤早期剥離", desc: "腹痛、子宮への圧痛、板状硬" },
+      { id: 172, suit: "M", num: 36, title: "常位胎盤早期剥離", desc: "妊娠高血圧症候群の既往、外傷、前期破水が危険因子" },
+      { id: 173, suit: "M", num: 37, title: "心膜炎", desc: "胸痛、体動（咳、仰臥位）で増悪、蒸気機関車様摩擦音" },
+      { id: 174, suit: "M", num: 37, title: "心膜炎", desc: "下に凸のST上昇、心タンポナーデ" },
+      { id: 175, suit: "M", num: 38, title: "感染性心内膜炎", desc: "心室中隔欠損症、大動脈弁逆流症、人工弁置換術後に好発" },
+      { id: 176, suit: "M", num: 38, title: "感染性心内膜炎", desc: "発熱、心雑音、自然治癒しない" },
+      { id: 177, suit: "M", num: 39, title: "髄膜炎", desc: "中耳炎や副鼻腔炎から波及することもある。ウイルス性はエンテロウイルスが" },
+      { id: 178, suit: "M", num: 39, title: "髄膜炎", desc: "発熱、頭痛、悪心・嘔吐、けいれん、羞明、項部硬直" },
+      { id: 179, suit: "M", num: 40, title: "統合失調症", desc: "治療薬の過量内服で悪性症候群の発症リスク" },
+      { id: 180, suit: "M", num: 40, title: "統合失調症", desc: "妄想、異常行動、無関心、注意散漫、幻覚" }
     ];
 
     const SUIT_ICONS = { C: '♣', S: '♠', H: '♥', D: '♦', M: '🧠', JOKER: '⚡' };
@@ -204,6 +224,7 @@
     let currentGameAccess = loadAccess();
   </script>
 
+  <!-- 以下UI構造（ご提示いただいた最終データ構造を完全維持） -->
   <div id="main-content-wrapper" class="w-full flex-1 flex flex-col items-center">
     <header class="w-full max-w-5xl px-4 py-3 border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40 flex items-center justify-between">
       <div class="flex items-center space-x-3">
@@ -268,15 +289,16 @@
               </div>
             </div>
 
-            <!-- 神経衰弱・廃用症候群専用設定（GAME 02用） -->
+            <!-- 神経衰弱用設定（GAME 02用：最大40ペア対応） -->
             <div id="memory-only-config" class="hidden pt-3 border-t border-slate-800/80 space-y-3">
               <div>
-                <label class="block text-[11px] font-semibold text-cyan-300 mb-1">神経衰弱 全体ペア数（カード総数）</label>
+                <label class="block text-[11px] font-semibold text-cyan-300 mb-1">神経衰弱 全体ペア数（最大40グループ）</label>
                 <select id="config-memory-pairs" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white">
                   <option value="12">12 ペア (24枚)</option>
-                  <option value="18" selected>18 ペア (36枚 / 標準)</option>
+                  <option value="18">18 ペア (36枚)</option>
                   <option value="24">24 ペア (48枚)</option>
-                  <option value="30">30 ペア (60枚 / 最大)</option>
+                  <option value="30">30 ペア (60枚)</option>
+                  <option value="40" selected>40 ペア (80枚 / 全グループ制覇)</option>
                 </select>
               </div>
               <div>
@@ -387,7 +409,7 @@
             <button onclick="app.toggleMemoryBoardModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-[0_0_15px_rgba(37,99,235,0.4)] flex items-center gap-1.5">
               <i data-lucide="layout-grid" class="w-4 h-4"></i><span>自陣ボードを確認</span>
             </button>
-            <span id="memory-timer-display" class="text-xs font-mono font-bold text-amber-400 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">残り 60秒</span>
+            <span id="memory-timer-display" class="text-xs font-mono font-bold text-amber-400 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">残り 90秒</span>
           </div>
         </div>
 
@@ -401,13 +423,13 @@
           <span class="text-[11px] text-cyan-400 font-bold">拡大 ↗</span>
         </div>
 
-        <!-- 机の周りのプレイヤー名札リング -->
+        <!-- プレイヤー名札リング -->
         <div id="table-players-ring" class="w-full max-w-5xl flex flex-wrap items-center justify-center gap-2 mb-3 px-2"></div>
 
-        <!-- 木目調テーブル盤面（固定グリッドによる完全崩れ防止構造） -->
+        <!-- 盤面 -->
         <div class="w-full max-w-5xl flex-1 bg-gradient-to-br from-[#5c3a21] via-[#432514] to-[#2a160b] border-4 border-[#1a0d06] rounded-3xl p-6 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] relative min-h-[480px] flex items-center justify-center overflow-y-auto">
           <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
-          <div id="memory-cards-grid" class="w-full max-w-4xl grid grid-cols-4 sm:grid-cols-6 gap-3 p-4 z-10"></div>
+          <div id="memory-cards-grid" class="w-full max-w-5xl grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 p-1 z-10"></div>
         </div>
       </section>
 
@@ -429,7 +451,6 @@
   </div>
 
   <!-- MODALS -->
-  <!-- 神経衰弱カード全プレイヤーアップ表示モダル -->
   <div id="modal-memory-popup" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm pointer-events-none">
     <div id="memory-popup-card-box" class="w-80 sm:w-96 bg-slate-900 border-4 border-cyan-400 rounded-3xl p-6 text-center shadow-[0_0_60px_rgba(6,182,212,0.5)] transform scale-105 transition-all pointer-events-auto">
       <div id="memory-popup-header" class="text-sm font-bold text-cyan-300 mb-3">カード公開</div>
@@ -437,17 +458,16 @@
     </div>
   </div>
 
-  <!-- 神経衰弱 一人称視点ボード拡大モダル -->
   <div id="modal-memory-board" class="fixed inset-0 z-50 bg-black/90 hidden flex items-center justify-center p-4 backdrop-blur-md">
     <div class="w-full max-w-4xl bg-slate-900 border-2 border-blue-500 rounded-3xl p-6 shadow-[0_0_50px_rgba(59,130,246,0.3)] flex flex-col max-h-[95vh]">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2"><i data-lucide="layout-grid" class="w-5 h-5 text-blue-400"></i> 救急疾患ボード（一人称視点 / 自陣）</h3>
+        <h3 class="text-lg font-bold text-white flex items-center gap-2"><i data-lucide="layout-grid" class="w-5 h-5 text-blue-400"></i> ランダム抽選 救急疾患ボード（自陣）</h3>
         <button onclick="app.toggleMemoryBoardModal()" class="p-2 bg-slate-800 text-slate-400 rounded-xl hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <p class="text-xs text-slate-400 mb-4" id="memory-board-guide-text">ペアが揃ったカードを選択し、ボード上の正しい疾患スロットにはめてください。</p>
       
       <div class="flex-1 overflow-y-auto custom-scrollbar pr-1">
-        <div id="full-memory-board-grid" class="grid grid-cols-3 gap-3"></div>
+        <div id="full-memory-board-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
       </div>
 
       <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center">
@@ -592,7 +612,7 @@
               <select id="admin-deck-selector" onchange="app.renderAdminCards()" class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
                 <option value="all">マスターデータ (全カード)</option>
                 <option value="babanuki">GAME 01: ババ抜き用</option>
-                <option value="memory">GAME 02: 廃用症候群用 (グループ1〜30)</option>
+                <option value="memory">GAME 02: 神経衰弱用 (全40グループ)</option>
                 <option value="jinuki">GAME 03: ジジ抜き用</option>
               </select>
               <button onclick="app.addNewCardPrompt()" class="text-xs bg-cyan-700 hover:bg-cyan-600 text-white px-3 py-1.5 rounded-lg transition font-bold">＋カード追加</button>
@@ -632,7 +652,7 @@
       mode: 'babanuki',
       phase: 'idle',
       room: { code: '', isHost: false, isSolo: false },
-      config: { maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 18, teamMode: 'solo' },
+      config: { maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo' },
       me: { id: 'p_' + Math.random().toString(36).substring(2, 9), name: '救急隊員' },
       players: [],
       turnIdx: 0,
@@ -649,7 +669,7 @@
         matchedStock: [],
         boardSlots: [],
         playerBoards: {},
-        timeLeft: 60,
+        timeLeft: 90,
         isProcessingTurn: false
       }
     };
@@ -707,7 +727,7 @@
         c.innerHTML = '';
         const games = [
           { id: 'game1', code: 'babanuki', lbl: 'GAME 01', title: '致死性不整脈を回避せよ！', icon: 'activity', desc: '【救急ババ抜き】除細動が不可欠な「心室細動（VF）」を最後まで抱え持っていた者が敗北！', col: 'rose' },
-          { id: 'game2', code: 'memory', lbl: 'GAME 02', title: '救急神経衰弱バトル', icon: 'brain', desc: '【救急神経衰弱】ECG背面のカードをテーブルに配置し、全員でペアを揃えろ！', col: 'blue' },
+          { id: 'game2', code: 'memory', lbl: 'GAME 02', title: '救急神経衰弱バトル', icon: 'brain', desc: '【救急神経衰弱】全40疾患グループ対応の神経衰弱バトル！', col: 'blue' },
           { id: 'game3', code: 'jinuki', lbl: 'GAME 03', title: '救急 隠れたものを当てろ', icon: 'search', desc: '【救急ジジ抜き＋VF/DCペア】全54枚から1枚が事前封印！孤立カードから病態を推理せよ！', col: 'amber' },
           { id: 'game4', code: 'jack', lbl: 'GAME 04', title: '99ジャック', icon: 'crosshair', desc: '【SpO2＆血圧コントロール】合計点「99」を目指す救急版ブラックジャック。', col: 'teal' }
         ];
@@ -768,7 +788,7 @@
         state.config.maxPlayers = parseInt(document.getElementById('config-max-players')?.value || 4, 10);
         state.config.turnTimeLimit = parseInt(document.getElementById('config-turn-time')?.value || 20, 10);
         state.config.autoFillAI = document.getElementById('config-auto-fill-ai')?.checked ?? true;
-        state.config.memoryPairs = parseInt(document.getElementById('config-memory-pairs')?.value || 18, 10);
+        state.config.memoryPairs = parseInt(document.getElementById('config-memory-pairs')?.value || 40, 10);
         state.config.teamMode = document.getElementById('config-team-mode')?.value || 'solo';
         state.me.name = document.getElementById('input-player-name')?.value.trim() || '救急隊員';
       },
@@ -794,9 +814,6 @@
 
       createRoom: () => {
         app.readConfig();
-        if(state.mode === 'memory' && state.config.teamMode !== 'solo') {
-          if(state.config.maxPlayers < 4) return utils.showToast('チーム戦は4名以上必要です');
-        }
         state.room = { code: Math.floor(100000 + Math.random() * 900000).toString(), isHost: true, isSolo: false };
         const codeDisplay = document.getElementById('room-code-display');
         if(codeDisplay) codeDisplay.textContent = state.room.code;
@@ -865,7 +882,7 @@
         else app.startStandardCardGameSession();
       },
 
-      // --- GAME 02: 救急神経衰弱 ---
+      // --- GAME 02: 救急神経衰弱（40グループ完全対応） ---
       startMemoryGameSession: () => {
         state.phase = 'memory_playing';
         state.turnIdx = 0;
@@ -873,38 +890,29 @@
 
         const pairCount = state.config.memoryPairs;
         let availablePairs = [];
-        for(let i=1; i<=30; i++) {
-          const items = currentCardDB.filter(c => c.num === i);
+        for(let i=1; i<=40; i++) {
+          const items = currentCardDB.filter(c => c.suit === 'M' && c.num === i);
           if(items.length >= 2) availablePairs.push({ num: i, cards: [items[0], items[1]] });
-        }
-        while(availablePairs.length < pairCount) {
-          const base = currentCardDB[Math.floor(Math.random() * currentCardDB.length)];
-          if(!availablePairs.some(p => p.num === base.num)) {
-            availablePairs.push({ num: base.num, cards: [base, {...base, id: base.id + 1000}] });
-          } else { break; }
         }
         availablePairs.sort(() => Math.random() - 0.5);
         const selectedPairs = availablePairs.slice(0, pairCount);
 
-        let deck = [];
+        let deck = [], slots = [];
         selectedPairs.forEach(p => {
           deck.push({ ...p.cards[0], uniqueKey: Math.random(), isFlipped: false, isMatched: false });
           deck.push({ ...p.cards[1], uniqueKey: Math.random(), isFlipped: false, isMatched: false });
+          slots.push({ num: p.num, title: p.cards[0].title, filled: false, ownerId: null });
+          slots.push({ num: p.num, title: p.cards[0].title, filled: false, ownerId: null });
         });
         deck.sort(() => Math.random() - 0.5);
+        slots.sort(() => Math.random() - 0.5);
+
         state.memoryState.cards = deck;
+        state.memoryState.boardSlots = slots;
         state.memoryState.selectedCardIndices = [];
         state.memoryState.matchedStock = [];
-        state.memoryState.timeLeft = 60;
+        state.memoryState.timeLeft = 90;
         state.memoryState.isProcessingTurn = false;
-
-        let slots = [];
-        selectedPairs.forEach(p => {
-          slots.push({ num: p.num, title: p.cards[0].title, filled: false, ownerId: null });
-          slots.push({ num: p.num, title: p.cards[0].title, filled: false, ownerId: null });
-        });
-        slots.sort(() => Math.random() - 0.5);
-        state.memoryState.boardSlots = slots;
 
         state.players.forEach(p => {
           state.memoryState.playerBoards[p.id] = {};
@@ -912,7 +920,7 @@
 
         app.renderMemoryGameTable();
         app.startMemoryTimer();
-        app.addLogMessage('救急神経衰弱バトルが開始されました。');
+        app.addLogMessage('救急神経衰弱バトル（全40グループ対応）が開始されました。');
       },
 
       startMemoryTimer: () => {
@@ -1256,7 +1264,7 @@
       startStandardCardGameSession: () => {
         state.phase = 'initial_discard'; state.discardPile = []; state.ranks = []; state.hiddenCard = null; state.selectedMyCards = []; state.lastDrawnId = null;
         
-        let deck = state.mode === 'babanuki' ? currentCardDB.filter(c => c.id !== 54) : [...currentCardDB];
+        let deck = state.mode === 'babanuki' ? currentCardDB.filter(c => c.id !== 54 && c.suit !== 'M') : currentCardDB.filter(c => c.suit !== 'M');
         deck.sort(() => Math.random() - 0.5);
         if(state.mode === 'jinuki') state.hiddenCard = deck.pop();
         
@@ -1714,7 +1722,7 @@
         r.classList.remove('hidden');
         if(isCorrect){ r.className='text-sm font-bold p-3 rounded-xl mb-4 bg-emerald-950/80 text-emerald-300 border border-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.3)]'; r.innerHTML=`🎯 正解！ 封印は [${utils.escapeHtml(h.title)}]！`; if(window.confetti) confetti(); }
         else { r.className='text-sm font-bold p-3 rounded-xl mb-4 bg-rose-950/80 text-rose-300 border border-rose-600 shadow-[0_0_15px_rgba(225,29,72,0.3)]'; r.innerHTML=`❌ 不正解... 実際は [${utils.escapeHtml(h.title)}] でした！`; }
-        document.getElementById('btn-close-jinuki-quiz')?.classList.add('hidden');
+        document.getElementById('btn-close-jinuki-quiz')?.classList.remove('hidden');
       },
 
       showResults: () => {
@@ -1821,7 +1829,7 @@
       },
       addNewCardPrompt: () => {
         const newId = currentCardDB.length > 0 ? Math.max(...currentCardDB.map(c => c.id)) + 1 : 1;
-        const newCard = { id: newId, suit: "M", num: 1, title: "新規廃用項目", desc: "ここに問題文を入力してください" };
+        const newCard = { id: newId, suit: "M", num: 1, title: "新規疾患項目", desc: "ここに問題文を入力してください" };
         currentCardDB.push(newCard);
         saveDB(currentCardDB);
         app.renderAdminCards();
