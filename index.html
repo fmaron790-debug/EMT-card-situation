@@ -1480,11 +1480,15 @@
       },
 
       drawCardFrom: async (targetId, cIdx) => {
-        // 🆕 1ターン1枚制限の厳格なガード
-        if (state.hasDrawnThisTurn) return;
+        // 🆕 【絶対的なガード】
+        // 1. いま自分のターンではない場合は絶対に引かせない
+        // 2. すでにこのターンでカードを引いている場合は引かせない
+        const currentP = state.players[state.turnIdx];
+        if (!currentP || currentP.id !== state.me.id || state.hasDrawnThisTurn) {
+          return;
+        }
 
         app.clearAllTimers();
-        const currentP = state.players[state.turnIdx];
         const targetP = state.players.find(p => p.id === targetId);
         
         if(!targetP || targetP.hand.length === 0) return app.nextTurn();
@@ -1492,10 +1496,10 @@
         const drawn = targetP.hand.splice(cIdx, 1)[0];
         currentP.hand.unshift(drawn);
         state.lastDrawnId = drawn.id;
-        state.hasDrawnThisTurn = true; // 🔒 このターン中はもう引けないようロック
+        state.hasDrawnThisTurn = true; // 🔒 自分のターンで引いた瞬間にロック
         
         app.addLogMessage(`${currentP.name} が ${targetP.name} からカードを引いた`);
-        if (currentP.id === state.me.id) utils.showToast(`カード獲得`);
+        utils.showToast(`カード獲得`);
         
         socket.emit('game_action', { 
           roomCode: state.room.code, 
@@ -1505,6 +1509,8 @@
           turnIdx: state.turnIdx, 
           hasDrawnThisTurn: true 
         });
+
+        // （以降の処理はそのまま続きます）
 
         if(app.checkClears()) return; 
         
