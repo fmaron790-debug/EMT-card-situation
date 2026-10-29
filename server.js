@@ -1,24 +1,19 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const path = require('path');
-
-const path = require('path');
-
-// publicフォルダではなく、server.jsと同じ階層（__dirname）を公開する設定にする
+// server.jsと同じ階層にある index.html を公開する設定
 app.use(express.static(__dirname));
 
-// ルートへのアクセスのフォールバック
+// ルート（/）にアクセスされた時のフォールバック
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
-
-app.use(express.static('public')); // 静的ファイルのパス
 
 const rooms = {};
 
