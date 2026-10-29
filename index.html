@@ -215,26 +215,52 @@
     const SUIT_COLORS = { C: 'text-emerald-400', S: 'text-indigo-400', H: 'text-rose-400', D: 'text-amber-400', M: 'text-cyan-400', JOKER: 'text-amber-300' };
     const BOT_NAME_POOL = ['救急隊員α', '救急隊員β', '救急隊員γ', '指導救命士', '機関員', '通信指令員'];
 
- function loadDB() { 
+ <script>
+    // ---------------------------------------------------------
+    // データベース・アクセス権限の読み込み (構文エラー防止版)
+    // ---------------------------------------------------------
+    function loadDB() { 
       try { 
         const s = localStorage.getItem('ems_db'); 
         if(s) {
           const parsed = JSON.parse(s);
-          // 神経衰弱用のカード（suit === 'M'）が含まれているかチェック
-          const hasMemoryCards = parsed.some(c => c.suit === 'M');
-    
+          if(parsed.some(c => c.suit === 'M')) {
             return parsed;
           }
         }
-      } catch(e){} 
-      // 含まれていない場合（古いデータ）は、全40グループ入りの最新デフォルトデータで上書き保存
+      } catch(e) {
+        console.error("DB Load Error:", e);
+      } 
       const defaultFull = JSON.parse(JSON.stringify(DEFAULT_EMS_CARDS));
       saveDB(defaultFull);
       return defaultFull;
     }
-    function saveDB(data) { localStorage.setItem('ems_db', JSON.stringify(data)); }
-    function loadAccess() { try { const s = localStorage.getItem('ems_acc'); if(s) return JSON.parse(s); } catch(e){} return { game1: true, game2: true, game3: true, game4: false }; }
-    function saveAccess(data) { localStorage.setItem('ems_acc', JSON.stringify(data)); }
+
+    function saveDB(data) { 
+      try {
+        localStorage.setItem('ems_db', JSON.stringify(data)); 
+      } catch(e) {
+        console.error("DB Save Error:", e);
+      }
+    }
+
+    function loadAccess() { 
+      try { 
+        const s = localStorage.getItem('ems_acc'); 
+        if(s) return JSON.parse(s); 
+      } catch(e) {
+        console.error("Access Load Error:", e);
+      } 
+      return { game1: true, game2: true, game3: true, game4: false }; 
+    }
+
+    function saveAccess(data) { 
+      try {
+        localStorage.setItem('ems_acc', JSON.stringify(data)); 
+      } catch(e) {
+        console.error("Access Save Error:", e);
+      }
+    }
 
     let currentCardDB = loadDB();
     let currentGameAccess = loadAccess();
