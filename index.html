@@ -1744,7 +1744,9 @@
             h += '<div class="flex flex-wrap gap-1 mt-2">';
             p.hand.forEach((_, cIdx) => { 
               // 🆕 まだこのターンで引いていない場合のみボタンを有効化
-              if(isTgt && !state.hasDrawnThisTurn && state.phase === 'playing') h += `<button onclick="app.drawCardFrom('${p.id}', ${cIdx})" class="w-6 h-9 bg-amber-700 border-2 border-amber-300 rounded-lg text-white font-bold text-[10px] shadow hover:scale-110 active:scale-95 transition">?</button>`;
+              if(isTgt && !state.hasDrawnThisTurn && state.phase === 'playing') {
+  h += `<button onclick="this.disabled=true; app.drawCardFrom('${p.id}', ${cIdx})" class="w-6 h-9 bg-amber-700 border-2 border-amber-300 rounded-lg text-white font-bold text-[10px] shadow hover:scale-110 active:scale-95 transition">?</button>`;
+}
               else h += `<div class="w-5 h-8 bg-slate-800 border border-slate-700 rounded-md"></div>`;
             });
             h += '</div>';
