@@ -7,10 +7,10 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// server.jsと同じ階層にある index.html を公開する設定
+// 静的ファイルの公開設定（同じ階層の index.html を公開）
 app.use(express.static(__dirname));
 
-// ルート（/）にアクセスされた時のフォールバック
+// ルートへのアクセスのフォールバック
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -18,6 +18,8 @@ app.get('/', (req, res) => {
 const rooms = {};
 
 io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+
   // ルーム参加（ID指定での入室処理）
   socket.on('join_room', (data) => {
     const { roomCode, playerName, config } = data;
@@ -66,6 +68,11 @@ io.on('connection', (socket) => {
   // 管理者によるアクセス権限の即時全体反映
   socket.on('admin_update_access', (accessData) => {
     io.emit('update_access', accessData);
+  });
+
+  // 管理者によるカードデータベースの即時全体同期
+  socket.on('admin_update_cards', (dbData) => {
+    io.emit('update_cards', dbData);
   });
 
   socket.on('disconnect', () => {

@@ -697,7 +697,6 @@
         saveAccess(currentGameAccess);
         app.renderPortal();
         
-        // 🆕 追加：他の端末で管理画面を開いている場合、チェックボックスの状態も同期させる
         const adminModal = document.getElementById('modal-admin');
         if (adminModal && !adminModal.classList.contains('hidden')) {
           const g1 = document.getElementById('toggle-game1'); if(g1) g1.checked = currentGameAccess.game1;
@@ -707,6 +706,22 @@
         }
 
         utils.showToast('<i data-lucide="shield-alert" class="w-4 h-4 inline mr-1 text-cyan-400"></i>管理システムにより出動権限が更新されました');
+        if(window.lucide) lucide.createIcons();
+      }
+    });
+
+    // 🆕 カードデータベースのリアルタイム全体同期イベント
+    socket.on('update_cards', (dbData) => {
+      if(dbData) {
+        currentCardDB = dbData;
+        saveDB(currentCardDB);
+        
+        // 管理画面のテーブルが開いていれば再描画
+        const adminModal = document.getElementById('modal-admin');
+        if (adminModal && !adminModal.classList.contains('hidden')) {
+          app.renderAdminCards();
+        }
+        utils.showToast('<i data-lucide="database" class="w-4 h-4 inline mr-1 text-cyan-400"></i>問題カードDBが同期されました');
         if(window.lucide) lucide.createIcons();
       }
     });
@@ -1595,8 +1610,8 @@
         if(state.timers.turn) clearInterval(state.timers.turn);
         if(state.timers.aiDelay) clearTimeout(state.timers.aiDelay);
         if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
-        if(state.timers.popupTimer) clearTimeout(state.timers.popupTimer);
-        if(state.timers.matchTimer) clearTimeout(state.timers.matchTimer);
+        if(state.timers.popupTimer) clearInterval(state.timers.popupTimer);
+        if(state.timers.matchTimer) clearInterval(state.timers.matchTimer);
       },
 
       playDefibAnimation: () => {
@@ -1860,13 +1875,8 @@
         currentGameAccess.game3 = document.getElementById('toggle-game3')?.checked ?? true;
         currentGameAccess.game4 = document.getElementById('toggle-game4')?.checked ?? false;
         saveAccess(currentGameAccess);
-        
-        // サーバーを通じて他のプレイヤーに即時反映
         socket.emit('admin_update_access', currentGameAccess);
-
-        // 🆕 追加：自分自身の画面（ポータル）も即座に更新してロック/アンロックを反映させる
         app.renderPortal(); 
-
         utils.showToast('<i data-lucide="save" class="w-4 h-4 inline mr-1"></i>設定を全プレイヤーに即時反映しました'); 
         if(window.lucide) lucide.createIcons();
       },
@@ -1906,24 +1916,36 @@
       },
       saveCard: (id) => {
         const t = document.getElementById(`te-${id}`)?.value || '', d = document.getElementById(`de-${id}`)?.value || '';
-        const c = currentCardDB.find(x=>x.id===id); if(c){ c.title=t; c.desc=d; } saveDB(currentCardDB); app.renderAdminCards(); utils.showToast('<i data-lucide="check" class="w-4 h-4 inline mr-1"></i>保存しました'); if(window.lucide) lucide.createIcons();
+        const c = currentCardDB.find(x=>x.id===id); if(c){ c.title=t; c.desc=d; } 
+        saveDB(currentCardDB); 
+        socket.emit('admin_update_cards', currentCardDB); // 🆕 サーバー経由で全体同期
+        app.renderAdminCards(); 
+        utils.showToast('<i data-lucide="check" class="w-4 h-4 inline mr-1"></i>保存しました'); if(window.lucide) lucide.createIcons();
       },
       addNewCardPrompt: () => {
         const newId = currentCardDB.length > 0 ? Math.max(...currentCardDB.map(c => c.id)) + 1 : 1;
         const newCard = { id: newId, suit: "M", num: 1, title: "新規疾患項目", desc: "ここに問題文を入力してください" };
         currentCardDB.push(newCard);
         saveDB(currentCardDB);
+        socket.emit('admin_update_cards', currentCardDB); // 🆕 サーバー経由で全体同期
         app.renderAdminCards();
-        utils.showToast('新規カードを追加しました。内容を編集してください。');
+        utils.showToast('新規カードを追加しました');
       },
       deleteCard: (id) => {
         if(currentCardDB.length <= 10) return utils.showToast('これ以上削除できません');
         currentCardDB = currentCardDB.filter(c => c.id !== id);
         saveDB(currentCardDB);
+        socket.emit('admin_update_cards', currentCardDB); // 🆕 サーバー経由で全体同期
         app.renderAdminCards();
         utils.showToast('カードを削除しました');
       },
-      resetDB: () => { currentCardDB = JSON.parse(JSON.stringify(DEFAULT_EMS_CARDS)); saveDB(currentCardDB); app.renderAdminCards(); utils.showToast('<i data-lucide="rotate-ccw" class="w-4 h-4 inline mr-1"></i>初期化完了'); if(window.lucide) lucide.createIcons(); }
+      resetDB: () => { 
+        currentCardDB = JSON.parse(JSON.stringify(DEFAULT_EMS_CARDS)); 
+        saveDB(currentCardDB); 
+        socket.emit('admin_update_cards', currentCardDB); // 🆕 サーバー経由で全体同期
+        app.renderAdminCards(); 
+        utils.showToast('<i data-lucide="rotate-ccw" class="w-4 h-4 inline mr-1"></i>初期化完了'); if(window.lucide) lucide.createIcons(); 
+      }
     };
 
     document.getElementById('secret-admin-trigger')?.addEventListener('click', () => {
