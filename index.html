@@ -428,7 +428,7 @@
       <section id="view-memory-game" class="w-full flex-1 flex flex-col items-center justify-start hidden animate-fade-in">
         <div class="w-full max-w-5xl bg-slate-900/95 border border-blue-500/50 rounded-2xl p-3 mb-3 flex items-center justify-between shadow-lg">
           <div class="flex items-center gap-3">
-            <span class="text-xs px-3 py-1.5 rounded-full bg-blue-950 text-blue-300 border border-blue-600 font-bold">改訂長谷川子規簡易知能評価スケールに引っかかるな</span>
+            <span class="text-xs px-3 py-1.5 rounded-full bg-blue-950 text-blue-300 border border-blue-600 font-bold">救急神経衰弱バトル</span>
             <span id="memory-turn-info" class="text-xs text-white font-bold">手番: プレイヤー</span>
           </div>
           <div class="flex items-center gap-3">
@@ -487,7 +487,7 @@
         <h3 class="text-lg font-bold text-white flex items-center gap-2"><i data-lucide="layout-grid" class="w-5 h-5 text-blue-400"></i> 救急疾患ボード（自陣）</h3>
         <button onclick="app.toggleMemoryBoardModal()" class="p-2 bg-slate-800 text-slate-400 rounded-xl hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-      <p class="text-xs text-slate-400 mb-4" id="memory-board-guide-text">ペアが揃ったカードを選択し、ボード上の正しい疾患スロットにはめてください。</p>
+      <div class="text-xs text-slate-400 mb-4" id="memory-board-guide-text">ペアが揃ったカードを選択し、ボード上の正しい疾患スロットにはめてください。</div>
       
       <div class="flex-1 overflow-y-auto custom-scrollbar pr-1">
         <div id="full-memory-board-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
@@ -696,6 +696,7 @@
         cards: [],
         selectedCardIndices: [],
         matchedStock: [],
+        selectedStockIdx: 0,
         boardSlots: [],
         playerBoards: {},
         timeLeft: 20,
@@ -755,7 +756,6 @@
       app.updateRoomUI();
     });
 
-    // 🆕 修正：game_action 受信時の処理（draw時にprocessTurnを呼んでフラグをリセットしてしまうバグを完全解消）
     socket.on('game_action', (actionData) => {
       if(actionData.players) state.players = actionData.players;
       if(actionData.discardPile) state.discardPile = actionData.discardPile;
@@ -778,18 +778,15 @@
       } else if(actionData.type === 'player_ready') {
         app.renderTable();
       } else if(actionData.type === 'ready') {
-        // 全員の手札確認が完了し、正式にゲーム開始
         state.phase = 'playing';
         state.hasDrawnThisTurn = false;
         document.getElementById('btn-initial-ready')?.classList.add('hidden');
         app.processTurn();
       } else if(actionData.type === 'next_turn') {
-        // 次のターンへ移行したときだけ processTurn を呼ぶ
         state.phase = 'playing';
         state.hasDrawnThisTurn = false;
         app.processTurn();
       } else if(actionData.type === 'draw' || actionData.type === 'discard') {
-        // カードを引いた時やペアを破棄した時は、フラグをリセットせずテーブル再描画とクリア判定のみ行う
         app.renderTable();
         app.checkClears();
       } else {
@@ -842,8 +839,8 @@
         c.innerHTML = '';
         const games = [
           { id: 'game1', code: 'babanuki', lbl: 'GAME 01', title: '致死性不整脈を回避せよ！', icon: 'activity', desc: '【救急ババ抜き】除細動が不可欠な「心室細動（VF）」を最後まで抱え持っていた者が敗北！', col: 'rose' },
-          { id: 'game2', code: 'memory', lbl: 'GAME 02', title: '改訂長谷川式簡易知能評価スケールに引っかかるな', icon: 'brain', desc: '【救急神経衰弱】全40疾患グループ対応の神経衰弱バトル！', col: 'blue' },
-          { id: 'game3', code: 'jinuki', lbl: 'GAME 03', title: ' 隠れた疾患を当てろ', icon: 'search', desc: '【救急ジジ抜き＋VF/DCペア】全54枚から1枚が事前封印！孤立カードから病態を推理せよ！', col: 'amber' },
+          { id: 'game2', code: 'memory', lbl: 'GAME 02', title: '救急神経衰弱バトル', icon: 'brain', desc: '【救急神経衰弱】全40疾患グループ対応の神経衰弱バトル！', col: 'blue' },
+          { id: 'game3', code: 'jinuki', lbl: 'GAME 03', title: '救急 隠れたものを当てろ', icon: 'search', desc: '【救急ジジ抜き＋VF/DCペア】全54枚から1枚が事前封印！孤立カードから病態を推理せよ！', col: 'amber' },
           { id: 'game4', code: 'jack', lbl: 'GAME 04', title: '99ジャック', icon: 'crosshair', desc: '【SpO2＆血圧コントロール】合計点「99」を目指す救急版ブラックジャック。', col: 'teal' }
         ];
         games.forEach(g => {
@@ -1028,7 +1025,6 @@
           deck.push({ ...p.cards[0], uniqueKey: Math.random(), isFlipped: false, isMatched: false });
           deck.push({ ...p.cards[1], uniqueKey: Math.random(), isFlipped: false, isMatched: false });
           slots.push({ num: p.num, title: p.cards[0].title, filled: false, ownerId: null });
-          slots.push({ num: p.num, title: p.cards[0].title, filled: false, ownerId: null });
         });
         deck.sort(() => Math.random() - 0.5);
         slots.sort(() => Math.random() - 0.5);
@@ -1037,6 +1033,7 @@
         state.memoryState.boardSlots = slots;
         state.memoryState.selectedCardIndices = [];
         state.memoryState.matchedStock = [];
+        state.memoryState.selectedStockIdx = 0;
         state.memoryState.isProcessingTurn = false;
 
         state.players.forEach(p => {
@@ -1080,7 +1077,7 @@
         }, 1000);
       },
 
-     renderMemoryGameTable: () => {
+      renderMemoryGameTable: () => {
         const grid = document.getElementById('memory-cards-grid');
         const turnInfo = document.getElementById('memory-turn-info');
         const ring = document.getElementById('table-players-ring');
@@ -1118,7 +1115,6 @@
           const isFlipped = card.isFlipped;
           const guideClass = isMyTurn ? 'border-cyan-400 ring-2 ring-cyan-400/40' : 'border-cyan-900/60 hover:border-cyan-600';
 
-          // 裏面（心電図モニター風）
           const ecgCardBackHtml = `
             <div class="w-full h-full flex flex-col items-center justify-between p-1">
               <div class="w-full flex items-center justify-between text-[9px] text-cyan-400 font-mono">
@@ -1133,7 +1129,6 @@
             </div>
           `;
 
-          // 表面（1枚のカード枠内にヘッダー・本文・IDを完全に閉じ込める構造）
           const showDisease = state.config.showMemoryDisease ?? true;
           const cardFrontHtml = `
             <div class="w-full h-full flex flex-col justify-between overflow-hidden">
@@ -1143,13 +1138,12 @@
               </div>
               <div class="w-full flex-1 flex flex-col items-center justify-center text-center px-1 py-0.5 bg-white rounded-lg border border-slate-300 shadow-inner overflow-hidden my-0.5">
                 ${showDisease ? `<div class="text-[10px] font-black text-slate-900 leading-tight mb-0.5 line-clamp-1 w-full break-all">${utils.escapeHtml(card.title)}</div>` : ''}
-                <div class="text-[9px] font-bold text-slate-700 leading-tight line-clamp-3 w-full break-words">${utils.escapeHtml(card.desc)}</div>
+                <div class="text-[9px] font-bold text-slate-800 leading-tight line-clamp-4 w-full break-words">${utils.escapeHtml(card.desc)}</div>
               </div>
               <div class="text-[8px] text-slate-500 text-right font-mono leading-none w-full">ID:${card.id}</div>
             </div>
           `;
 
-          // 1マス分のカード外枠（overflow-hidden で枠外への飛び出しを完全防止）
           grid.innerHTML += `
             <div onclick="app.handleMemoryCardClick(${idx})" class="aspect-[3/4] w-full rounded-2xl border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between p-1.5 shadow-[0_10px_20px_rgba(0,0,0,0.6)] select-none relative overflow-hidden ${isFlipped ? 'bg-slate-100 text-slate-900 border-indigo-500 z-20 shadow-[0_0_20px_rgba(99,102,241,0.5)]' : `bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 ${guideClass} hover:scale-105 z-10 text-slate-100`}">
               ${isFlipped ? cardFrontHtml : ecgCardBackHtml}
@@ -1209,15 +1203,15 @@
         const header = document.getElementById('memory-popup-header');
         const content = document.getElementById('memory-popup-content');
 
-        if(header) header.textContent = `${actorP ? actorP.name : 'プレイヤー'} が選択したカード`;
+        if(header) header.textContent = `${actorP ? actorP.name : 'プレイヤー'} がめくった問題カード`;
         const showDisease = state.config.showMemoryDisease ?? true;
         if(content) {
           content.innerHTML = `
-            <div class="w-36 aspect-[3/4] bg-slate-100 text-slate-900 border-4 border-indigo-400 rounded-2xl p-3 flex flex-col justify-between shadow-2xl text-left">
-              <div class="flex items-center justify-between text-[11px] font-bold"><span class="${SUIT_COLORS[card.suit]||''} text-base">${SUIT_ICONS[card.suit]||'♠'}</span><span class="font-mono bg-cyan-200 text-cyan-900 px-1.5 py-0.5 rounded text-[10px] font-black">Gr.${card.num}</span></div>
-              <div class="my-auto py-1 px-1 bg-white rounded-xl border border-slate-300 shadow-inner text-center">
+            <div class="w-44 aspect-[3/4] bg-slate-100 text-slate-900 border-4 border-indigo-400 rounded-2xl p-3 flex flex-col justify-between shadow-2xl text-left">
+              <div class="flex items-center justify-between text-xs font-bold"><span class="${SUIT_COLORS[card.suit]||''} text-base">${SUIT_ICONS[card.suit]||'🧠'}</span><span class="font-mono bg-cyan-200 text-cyan-900 px-1.5 py-0.5 rounded text-[10px] font-black">Gr.${card.num}</span></div>
+              <div class="my-auto py-2 px-2 bg-white rounded-xl border border-slate-300 shadow-inner text-center">
                 ${showDisease ? `<div class="text-xs font-black text-slate-900 mb-1">${utils.escapeHtml(card.title)}</div>` : ''}
-                <div class="text-[11px] font-bold text-slate-800 leading-tight line-clamp-3">${utils.escapeHtml(card.desc)}</div>
+                <div class="text-xs font-bold text-slate-800 leading-snug">${utils.escapeHtml(card.desc)}</div>
               </div>
               <div class="text-[9px] text-slate-500 text-right font-mono">ID:${card.id}</div>
             </div>
@@ -1229,7 +1223,7 @@
         state.timers.popupTimer = setTimeout(() => {
           modal?.classList.add('hidden');
           if(callback) callback();
-        }, 3000);
+        }, 2500);
       },
 
       processMemoryPairResult: (actorP) => {
@@ -1242,10 +1236,18 @@
         const isMatch = (c1.num === c2.num);
         if(isMatch) {
           c1.isMatched = true; c2.isMatched = true;
-          state.memoryState.matchedStock.push(c1, c2);
-          utils.showToast(`🎯 ペア成立 (${c1.title})！`);
-          app.addLogMessage(`${currentP.name} がペア (${c1.title}) を獲得しました。`);
-          if(currentP.id === state.me.id) app.toggleMemoryBoardModal();
+          if(currentP.id === state.me.id) {
+            state.memoryState.matchedStock.push({ num: c1.num, title: c1.title, cards: [c1, c2] });
+            state.memoryState.selectedStockIdx = state.memoryState.matchedStock.length - 1;
+          } else if(currentP.isAI) {
+            const sIdx = state.memoryState.boardSlots.findIndex(s => s.num === c1.num);
+            if(sIdx !== -1) {
+              if(!state.memoryState.playerBoards[currentP.id]) state.memoryState.playerBoards[currentP.id] = {};
+              state.memoryState.playerBoards[currentP.id][sIdx] = { filled: true, color: currentP.color || '#f43f5e', cards: [c1, c2] };
+            }
+          }
+          utils.showToast(`🎯 問題ペア成立！ボードの疾患枠にはめ込めます！`);
+          app.addLogMessage(`${currentP.name} が問題ペア (Gr.${c1.num}) を獲得しました。`);
         } else {
           utils.showToast('不一致です');
         }
@@ -1257,7 +1259,17 @@
           state.memoryState.selectedCardIndices = [];
           state.memoryState.isProcessingTurn = false;
           app.renderMemoryGameTable();
-          app.advanceMemoryTurnCounterclockwise();
+          
+          if(isMatch && currentP.id === state.me.id) {
+            app.toggleMemoryBoardModal();
+          }
+          
+          const remaining = state.memoryState.cards.filter(c => !c.isMatched).length;
+          if(remaining === 0 && state.memoryState.matchedStock.length === 0) {
+            app.endMemoryGame();
+          } else {
+            app.advanceMemoryTurnCounterclockwise();
+          }
         });
       },
 
@@ -1266,7 +1278,7 @@
         const header = document.getElementById('memory-popup-header');
         const content = document.getElementById('memory-popup-content');
 
-        if(header) header.textContent = isMatch ? '✨ ペア成立！' : '❌ 不一致...';
+        if(header) header.textContent = isMatch ? '✨ 問題ペア成立！（2枚1組獲得）' : '❌ 不一致...';
         const isActorMe = (actorP && actorP.id === state.me.id && !actorP.isAI);
         const showDisease = state.config.showMemoryDisease ?? true;
 
@@ -1274,16 +1286,16 @@
           content.innerHTML = `
             <div class="flex flex-col items-center w-full">
               <div class="flex justify-center gap-3 mb-3 w-full">
-                <div class="w-32 aspect-[3/4] bg-slate-100 text-slate-900 border-2 border-indigo-400 rounded-2xl p-2.5 flex flex-col justify-between shadow-xl text-left">
-                  <div class="flex items-center justify-between text-[10px] font-bold"><span class="${SUIT_COLORS[c1.suit]||''}">${SUIT_ICONS[c1.suit]||'♠'}</span><span class="font-mono text-cyan-900 bg-cyan-200 px-1 rounded text-[9px] font-black">Gr.${c1.num}</span></div>
-                  <div class="my-auto py-1 px-1 bg-white rounded-lg text-center">${showDisease ? `<div class="text-[10px] font-black text-slate-900">${utils.escapeHtml(c1.title)}</div>` : ''}<div class="text-[9px] font-bold text-slate-800 line-clamp-2">${utils.escapeHtml(c1.desc)}</div></div>
+                <div class="w-36 aspect-[3/4] bg-slate-100 text-slate-900 border-2 border-indigo-400 rounded-2xl p-2.5 flex flex-col justify-between shadow-xl text-left">
+                  <div class="flex items-center justify-between text-[10px] font-bold"><span class="${SUIT_COLORS[c1.suit]||''}">${SUIT_ICONS[c1.suit]||'🧠'}</span><span class="font-mono text-cyan-900 bg-cyan-200 px-1 rounded text-[9px] font-black">Gr.${c1.num}</span></div>
+                  <div class="my-auto py-1.5 px-1 bg-white rounded-lg text-center">${showDisease ? `<div class="text-[10px] font-black text-slate-900 mb-0.5">${utils.escapeHtml(c1.title)}</div>` : ''}<div class="text-[10px] font-bold text-slate-800 leading-tight">${utils.escapeHtml(c1.desc)}</div></div>
                 </div>
-                <div class="w-32 aspect-[3/4] bg-slate-100 text-slate-900 border-2 border-indigo-400 rounded-2xl p-2.5 flex flex-col justify-between shadow-xl text-left">
-                  <div class="flex items-center justify-between text-[10px] font-bold"><span class="${SUIT_COLORS[c2.suit]||''}">${SUIT_ICONS[c2.suit]||'♠'}</span><span class="font-mono text-cyan-900 bg-cyan-200 px-1 rounded text-[9px] font-black">Gr.${c2.num}</span></div>
-                  <div class="my-auto py-1 px-1 bg-white rounded-lg text-center">${showDisease ? `<div class="text-[10px] font-black text-slate-900">${utils.escapeHtml(c2.title)}</div>` : ''}<div class="text-[9px] font-bold text-slate-800 line-clamp-2">${utils.escapeHtml(c2.desc)}</div></div>
+                <div class="w-36 aspect-[3/4] bg-slate-100 text-slate-900 border-2 border-indigo-400 rounded-2xl p-2.5 flex flex-col justify-between shadow-xl text-left">
+                  <div class="flex items-center justify-between text-[10px] font-bold"><span class="${SUIT_COLORS[c2.suit]||''}">${SUIT_ICONS[c2.suit]||'🧠'}</span><span class="font-mono text-cyan-900 bg-cyan-200 px-1 rounded text-[9px] font-black">Gr.${c2.num}</span></div>
+                  <div class="my-auto py-1.5 px-1 bg-white rounded-lg text-center">${showDisease ? `<div class="text-[10px] font-black text-slate-900 mb-0.5">${utils.escapeHtml(c2.title)}</div>` : ''}<div class="text-[10px] font-bold text-slate-800 leading-tight">${utils.escapeHtml(c2.desc)}</div></div>
                 </div>
               </div>
-              ${isActorMe ? '<button id="btn-skip-memory-result" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md">次のプレイヤーへ (スキップ)</button>' : '<div class="text-xs text-slate-400 italic">判定確認中...</div>'}
+              ${isActorMe ? '<button id="btn-skip-memory-result" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md">確認完了 (ボードへ進む / スキップ)</button>' : '<div class="text-xs text-slate-400 italic">判定確認中...</div>'}
             </div>
           `;
         }
@@ -1302,7 +1314,7 @@
         if(skipBtn) skipBtn.onclick = finish;
 
         if(state.timers.matchTimer) clearTimeout(state.timers.matchTimer);
-        state.timers.matchTimer = setTimeout(finish, 10000);
+        state.timers.matchTimer = setTimeout(finish, 6000);
       },
 
       advanceMemoryTurnCounterclockwise: () => {
@@ -1356,61 +1368,125 @@
         }
       },
 
+      selectMatchedStock: (idx) => {
+        state.memoryState.selectedStockIdx = idx;
+        app.renderFullMemoryBoardModal();
+      },
+
       renderFullMemoryBoardModal: () => {
         const grid = document.getElementById('full-memory-board-grid');
         const stockEl = document.getElementById('matched-stock-indicator');
+        const guideEl = document.getElementById('memory-board-guide-text');
         if(!grid) return;
         grid.innerHTML = '';
 
         const myBoard = state.memoryState.playerBoards[state.me.id] || {};
-        const myStockCount = state.memoryState.matchedStock.length / 2;
-        if(stockEl) stockEl.textContent = `獲得ストック (ペア数): ${myStockCount} ペア分`;
+        const stocks = state.memoryState.matchedStock;
+        if(state.memoryState.selectedStockIdx >= stocks.length) {
+          state.memoryState.selectedStockIdx = Math.max(0, stocks.length - 1);
+        }
+        const activePair = stocks[state.memoryState.selectedStockIdx];
+
+        if(stockEl) {
+          stockEl.textContent = stocks.length > 0 
+            ? `未配置の獲得ペア: ${stocks.length} 組` 
+            : `獲得ストック: なし（場のカードをめくってペアを揃えてください）`;
+        }
+
+        if(guideEl) {
+          if(activePair) {
+            guideEl.innerHTML = `
+              <div class="bg-slate-950 border-2 border-amber-500/80 rounded-2xl p-3 mb-2 shadow-lg">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-extrabold text-amber-400">👇 現在選択中のペア（この2枚が示す疾患枠を下から選んでクリック！）</span>
+                  ${stocks.length > 1 ? `<div class="flex gap-1">${stocks.map((st, i) => `<button onclick="app.selectMatchedStock(${i})" class="px-2 py-0.5 rounded text-[10px] font-bold ${i===state.memoryState.selectedStockIdx ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300'}">ペア${i+1}</button>`).join('')}</div>` : ''}
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
+                  <div class="bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-slate-200"><span class="text-cyan-400 font-bold mr-1">[カード1]</span>${utils.escapeHtml(activePair.cards[0].desc)}</div>
+                  <div class="bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-slate-200"><span class="text-cyan-400 font-bold mr-1">[カード2]</span>${utils.escapeHtml(activePair.cards[1].desc)}</div>
+                </div>
+              </div>
+            `;
+          } else {
+            guideEl.innerHTML = `場（テーブル）で問題文カードを2枚揃えると、ここにペアがストックされ、該当する疾患枠に2枚1組ではめ込むことができます。`;
+          }
+        }
 
         state.memoryState.boardSlots.forEach((slot, sIdx) => {
           const isFilled = myBoard[sIdx]?.filled;
-          const color = myBoard[sIdx]?.color || '#38bdf8';
+          const matchedCards = myBoard[sIdx]?.cards || [];
           
           grid.innerHTML += `
-            <div class="p-3 rounded-2xl border ${isFilled ? 'border-cyan-500 bg-slate-950' : 'border-slate-700 bg-slate-800/80 hover:border-cyan-400 cursor-pointer'} flex flex-col justify-between transition shadow-md" ${!isFilled && myStockCount > 0 ? `onclick="app.placeCardToBoardSlot(${sIdx})"` : ''}>
-              <div class="flex justify-between items-center mb-1">
-                <span class="text-xs font-bold text-cyan-300">Gr.${slot.num} : ${utils.escapeHtml(slot.title)}</span>
-                <span class="text-[10px] px-2 py-0.5 rounded-full ${isFilled ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-slate-900 text-slate-400'}">${isFilled ? '埋設完了' : '空き枠'}</span>
+            <div class="p-3 rounded-2xl border-2 ${isFilled ? 'border-emerald-500 bg-slate-950' : (activePair ? 'border-slate-700 bg-slate-800/90 hover:border-amber-400 cursor-pointer hover:scale-[1.02]' : 'border-slate-800 bg-slate-900/60 opacity-75')} flex flex-col justify-between transition shadow-md" ${!isFilled && activePair ? `onclick="app.placeCardToBoardSlot(${sIdx})"` : ''}>
+              <div class="flex justify-between items-center mb-2 border-b border-slate-800 pb-1.5">
+                <span class="text-xs font-extrabold ${isFilled ? 'text-emerald-300' : 'text-white'}">${utils.escapeHtml(slot.title)}</span>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${isFilled ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold' : 'bg-slate-900 text-slate-400'}">${isFilled ? '✅ 2枚格納済' : '空き (0/2枚)'}</span>
               </div>
-              <div class="h-10 rounded-xl flex items-center justify-center text-xs font-bold text-slate-300 border border-slate-700/60" style="background-color: ${isFilled ? color : '#0f172a'}">
-                ${isFilled ? '自陣カラー配置' : (myStockCount > 0 ? 'ここにはめる (クリック)' : 'ストックなし')}
-              </div>
+              ${isFilled ? `
+                <div class="space-y-1 text-[10px] text-slate-300 bg-slate-900/90 p-2 rounded-xl border border-emerald-500/30">
+                  <div class="truncate">・${utils.escapeHtml(matchedCards[0]?.desc || '')}</div>
+                  <div class="truncate">・${utils.escapeHtml(matchedCards[1]?.desc || '')}</div>
+                </div>
+              ` : `
+                <div class="h-12 rounded-xl flex items-center justify-center text-xs font-bold ${activePair ? 'text-amber-300 bg-amber-950/30 border border-dashed border-amber-500/50' : 'text-slate-500 bg-slate-950 border border-slate-800'}">
+                  ${activePair ? '📥 この疾患にペアをはめ込む' : 'ペア未獲得'}
+                </div>
+              `}
             </div>
           `;
         });
       },
 
       placeCardToBoardSlot: (sIdx) => {
-        if(state.memoryState.matchedStock.length === 0) return utils.showToast('配置できる獲得ストック（ペア）がありません');
+        const stocks = state.memoryState.matchedStock;
+        if(stocks.length === 0) return utils.showToast('配置できる獲得ペアがありません');
+        
         const slot = state.memoryState.boardSlots[sIdx];
         const myBoard = state.memoryState.playerBoards[state.me.id];
-        if(myBoard[sIdx]?.filled) return utils.showToast('すでに埋まっています');
+        if(myBoard[sIdx]?.filled) return utils.showToast('この疾患枠はすでに埋まっています');
 
-        state.memoryState.matchedStock.pop();
-        state.memoryState.matchedStock.pop();
-        myBoard[sIdx] = { filled: true, color: '#38bdf8' };
-        utils.showToast(`✨ 正しく疾患スロットに配置しました！`);
+        const activeIdx = state.memoryState.selectedStockIdx || 0;
+        const activePair = stocks[activeIdx];
+        if(!activePair) return;
+
+        if(slot.num !== activePair.num) {
+          return utils.showToast(`❌ 不一致です！このペアは「${slot.title}」ではありません`);
+        }
+
+        stocks.splice(activeIdx, 1);
+        state.memoryState.selectedStockIdx = 0;
+        myBoard[sIdx] = { filled: true, color: '#38bdf8', cards: activePair.cards };
+
+        utils.showToast(`🎉 正解！「${slot.title}」の枠に2枚のカードをはめ込みました！`);
+        app.addLogMessage(`${state.me.name} がボードの「${slot.title}」を完成させました！`);
+        
         app.renderFullMemoryBoardModal();
         app.renderMemoryGameTable();
 
         const totalSlots = state.memoryState.boardSlots.length;
         const filledCount = Object.keys(myBoard).length;
-        if(filledCount >= totalSlots / 2) {
-          app.endMemoryGame();
+        const remainingCards = state.memoryState.cards.filter(c => !c.isMatched).length;
+        if(filledCount >= totalSlots || (remainingCards === 0 && stocks.length === 0)) {
+          setTimeout(() => app.endMemoryGame(), 1000);
         }
       },
 
       endMemoryGame: () => {
         if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
+        const scores = state.players.map(p => {
+          const b = state.memoryState.playerBoards[p.id] || {};
+          return { id: p.id, count: Object.keys(b).length };
+        });
+        scores.sort((a, b) => b.count - a.count);
+        state.ranks = scores.map(s => s.id);
+        state.players.forEach(p => {
+          p.rank = state.ranks.indexOf(p.id) + 1;
+        });
+        document.getElementById('modal-memory-board')?.classList.add('hidden');
         app.showResults();
       },
 
       startStandardCardGameSession: () => {
-        // 🆕 修正：開始時は initial_discard フェーズにし、手札のペア破棄ができるようにする（他人のカードは引けない）
         state.phase = 'initial_discard';
         state.discardPile = [];
         state.ranks = [];
@@ -1453,7 +1529,6 @@
         app.renderTable();
       },
 
-      // 🆕 修正：全員が「手札確認完了」を押すまで待機し、全員完了したら一斉にスタートする
       humanReady: () => {
         document.getElementById('btn-initial-ready')?.classList.add('hidden');
         const myP = state.players.find(p => p.id === state.me.id);
@@ -1538,7 +1613,6 @@
           if(banner) banner.innerHTML = `<span class="text-cyan-400 font-bold">${utils.escapeHtml(currentP?.name || '')}</span> の手番です（待機中...）`;
           if(subTimer) subTimer.textContent = '待機中...';
           
-          // AIのターンはホスト（またはソロプレイヤー）のみが代表して進行させる
           if (currentP && currentP.isAI && (state.room.isHost || state.room.isSolo)) {
             state.timers.aiDelay = setTimeout(() => {
               if(targetP) app.drawCardFrom(targetP.id, Math.floor(Math.random() * targetP.hand.length));
@@ -1548,17 +1622,14 @@
       },
 
       drawCardFrom: async (targetId, cIdx) => {
-        // 🔒 【絶対ガード】ゲームプレイ中以外、または既にこのターンで1枚引いている場合は絶対に引かせない
         if (state.phase !== 'playing' || state.hasDrawnThisTurn) return;
         const currentP = state.players[state.turnIdx];
         if (!currentP) return;
 
-        // 自分のターンか、ホストがAIのターンを代行している場合のみ許可
         const isMyTurn = (currentP.id === state.me.id && !currentP.isAI);
         const isAiTurnHandledByMe = (currentP.isAI && (state.room.isHost || state.room.isSolo));
         if (!isMyTurn && !isAiTurnHandledByMe) return;
 
-        // ⚡ 1枚引いた瞬間にロック！
         state.hasDrawnThisTurn = true;
         app.clearAllTimers();
 
@@ -1573,7 +1644,7 @@
         app.addLogMessage(`${currentP.name} が ${targetP.name} からカードを引いた`);
         if (isMyTurn) utils.showToast(`カード獲得`);
         
-        app.renderTable(); // 即座に「?」ボタンを消去
+        app.renderTable();
 
         socket.emit('game_action', { 
           roomCode: state.room.code, 
@@ -1687,7 +1758,6 @@
         return triggeredDefib;
       },
       
-      // 🆕 修正：初期手札確認中（initial_discard）も自分のターン中も、自分のカードを選択してペア破棄できるように復旧
       handleMyCardClick: (cId) => {
         if(state.phase !== 'initial_discard' && (state.phase !== 'playing' || state.players[state.turnIdx]?.id !== state.me.id)) return;
         const myP = state.players.find(p=>p.id===state.me.id);
@@ -1856,7 +1926,6 @@
           else {
             h += '<div class="flex flex-wrap gap-1 mt-2">';
             p.hand.forEach((_, cIdx) => { 
-              // 🔒 自分のターンかつ未ドローのときだけ「?」ボタンを表示し、1枚引いたら即座に普通の裏面表示に切り替える
               if(isTgt && !state.hasDrawnThisTurn) {
                 h += `<button onclick="this.disabled=true; app.drawCardFrom('${p.id}', ${cIdx})" class="w-6 h-9 bg-amber-700 border-2 border-amber-300 rounded-lg text-white font-bold text-[10px] shadow hover:scale-110 active:scale-95 transition">?</button>`;
               } else {
