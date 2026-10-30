@@ -280,8 +280,8 @@
             </div>
           </div>
           <div class="mb-5">
-            <label class="block text-xs font-semibold text-slate-300 mb-2">隊員コールサイン</label>
-            <input id="input-player-name" type="text" maxlength="10" value="救急隊員" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 font-semibold">
+            <label class="block text-xs font-semibold text-slate-300 mb-2">あなたの名前（隊員コールサイン）</label>
+            <input id="input-player-name" type="text" maxlength="10" value="救急隊員" placeholder="名前を入力..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 font-semibold">
           </div>
           <div class="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-4 mb-5 space-y-3">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -555,10 +555,18 @@
     </div>
   </div>
 
+  <!-- 🆕 修正：6桁コード参加モーダル内でも名前を入力・変更できるように追加 -->
   <div id="modal-join-room" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl">
-      <h3 class="text-lg font-bold text-white mb-2">出動ルームに参加</h3>
-      <input id="input-join-code" type="text" maxlength="6" placeholder="123456" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-center text-xl text-white font-mono mb-4 focus:outline-none focus:border-cyan-500 tracking-widest">
+      <h3 class="text-lg font-bold text-white mb-4">出動ルームに参加</h3>
+      <div class="mb-4">
+        <label class="block text-xs font-semibold text-slate-300 mb-1.5">あなたの名前（隊員コールサイン）</label>
+        <input id="input-join-player-name" type="text" maxlength="10" value="救急隊員" placeholder="名前を入力..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 font-semibold">
+      </div>
+      <div class="mb-5">
+        <label class="block text-xs font-semibold text-slate-300 mb-1.5">ルームコード（6桁）</label>
+        <input id="input-join-code" type="text" maxlength="6" placeholder="123456" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-center text-xl text-white font-mono focus:outline-none focus:border-cyan-500 tracking-widest">
+      </div>
       <div class="flex gap-2">
         <button onclick="app.closeJoinModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl transition">キャンセル</button>
         <button onclick="app.executeJoin()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-3 rounded-xl font-bold transition shadow-[0_0_10px_rgba(8,145,178,0.4)]">合流する</button>
@@ -759,7 +767,6 @@
       app.updateRoomUI();
     });
 
-    // 🆕 修正：ホストがどのゲームモードを開始しても、参加者全員が確実にゲーム画面へ遷移・同期する
     socket.on('game_action', (actionData) => {
       if(actionData.mode) app.applyModeBadgeUI(actionData.mode);
       if(actionData.config) state.config = actionData.config;
@@ -826,6 +833,14 @@
     const app = {
       init: () => {
         try {
+          const savedName = localStorage.getItem('ems_player_name');
+          if (savedName) {
+            state.me.name = savedName;
+            const lobbyInput = document.getElementById('input-player-name');
+            const joinInput = document.getElementById('input-join-player-name');
+            if (lobbyInput) lobbyInput.value = savedName;
+            if (joinInput) joinInput.value = savedName;
+          }
           app.renderPortal(); 
           app.showScreen('view-portal');
           if (window.lucide) lucide.createIcons();
@@ -893,7 +908,6 @@
         if (window.lucide) lucide.createIcons();
       },
 
-      // 🆕 モードに応じたヘッダー・ボタン表示の切り替えを共通化（ゲスト参加時にも反映されるように）
       applyModeBadgeUI: (mode) => {
         state.mode = mode;
         const tag = document.getElementById('lobby-mode-tag'), title = document.getElementById('lobby-mode-title'), badge = document.getElementById('current-mode-badge');
@@ -945,6 +959,7 @@
         state.config.showMemoryDisease = document.getElementById('config-memory-show-disease')?.checked ?? true;
         state.config.showGroupNum = document.getElementById('config-show-group-num')?.checked ?? true;
         state.me.name = document.getElementById('input-player-name')?.value.trim() || '救急隊員';
+        try { localStorage.setItem('ems_player_name', state.me.name); } catch(e){}
       },
 
       updateRoomUI: () => {
@@ -985,14 +1000,36 @@
         app.startGame(); 
       },
 
-      showJoinModal: () => document.getElementById('modal-join-room')?.classList.remove('hidden'),
+      // 🆕 参加モーダルを開いたとき、現在のロビーの名前入力欄の値を引き継いで表示する
+      showJoinModal: () => {
+        const lobbyName = document.getElementById('input-player-name')?.value.trim();
+        const joinNameInput = document.getElementById('input-join-player-name');
+        if (joinNameInput && lobbyName) {
+          joinNameInput.value = lobbyName;
+        }
+        document.getElementById('modal-join-room')?.classList.remove('hidden');
+      },
       closeJoinModal: () => document.getElementById('modal-join-room')?.classList.add('hidden'),
       
+      // 🆕 参加モーダルで入力した名前を反映してルームに合流する
       executeJoin: () => {
         const codeInput = document.getElementById('input-join-code');
         const code = codeInput ? codeInput.value.trim() : ''; 
         if(code.length < 4) return utils.showToast('ルームコード（6桁）を入力してください');
+        
+        const joinNameInput = document.getElementById('input-join-player-name');
+        const lobbyNameInput = document.getElementById('input-player-name');
+        const joinName = joinNameInput ? joinNameInput.value.trim() : '';
+        if (joinName && lobbyNameInput) {
+          lobbyNameInput.value = joinName;
+        }
+
         app.readConfig(); 
+        if (joinName) {
+          state.me.name = joinName;
+          try { localStorage.setItem('ems_player_name', state.me.name); } catch(e){}
+        }
+
         state.room = { code: code, isHost: false, isSolo: false };
         const codeDisplay = document.getElementById('room-code-display');
         if(codeDisplay) codeDisplay.textContent = state.room.code;
@@ -1004,8 +1041,8 @@
         app.closeJoinModal(); 
         app.updateRoomUI(); 
         app.showScreen('view-room');
-        utils.showToast(`ルーム [${code}] に合流しました！`);
-        app.addLogMessage(`ルーム ${code} に参加しました`);
+        utils.showToast(`${utils.escapeHtml(state.me.name)} としてルーム [${code}] に合流しました！`);
+        app.addLogMessage(`${state.me.name} がルーム ${code} に参加しました`);
       },
 
       addBot: () => {
@@ -1075,7 +1112,6 @@
           state.memoryState.playerBoards[p.id] = {};
         });
 
-        // 🆕 神経衰弱開始時もルーム全員に開始イベントを送信してゲーム画面へ飛ばす
         socket.emit('game_action', {
           roomCode: state.room.code,
           type: 'start',
