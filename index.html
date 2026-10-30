@@ -678,7 +678,7 @@
       mode: 'babanuki',
       phase: 'idle',
       room: { code: '', isHost: false, isSolo: false },
-      config: { maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true },
+      config: { mode: 'babanuki', maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true },
       me: { id: 'p_' + Math.random().toString(36).substring(2, 9), name: '救急隊員' },
       players: [],
       turnIdx: 0,
@@ -752,29 +752,57 @@
     socket.on('update_room', (data) => {
       if(data.players) state.players = data.players;
       if(data.discardPile) state.discardPile = data.discardPile;
-      if(data.config) state.config = data.config;
+      if(data.config) {
+        state.config = data.config;
+        if(data.config.mode) app.applyModeBadgeUI(data.config.mode);
+      }
       app.updateRoomUI();
     });
 
+    // 🆕 修正：ホストがどのゲームモードを開始しても、参加者全員が確実にゲーム画面へ遷移・同期する
     socket.on('game_action', (actionData) => {
+      if(actionData.mode) app.applyModeBadgeUI(actionData.mode);
+      if(actionData.config) state.config = actionData.config;
       if(actionData.players) state.players = actionData.players;
       if(actionData.discardPile) state.discardPile = actionData.discardPile;
       if(actionData.turnIdx !== undefined) state.turnIdx = actionData.turnIdx;
       if(actionData.hasDrawnThisTurn !== undefined) state.hasDrawnThisTurn = actionData.hasDrawnThisTurn;
       if(actionData.hiddenCard !== undefined) state.hiddenCard = actionData.hiddenCard;
       if(actionData.ranks !== undefined) state.ranks = actionData.ranks;
+      if(actionData.memoryState) {
+        state.memoryState.cards = actionData.memoryState.cards || state.memoryState.cards;
+        state.memoryState.boardSlots = actionData.memoryState.boardSlots || state.memoryState.boardSlots;
+        state.memoryState.playerBoards = actionData.memoryState.playerBoards || state.memoryState.playerBoards;
+      }
       
       if(actionData.type === 'start') {
-        state.phase = 'initial_discard';
-        state.hasDrawnThisTurn = false;
-        state.lastDrawnId = null;
-        state.selectedMyCards = [];
-        app.showScreen('view-game');
-        document.getElementById('btn-initial-ready')?.classList.remove('hidden');
-        document.getElementById('btn-end-turn')?.classList.add('hidden');
-        const banner = document.getElementById('game-announcement-banner');
-        if(banner) banner.textContent = '初期手札のペアを破棄し、「手札確認完了」を押してください';
-        app.renderTable();
+        if(state.mode === 'memory') {
+          state.phase = 'memory_playing';
+          state.memoryState.selectedCardIndices = [];
+          state.memoryState.matchedStock = [];
+          state.memoryState.selectedStockIdx = 0;
+          state.memoryState.isProcessingTurn = false;
+          app.showScreen('view-memory-game');
+          app.renderMemoryGameTable();
+        } else {
+          state.phase = 'initial_discard';
+          state.hasDrawnThisTurn = false;
+          state.lastDrawnId = null;
+          state.selectedMyCards = [];
+          app.showScreen('view-game');
+          document.getElementById('btn-initial-ready')?.classList.remove('hidden');
+          document.getElementById('btn-end-turn')?.classList.add('hidden');
+          const banner = document.getElementById('game-announcement-banner');
+          if(banner) banner.textContent = '初期手札のペアを破棄し、「手札確認完了」を押してください';
+          app.renderTable();
+        }
+      } else if(actionData.type === 'memory_sync') {
+        if(state.phase !== 'memory_playing') {
+          state.phase = 'memory_playing';
+          app.showScreen('view-memory-game');
+        }
+        state.memoryState.isProcessingTurn = false;
+        app.renderMemoryGameTable();
       } else if(actionData.type === 'player_ready') {
         app.renderTable();
       } else if(actionData.type === 'ready') {
@@ -790,7 +818,8 @@
         app.renderTable();
         app.checkClears();
       } else {
-        app.renderTable();
+        if(state.mode === 'memory') app.renderMemoryGameTable();
+        else app.renderTable();
       }
     });
 
@@ -863,7 +892,9 @@
         });
         if (window.lucide) lucide.createIcons();
       },
-      selectGame: (mode) => {
+
+      // 🆕 モードに応じたヘッダー・ボタン表示の切り替えを共通化（ゲスト参加時にも反映されるように）
+      applyModeBadgeUI: (mode) => {
         state.mode = mode;
         const tag = document.getElementById('lobby-mode-tag'), title = document.getElementById('lobby-mode-title'), badge = document.getElementById('current-mode-badge');
         const turnBadge = document.getElementById('game-turn-text');
@@ -891,6 +922,10 @@
           if(memoryConfig) memoryConfig.classList.add('hidden');
           if(babanukiConfig) babanukiConfig.classList.remove('hidden');
         }
+      },
+
+      selectGame: (mode) => {
+        app.applyModeBadgeUI(mode);
         app.showScreen('view-lobby');
       },
 
@@ -901,6 +936,7 @@
       },
 
       readConfig: () => {
+        state.config.mode = state.mode;
         state.config.maxPlayers = parseInt(document.getElementById('config-max-players')?.value || 4, 10);
         state.config.turnTimeLimit = parseInt(document.getElementById('config-turn-time')?.value || 20, 10);
         state.config.autoFillAI = document.getElementById('config-auto-fill-ai')?.checked ?? true;
@@ -1009,7 +1045,6 @@
       startMemoryGameSession: () => {
         state.phase = 'memory_playing';
         state.turnIdx = 0;
-        app.showScreen('view-memory-game');
 
         const pairCount = state.config.memoryPairs;
         let availablePairs = [];
@@ -1040,6 +1075,22 @@
           state.memoryState.playerBoards[p.id] = {};
         });
 
+        // 🆕 神経衰弱開始時もルーム全員に開始イベントを送信してゲーム画面へ飛ばす
+        socket.emit('game_action', {
+          roomCode: state.room.code,
+          type: 'start',
+          mode: 'memory',
+          config: state.config,
+          players: state.players,
+          turnIdx: state.turnIdx,
+          memoryState: {
+            cards: state.memoryState.cards,
+            boardSlots: state.memoryState.boardSlots,
+            playerBoards: state.memoryState.playerBoards
+          }
+        });
+
+        app.showScreen('view-memory-game');
         app.renderMemoryGameTable();
         app.addLogMessage('救急神経衰弱バトルが開始されました。');
       },
@@ -1153,7 +1204,7 @@
 
         app.renderMiniBoardPreview();
 
-        if (currentP && currentP.isAI && !state.memoryState.isProcessingTurn) {
+        if (currentP && currentP.isAI && (state.room.isHost || state.room.isSolo) && !state.memoryState.isProcessingTurn) {
           state.memoryState.isProcessingTurn = true;
           setTimeout(app.processAiMemoryTurn, 1800);
         }
@@ -1187,6 +1238,18 @@
         card.isFlipped = true;
         state.memoryState.selectedCardIndices.push(idx);
         app.renderMemoryGameTable();
+
+        socket.emit('game_action', {
+          roomCode: state.room.code,
+          type: 'memory_sync',
+          mode: 'memory',
+          turnIdx: state.turnIdx,
+          memoryState: {
+            cards: state.memoryState.cards,
+            boardSlots: state.memoryState.boardSlots,
+            playerBoards: state.memoryState.playerBoards
+          }
+        });
 
         app.showMemoryPopupCard(card, actorP, () => {
           if(state.memoryState.selectedCardIndices.length === 1) {
@@ -1319,6 +1382,17 @@
 
       advanceMemoryTurnCounterclockwise: () => {
         state.turnIdx = (state.turnIdx - 1 + state.players.length) % state.players.length;
+        socket.emit('game_action', {
+          roomCode: state.room.code,
+          type: 'memory_sync',
+          mode: 'memory',
+          turnIdx: state.turnIdx,
+          memoryState: {
+            cards: state.memoryState.cards,
+            boardSlots: state.memoryState.boardSlots,
+            playerBoards: state.memoryState.playerBoards
+          }
+        });
         app.renderMemoryGameTable();
       },
 
@@ -1460,6 +1534,18 @@
         utils.showToast(`🎉 正解！「${slot.title}」の枠に2枚のカードをはめ込みました！`);
         app.addLogMessage(`${state.me.name} がボードの「${slot.title}」を完成させました！`);
         
+        socket.emit('game_action', {
+          roomCode: state.room.code,
+          type: 'memory_sync',
+          mode: 'memory',
+          turnIdx: state.turnIdx,
+          memoryState: {
+            cards: state.memoryState.cards,
+            boardSlots: state.memoryState.boardSlots,
+            playerBoards: state.memoryState.playerBoards
+          }
+        });
+
         app.renderFullMemoryBoardModal();
         app.renderMemoryGameTable();
 
@@ -1514,6 +1600,8 @@
         socket.emit('game_action', {
           roomCode: state.room.code,
           type: 'start',
+          mode: state.mode,
+          config: state.config,
           players: state.players,
           discardPile: state.discardPile,
           turnIdx: state.turnIdx,
