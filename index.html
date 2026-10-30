@@ -69,7 +69,7 @@
     }
   </style>
 </head>
-<body class="min-h-screen bg-slate-950 flex flex-col items-center justify-start text-slate-100 overflow-x-hidden">
+<body class="min-h-screen bg-slate-950 flex flex-col items-center justify-start text-slate-100 overflow-x-hidden pb-20">
 
   <script>
     const DEFAULT_EMS_CARDS = [
@@ -254,10 +254,6 @@
             <span>EMS CARD STATION</span>
             <span id="current-mode-badge" class="text-xs px-2 py-0.5 rounded-full bg-cyan-900/60 text-cyan-300 border border-cyan-700">総合ポータル</span>
           </h1>
-          <button onclick="app.toggleChatModal()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 transition flex items-center justify-center relative" title="指令・現場チャット">
-            <i data-lucide="message-square" class="w-5 h-5"></i>
-            <span id="chat-badge-dot" class="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 hidden"></span>
-          </button>
         </div>
       </div>
       <div class="flex items-center space-x-2">
@@ -482,6 +478,27 @@
     </main>
   </div>
 
+  <!-- 🆕 画面下部の3連通信ドック（左：お知らせ、中央：会話ルーム、右：ゲームログ） -->
+  <div class="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 w-full max-w-md px-4 pointer-events-none">
+    <div class="bg-slate-900/95 border border-slate-700/90 backdrop-blur-md rounded-2xl p-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.8)] grid grid-cols-3 gap-1.5 pointer-events-auto">
+      <button onclick="app.openCommModal('announce')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-amber-400 border border-slate-700/60 transition active:scale-95 relative">
+        <i data-lucide="megaphone" class="w-4 h-4"></i>
+        <span class="text-xs font-bold">お知らせ</span>
+        <span id="badge-dot-announce" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 hidden animate-ping"></span>
+      </button>
+      <button onclick="app.openCommModal('chat')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-cyan-400 border border-slate-700/60 transition active:scale-95 relative">
+        <i data-lucide="message-circle" class="w-4 h-4"></i>
+        <span class="text-xs font-bold">会話ルーム</span>
+        <span id="badge-dot-chat" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 hidden"></span>
+      </button>
+      <button onclick="app.openCommModal('log')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-emerald-400 border border-slate-700/60 transition active:scale-95 relative">
+        <i data-lucide="list-tree" class="w-4 h-4"></i>
+        <span class="text-xs font-bold">ゲームログ</span>
+        <span id="badge-dot-log" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 hidden"></span>
+      </button>
+    </div>
+  </div>
+
   <!-- MODALS -->
   <div id="modal-memory-popup" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm pointer-events-none">
     <div id="memory-popup-card-box" class="w-80 sm:w-96 bg-slate-900 border-4 border-cyan-400 rounded-3xl p-6 text-center shadow-[0_0_60px_rgba(6,182,212,0.5)] transform scale-105 transition-all pointer-events-auto">
@@ -521,23 +538,28 @@
     </div>
   </div>
 
+  <!-- 🆕 3ルーム対応の通信モーダル（左：お知らせ、中：会話ルーム、右：ゲームログ） -->
   <div id="modal-chat" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl flex flex-col h-[480px]">
+    <div class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl flex flex-col h-[500px]">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
-        <h3 class="text-base font-bold text-white flex items-center gap-2"><i data-lucide="message-square" class="w-5 h-5 text-cyan-400"></i>指令・現場通信</h3>
+        <h3 class="text-base font-bold text-white flex items-center gap-2"><i data-lucide="radio" class="w-5 h-5 text-cyan-400"></i>指令・現場通信センター</h3>
         <button onclick="app.toggleChatModal()" class="p-2 bg-slate-800 text-slate-400 rounded-xl hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-      <div class="flex gap-2 mb-3 border-b border-slate-800 pb-2">
-        <button onclick="app.switchChatTab('log')" id="btn-tab-log" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-cyan-600 text-white transition flex items-center justify-center gap-1.5"><i data-lucide="list-tree" class="w-4 h-4"></i><span>システムログ</span></button>
-        <button onclick="app.switchChatTab('chat')" id="btn-tab-chat" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5"><i data-lucide="message-circle" class="w-4 h-4"></i><span>会話ルーム（全体公開）</span></button>
+      <div class="grid grid-cols-3 gap-2 mb-3 border-b border-slate-800 pb-2">
+        <button onclick="app.switchChatTab('announce')" id="btn-tab-announce" class="py-2 px-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center gap-1"><i data-lucide="megaphone" class="w-3.5 h-3.5"></i><span>お知らせ</span></button>
+        <button onclick="app.switchChatTab('chat')" id="btn-tab-chat" class="py-2 px-2 rounded-xl text-xs font-bold bg-cyan-600 text-white transition flex items-center justify-center gap-1"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i><span>会話ルーム</span></button>
+        <button onclick="app.switchChatTab('log')" id="btn-tab-log" class="py-2 px-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center gap-1"><i data-lucide="list-tree" class="w-3.5 h-3.5"></i><span>ゲームログ</span></button>
       </div>
-      <div id="tab-content-log" class="flex-1 overflow-y-auto custom-scrollbar mb-3 space-y-2 text-xs pr-1 bg-slate-950 p-3 rounded-2xl border border-slate-800">
-        <div class="text-slate-500 italic">システム通信記録待機中...</div>
+      <div id="tab-content-announce" class="flex-1 overflow-y-auto custom-scrollbar mb-3 space-y-2 text-xs pr-1 bg-slate-950 p-3 rounded-2xl border border-slate-800 hidden">
+        <div class="text-slate-500 italic">管理室からの全体お知らせ待機中...</div>
       </div>
-      <div id="tab-content-chat" class="flex-1 overflow-y-auto custom-scrollbar mb-3 space-y-2 text-xs pr-1 bg-slate-950 p-3 rounded-2xl border border-slate-800 hidden">
+      <div id="tab-content-chat" class="flex-1 overflow-y-auto custom-scrollbar mb-3 space-y-2 text-xs pr-1 bg-slate-950 p-3 rounded-2xl border border-slate-800">
         <div class="text-slate-500 italic">全体公開チャット接続完了。全員にメッセージが公開されます。</div>
       </div>
-      <div id="chat-input-area" class="flex gap-2 pt-2 border-t border-slate-800 hidden">
+      <div id="tab-content-log" class="flex-1 overflow-y-auto custom-scrollbar mb-3 space-y-2 text-xs pr-1 bg-slate-950 p-3 rounded-2xl border border-slate-800 hidden">
+        <div class="text-slate-500 italic">システム通信記録待機中...</div>
+      </div>
+      <div id="chat-input-area" class="flex gap-2 pt-2 border-t border-slate-800">
         <input id="game-chat-input" type="text" placeholder="全員にメッセージ送信..." onkeydown="if(event.key==='Enter')app.sendChatMsg()" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
         <button onclick="app.sendChatMsg()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition">送信</button>
       </div>
@@ -604,12 +626,25 @@
       </div>
       
       <div id="admin-content-box" class="hidden flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-5 pr-2">
+        <!-- 🆕 リアルタイム接続人数の表示 -->
         <div class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-inner">
           <div class="flex items-center gap-3">
             <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span></span>
-            <span class="text-xs font-bold text-slate-300">システム広域ネットワーク アクティブセッション:</span>
+            <span class="text-xs font-bold text-slate-300">現在のリアルタイム接続人数 (アクティブセッション):</span>
           </div>
-          <span class="text-2xl font-mono font-black text-cyan-400" id="admin-active-users">38</span>
+          <div class="flex items-baseline gap-1">
+            <span class="text-2xl font-mono font-black text-cyan-400" id="admin-active-users">1</span>
+            <span class="text-xs text-slate-400 font-bold">名</span>
+          </div>
+        </div>
+
+        <!-- 🆕 管理室から全体へのお知らせ配信フォーム -->
+        <div class="w-full bg-slate-800/40 border border-amber-500/40 rounded-2xl p-4">
+          <h4 class="text-sm font-bold text-amber-300 mb-2 flex items-center gap-2"><i data-lucide="megaphone" class="w-4 h-4"></i>全体お知らせ配信（全プレイヤーのお知らせルームへ一斉通知）</h4>
+          <div class="flex gap-2">
+            <input id="admin-announce-input" type="text" placeholder="全プレイヤーへ通知するお知らせ内容を入力..." onkeydown="if(event.key==='Enter')app.sendAdminAnnouncement()" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+            <button onclick="app.sendAdminAnnouncement()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition shadow-md">一斉送信</button>
+          </div>
         </div>
         
         <div class="w-full bg-slate-800/40 border border-slate-700 rounded-2xl p-4">
@@ -674,7 +709,7 @@
     </div>
   </div>
 
-  <div id="toast-box" class="fixed bottom-5 z-50 transform -translate-y-2 opacity-0 pointer-events-none transition-all duration-300 bg-slate-800 border border-slate-700 text-white text-xs px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2"><span id="toast-text"></span></div>
+  <div id="toast-box" class="fixed bottom-20 z-50 transform -translate-y-2 opacity-0 pointer-events-none transition-all duration-300 bg-slate-800 border border-slate-700 text-white text-xs px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2"><span id="toast-text"></span></div>
 
   <script>
     let socket;
@@ -693,6 +728,7 @@
     const state = {
       mode: 'babanuki',
       phase: 'idle',
+      activeCommTab: 'chat',
       room: { code: '', isHost: false, isSolo: false },
       config: { mode: 'babanuki', maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true },
       me: { id: 'p_' + Math.random().toString(36).substring(2, 9), name: '救急隊員' },
@@ -724,8 +760,40 @@
       state.me.id = socket.id;
       socket.emit('request_admin_state');
     });
+
+    // 🆕 リアルタイム接続人数の受信と管理室への即時表示
+    socket.on('update_active_users', (count) => {
+      const el = document.getElementById('admin-active-users');
+      if (el && count !== undefined) el.textContent = count;
+    });
+
+    // 🆕 お知らせ履歴の初期同期
+    socket.on('init_announcements', (list) => {
+      const box = document.getElementById('tab-content-announce');
+      if (!box || !Array.isArray(list) || list.length === 0) return;
+      box.innerHTML = '';
+      list.forEach(item => {
+        box.innerHTML += `<div class="p-3 rounded-xl bg-amber-950/40 border border-amber-500/50 mb-2"><div class="flex items-center justify-between text-[10px] text-amber-300 font-bold mb-1"><span>📢 管理室よりお知らせ</span><span class="font-mono">${utils.escapeHtml(item.time || '')}</span></div><div class="text-slate-100 font-bold leading-relaxed">${utils.escapeHtml(item.message)}</div></div>`;
+      });
+      box.scrollTop = box.scrollHeight;
+    });
+
+    // 🆕 管理室からの新規お知らせ受信
+    socket.on('receive_announcement', (item) => {
+      const box = document.getElementById('tab-content-announce');
+      const dot = document.getElementById('badge-dot-announce');
+      if (box && item) {
+        if (box.querySelector('.italic')) box.innerHTML = '';
+        box.innerHTML += `<div class="p-3 rounded-xl bg-amber-950/40 border border-amber-500/50 mb-2"><div class="flex items-center justify-between text-[10px] text-amber-300 font-bold mb-1"><span>📢 管理室よりお知らせ</span><span class="font-mono">${utils.escapeHtml(item.time || '')}</span></div><div class="text-slate-100 font-bold leading-relaxed">${utils.escapeHtml(item.message)}</div></div>`;
+        box.scrollTop = box.scrollHeight;
+      }
+      const modalHidden = document.getElementById('modal-chat')?.classList.contains('hidden');
+      if (dot && (modalHidden || state.activeCommTab !== 'announce')) {
+        dot.classList.remove('hidden');
+      }
+      utils.showToast(`📢 お知らせ: ${utils.escapeHtml(item?.message || '')}`);
+    });
     
-    // 🆕 他の管理室から変更されたアクセス権限を即座に全端末のゲーム選択＆管理室トグルへ反映
     socket.on('update_access', (data) => {
       if(data) {
         currentGameAccess = data;
@@ -739,7 +807,6 @@
       }
     });
 
-    // 🆕 他の管理室から変更されたカードDBを即座に全端末のDB＆管理室テーブルへ反映
     socket.on('update_cards', (dbData) => {
       if(Array.isArray(dbData)) {
         currentCardDB = dbData;
@@ -754,13 +821,14 @@
 
     socket.on('receive_chat', (data) => {
       const chatContent = document.getElementById('tab-content-chat');
-      const badgeDot = document.getElementById('chat-badge-dot');
+      const badgeDot = document.getElementById('badge-dot-chat');
       if(chatContent) {
         if(chatContent.querySelector('.italic')) chatContent.innerHTML = '';
         chatContent.innerHTML += `<div class="p-2 rounded-xl bg-slate-900 border border-slate-800 mb-1"><span class="text-cyan-400 font-bold mr-2">${utils.escapeHtml(data.name)}:</span><span class="text-slate-200">${utils.escapeHtml(data.message)}</span></div>`;
         chatContent.scrollTop = chatContent.scrollHeight;
       }
-      if(badgeDot && document.getElementById('modal-chat')?.classList.contains('hidden')) {
+      const modalHidden = document.getElementById('modal-chat')?.classList.contains('hidden');
+      if(badgeDot && (modalHidden || state.activeCommTab !== 'chat')) {
         badgeDot.classList.remove('hidden');
       }
     });
@@ -867,6 +935,15 @@
           message: msg
         });
         input.value = '';
+      },
+
+      sendAdminAnnouncement: () => {
+        const input = document.getElementById('admin-announce-input');
+        const msg = input ? input.value.trim() : '';
+        if (!msg) return utils.showToast('お知らせ内容を入力してください');
+        socket.emit('admin_send_announcement', { message: msg });
+        input.value = '';
+        utils.showToast('全体お知らせを配信しました');
       },
 
       showScreen: (id) => {
@@ -1176,7 +1253,6 @@
         }, 1000);
       },
 
-      // 🆕 修正：小さなカードでもめくられた位置と文字内容がくっきり読めるデザインに改善
       renderMemoryGameTable: () => {
         const grid = document.getElementById('memory-cards-grid');
         const turnInfo = document.getElementById('memory-turn-info');
@@ -1233,7 +1309,6 @@
             </div>
           `;
 
-          // 小さいカードでも文字が最大限大きく見やすくなるようレイアウトを最適化
           const showDisease = state.config.showMemoryDisease ?? true;
           const cardFrontHtml = `
             <div class="w-full h-full flex flex-col justify-between overflow-hidden">
@@ -1315,7 +1390,6 @@
         });
       },
 
-      // 🆕 修正：カードをめくった本人（人間プレイヤー）にのみ拡大ポップアップを表示し、他の人は盤面上で確認する
       showMemoryPopupCard: (card, actorP, callback) => {
         const isActorMe = (actorP && !actorP.isAI && actorP.id === state.me.id);
         if (!isActorMe) {
@@ -1400,7 +1474,6 @@
         });
       },
 
-      // 🆕 修正：ペア判定のでかいポップアップも引いた本人のみに表示し、他プレイヤーには出さない
       showMemoryMatchResultBanner: (c1, c2, isMatch, actorP, onComplete) => {
         const isActorMe = (actorP && !actorP.isAI && actorP.id === state.me.id);
         if (!isActorMe) {
@@ -2057,40 +2130,57 @@
         });
       },
 
+      // 🆕 下部バーの3ボタン（お知らせ・会話・ゲームログ）から指定タブで直接モーダルを開く
+      openCommModal: (tab) => {
+        const modal = document.getElementById('modal-chat');
+        modal?.classList.remove('hidden');
+        app.switchChatTab(tab);
+        if (window.lucide) lucide.createIcons();
+      },
+
       toggleChatModal: () => {
         const modal = document.getElementById('modal-chat');
         modal?.classList.toggle('hidden');
-        document.getElementById('chat-badge-dot')?.classList.add('hidden');
         if (window.lucide) lucide.createIcons();
       },
 
       switchChatTab: (tab) => {
-        const logContent = document.getElementById('tab-content-log');
+        state.activeCommTab = tab;
+        const announceContent = document.getElementById('tab-content-announce');
         const chatContent = document.getElementById('tab-content-chat');
-        const btnLog = document.getElementById('btn-tab-log');
+        const logContent = document.getElementById('tab-content-log');
+        const btnAnnounce = document.getElementById('btn-tab-announce');
         const btnChat = document.getElementById('btn-tab-chat');
+        const btnLog = document.getElementById('btn-tab-log');
         const inputArea = document.getElementById('chat-input-area');
 
-        if (tab === 'log') {
-          logContent?.classList.remove('hidden');
-          chatContent?.classList.add('hidden');
-          if(btnLog) btnLog.className = 'flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-cyan-600 text-white transition flex items-center justify-center gap-1.5';
-          if(btnChat) btnChat.className = 'flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5';
-          inputArea?.classList.add('hidden');
-        } else {
-          logContent?.classList.add('hidden');
-          chatContent?.classList.remove('hidden');
-          if(btnChat) btnChat.className = 'flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-cyan-600 text-white transition flex items-center justify-center gap-1.5';
-          if(btnLog) btnLog.className = 'flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5';
-          inputArea?.classList.remove('hidden');
-        }
+        announceContent?.classList.toggle('hidden', tab !== 'announce');
+        chatContent?.classList.toggle('hidden', tab !== 'chat');
+        logContent?.classList.toggle('hidden', tab !== 'log');
+
+        const inactiveCls = 'py-2 px-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center gap-1';
+        if(btnAnnounce) btnAnnounce.className = tab === 'announce' ? 'py-2 px-2 rounded-xl text-xs font-bold bg-amber-600 text-white transition flex items-center justify-center gap-1' : inactiveCls;
+        if(btnChat) btnChat.className = tab === 'chat' ? 'py-2 px-2 rounded-xl text-xs font-bold bg-cyan-600 text-white transition flex items-center justify-center gap-1' : inactiveCls;
+        if(btnLog) btnLog.className = tab === 'log' ? 'py-2 px-2 rounded-xl text-xs font-bold bg-emerald-600 text-white transition flex items-center justify-center gap-1' : inactiveCls;
+
+        if(tab === 'announce') document.getElementById('badge-dot-announce')?.classList.add('hidden');
+        if(tab === 'chat') document.getElementById('badge-dot-chat')?.classList.add('hidden');
+        if(tab === 'log') document.getElementById('badge-dot-log')?.classList.add('hidden');
+
+        inputArea?.classList.toggle('hidden', tab !== 'chat');
       },
 
       addLogMessage: (msg) => {
         const log = document.getElementById('tab-content-log');
+        const dot = document.getElementById('badge-dot-log');
         if(!log) return;
+        if(log.querySelector('.italic')) log.innerHTML = '';
         log.innerHTML += `<div class="leading-snug text-slate-300 font-mono text-[11px] py-0.5 border-b border-slate-900">[LOG] ${utils.escapeHtml(msg)}</div>`;
         log.scrollTop = log.scrollHeight;
+        const modalHidden = document.getElementById('modal-chat')?.classList.contains('hidden');
+        if(dot && (modalHidden || state.activeCommTab !== 'log')) {
+          dot.classList.remove('hidden');
+        }
       },
 
       renderTable: () => {
@@ -2355,7 +2445,6 @@
       },
       rematch: () => state.room.isSolo ? app.startSoloAI() : app.returnToPortal(),
 
-      // 🆕 管理室を開くたびにサーバーから最新の状態を取得して全端末で完全一致させる
       adminClicks: 0, adminTimer: null,
       openAdmin: () => { 
         socket.emit('request_admin_state');

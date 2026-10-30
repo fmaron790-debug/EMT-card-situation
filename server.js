@@ -15,39 +15,35 @@ app.get('/', (req, res) => {
 
 const rooms = {};
 
-// 🆕 管理室（CMS）の最新設定をサーバー側で一元保持（どの端末から入っても同じ内容に同期）
+// 管理室（CMS）の最新設定・お知らせ履歴をサーバー側で一元保持
 let globalAccessState = { game1: true, game2: true, game3: true, game4: false };
 let globalCardDB = null;
+let globalAnnouncements = [];
 
-// プレイヤーごとに割り当てるカラーパレット（視認性の高い10色）
 const PLAYER_COLORS = [
-  '#38bdf8', // スカイブルー
-  '#f43f5e', // ローズレッド
-  '#10b981', // エメラルドグリーン
-  '#f59e0b', // アンバーイエロー
-  '#a855f7', // パープル
-  '#ec4899', // ピンク
-  '#84cc16', // ライムグリーン
-  '#f97316', // オレンジ
-  '#06b6d4', // シアン
-  '#6366f1'  // インディゴ
+  '#38bdf8', '#f43f5e', '#10b981', '#f59e0b', '#a855f7',
+  '#ec4899', '#84cc16', '#f97316', '#06b6d4', '#6366f1'
 ];
+
+// 現在のリアルタイム接続人数を全端末へ配信
+function broadcastActiveUsers() {
+  io.emit('update_active_users', io.engine.clientsCount);
+}
 
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
+  broadcastActiveUsers();
 
-  // 🆕 接続した端末へ現在の管理室設定・カードDBを即座に同期
+  // 接続した端末へ最新の設定・カードDB・お知らせ履歴・接続人数を即座に同期
   socket.emit('update_access', globalAccessState);
-  if (globalCardDB) {
-    socket.emit('update_cards', globalCardDB);
-  }
+  if (globalCardDB) socket.emit('update_cards', globalCardDB);
+  socket.emit('init_announcements', globalAnnouncements);
 
-  // 🆕 管理室を開いた際などの最新状態リクエストに応答
   socket.on('request_admin_state', () => {
     socket.emit('update_access', globalAccessState);
-    if (globalCardDB) {
-      socket.emit('update_cards', globalCardDB);
-    }
+    if (globalCardDB) socket.emit('update_cards', globalCardDB);
+    socket.emit('update_active_users', io.engine.clientsCount);
+    socket.emit('init_announcements', globalAnnouncements);
   });
 
   socket.on('join_room', (data) => {
@@ -94,7 +90,6 @@ io.on('connection', (socket) => {
     });
   });
 
-  // ゲーム内アクションの同期
   socket.on('game_action', (data) => {
     const { roomCode, type, players, discardPile, turnIdx, hasDrawnThisTurn } = data;
     const room = rooms[roomCode];
@@ -117,7 +112,6 @@ io.on('connection', (socket) => {
     io.to(roomCode).emit('game_action', data);
   });
 
-  // 🆕 管理室での出動権限変更をサーバーに保存し、全端末へ即時配信
   socket.on('admin_update_access', (accessData) => {
     if (accessData && typeof accessData === 'object') {
       globalAccessState = { ...globalAccessState, ...accessData };
@@ -125,7 +119,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 🆕 管理室でのカードDB変更をサーバーに保存し、全端末へ即時配信
   socket.on('admin_update_cards', (dbData) => {
     if (Array.isArray(dbData)) {
       globalCardDB = dbData;
@@ -133,7 +126,20 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 🆕 チャットを全プレイヤー公開に変更（誰が打っても全員が見られる）
+  // 管理室からの全体お知らせ配信
+  socket.on('admin_send_announcement', (data) => {
+    const msg = (data && data.message ? String(data.message).trim() : '');
+    if (!msg) return;
+    const item = {
+      id: Date.now(),
+      message: msg,
+      time: new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })
+    };
+    globalAnnouncements.push(item);
+    if (globalAnnouncements.length > 50) globalAnnouncements.shift();
+    io.emit('receive_announcement', item);
+  });
+
   socket.on('send_chat', (data) => {
     const { name, message } = data;
     io.emit('receive_chat', { name, message });
@@ -141,6 +147,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
+    broadcastActiveUsers();
     for (const roomCode in rooms) {
       const room = rooms[roomCode];
       const idx = room.players.findIndex(p => p.id === socket.id);
