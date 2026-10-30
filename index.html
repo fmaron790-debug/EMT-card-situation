@@ -1474,10 +1474,12 @@
       },
 
       drawCardFrom: async (targetId, cIdx) => {
-        // 🔒 絶対ガード：ゲームが playing 状態でない、すでに引いている、または自分のターンではない場合は一切引けない
+        // 🔒 最速の即時ロック：この関数が呼ばれた瞬間にフラグを立てて、2回目以降の実行を完全にシャットアウト
         if (state.phase !== 'playing' || state.hasDrawnThisTurn) return;
         const currentP = state.players[state.turnIdx];
-        if (!currentP || (currentP.id !== state.me.id && !currentP.isAI)) return;
+        if (!currentP || currentP.id !== state.me.id) return;
+
+        state.hasDrawnThisTurn = true; // ← サーバーからの返事を待たずに即座にロック！
 
         app.clearAllTimers();
         const targetP = state.players.find(p => p.id === targetId);
@@ -1487,10 +1489,9 @@
         const drawn = targetP.hand.splice(cIdx, 1)[0];
         currentP.hand.unshift(drawn);
         state.lastDrawnId = drawn.id;
-        state.hasDrawnThisTurn = true; // 🔒 1枚引いた瞬間にロック
         
         app.addLogMessage(`${currentP.name} が ${targetP.name} からカードを引いた`);
-        if (currentP.id === state.me.id) utils.showToast(`カード獲得`);
+        utils.showToast(`カード獲得`);
         
         socket.emit('game_action', { 
           roomCode: state.room.code, 
@@ -1500,8 +1501,10 @@
           turnIdx: state.turnIdx, 
           hasDrawnThisTurn: true 
         });
-
-        if(app.checkClears()) return; 
+        
+        app.renderTable(); // すぐに画面を再描画して「?」ボタンを消去・無効化
+        
+        // （以下続く...） 
         
         const subTimer = document.getElementById('game-sub-timer');
         const banner = document.getElementById('game-announcement-banner');

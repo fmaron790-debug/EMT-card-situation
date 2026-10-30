@@ -58,36 +58,26 @@ io.on('connection', (socket) => {
 
   // 修正：ゲーム内アクション（自分を含むルーム全員に同期を徹底）
   // ゲーム内アクション
+ // ゲーム内アクション
   socket.on('game_action', (data) => {
     const { roomCode, type, players, discardPile, turnIdx, hasDrawnThisTurn } = data;
-    if (rooms[roomCode]) {
-      if (players) rooms[roomCode].players = players;
-      if (discardPile) rooms[roomCode].discardPile = discardPile;
-      if (turnIdx !== undefined) rooms[roomCode].turnIdx = turnIdx;
+    const room = rooms[roomCode];
+    if (room) {
+      // 🆕 ジジ抜きやババ抜きでのドローアクション時の厳格なサーバー側チェック
+      if (type === 'draw') {
+        const currentTurnPlayer = room.players[room.turnIdx];
+        // 送信者が現在のターンプレイヤーでない場合、または不正な複数ドローは拒否
+        if (currentTurnPlayer && currentTurnPlayer.id !== socket.id) {
+          return; // ターン外のプレイヤーからのドロー要求は無視
+        }
+      }
+
+      if (players) room.players = players;
+      if (discardPile) room.discardPile = discardPile;
+      if (turnIdx !== undefined) room.turnIdx = turnIdx;
     }
-    // ルーム全員（自分含む）に最新の状態を確実に同期
     io.to(roomCode).emit('game_action', data);
   });
-  // 管理者によるアクセス権限の即時全体反映
-  socket.on('admin_update_access', (accessData) => {
-    io.emit('update_access', accessData);
-  });
-
-  // 管理者によるカードデータベースの即時全体同期
-  socket.on('admin_update_cards', (dbData) => {
-    io.emit('update_cards', dbData);
-  });
-
-  // ルーム内リアルタイムチャットの送受信
-  socket.on('send_chat', (data) => {
-    const { roomCode, name, message } = data;
-    if (roomCode && rooms[roomCode]) {
-      io.to(roomCode).emit('receive_chat', { name, message });
-    } else {
-      io.emit('receive_chat', { name, message });
-    }
-  });
-
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
     // 参加していたルームから切断された場合の処理（必要に応じてルーム内プレイヤー管理）
