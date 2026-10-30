@@ -459,7 +459,7 @@
 
         <div id="table-players-ring" class="w-full max-w-5xl flex flex-wrap items-center justify-center gap-2 mb-3 px-2"></div>
 
-        <div class="w-full max-w-5xl flex-1 bg-gradient-to-br from-[#5c3a21] via-[#432514] to-[#2a160b] border-4 border-[#1a0d06] rounded-3xl p-6 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] relative min-h-[480px] flex items-center justify-center overflow-y-auto">
+        <div class="w-full max-w-5xl flex-1 bg-gradient-to-br from-[#5c3a21] via-[#432514] to-[#2a160b] border-4 border-[#1a0d06] rounded-3xl p-4 sm:p-6 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] relative min-h-[480px] flex items-center justify-center overflow-y-auto">
           <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
           <div id="memory-cards-grid" class="w-full max-w-5xl grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 p-1 z-10"></div>
         </div>
@@ -529,16 +529,16 @@
       </div>
       <div class="flex gap-2 mb-3 border-b border-slate-800 pb-2">
         <button onclick="app.switchChatTab('log')" id="btn-tab-log" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-cyan-600 text-white transition flex items-center justify-center gap-1.5"><i data-lucide="list-tree" class="w-4 h-4"></i><span>システムログ</span></button>
-        <button onclick="app.switchChatTab('chat')" id="btn-tab-chat" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5"><i data-lucide="message-circle" class="w-4 h-4"></i><span>会話ルーム</span></button>
+        <button onclick="app.switchChatTab('chat')" id="btn-tab-chat" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center gap-1.5"><i data-lucide="message-circle" class="w-4 h-4"></i><span>会話ルーム（全体公開）</span></button>
       </div>
       <div id="tab-content-log" class="flex-1 overflow-y-auto custom-scrollbar mb-3 space-y-2 text-xs pr-1 bg-slate-950 p-3 rounded-2xl border border-slate-800">
         <div class="text-slate-500 italic">システム通信記録待機中...</div>
       </div>
       <div id="tab-content-chat" class="flex-1 overflow-y-auto custom-scrollbar mb-3 space-y-2 text-xs pr-1 bg-slate-950 p-3 rounded-2xl border border-slate-800 hidden">
-        <div class="text-slate-500 italic">会話ルーム接続完了。隊員間メッセージ送信可能。</div>
+        <div class="text-slate-500 italic">全体公開チャット接続完了。全員にメッセージが公開されます。</div>
       </div>
       <div id="chat-input-area" class="flex gap-2 pt-2 border-t border-slate-800 hidden">
-        <input id="game-chat-input" type="text" placeholder="メッセージ送信..." onkeydown="if(event.key==='Enter')app.sendChatMsg()" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+        <input id="game-chat-input" type="text" placeholder="全員にメッセージ送信..." onkeydown="if(event.key==='Enter')app.sendChatMsg()" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
         <button onclick="app.sendChatMsg()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition">送信</button>
       </div>
     </div>
@@ -613,38 +613,38 @@
         </div>
         
         <div class="w-full bg-slate-800/40 border border-slate-700 rounded-2xl p-4">
-          <h4 class="text-sm font-bold text-white mb-3 border-b border-slate-700 pb-2 flex items-center gap-2"><i data-lucide="unlock" class="w-4 h-4"></i>出動権限（アクセス）コントロール</h4>
+          <h4 class="text-sm font-bold text-white mb-3 border-b border-slate-700 pb-2 flex items-center gap-2"><i data-lucide="unlock" class="w-4 h-4"></i>出動権限（アクセス）コントロール（変更時に全端末へ即時同期）</h4>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="flex justify-between items-center p-3 bg-slate-900 rounded-xl border border-slate-800">
               <span class="text-xs font-bold text-rose-300">GAME 01: 致死性不整脈を回避せよ！</span>
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="toggle-game1" class="sr-only peer">
+                <input type="checkbox" id="toggle-game1" onchange="app.saveAdminAccess()" class="sr-only peer">
                 <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
               </label>
             </div>
             <div class="flex justify-between items-center p-3 bg-slate-900 rounded-xl border border-slate-800">
               <span class="text-xs font-bold text-blue-300">GAME 02: 救急神経衰弱バトル</span>
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="toggle-game2" class="sr-only peer">
+                <input type="checkbox" id="toggle-game2" onchange="app.saveAdminAccess()" class="sr-only peer">
                 <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
               </label>
             </div>
             <div class="flex justify-between items-center p-3 bg-slate-900 rounded-xl border border-slate-800">
               <span class="text-xs font-bold text-amber-300">GAME 03: 救急 隠れたものを当てろ</span>
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="toggle-game3" class="sr-only peer">
+                <input type="checkbox" id="toggle-game3" onchange="app.saveAdminAccess()" class="sr-only peer">
                 <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
               </label>
             </div>
             <div class="flex justify-between items-center p-3 bg-slate-900 rounded-xl border border-slate-800">
               <span class="text-xs font-bold text-teal-300">GAME 04: 99ジャック</span>
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="toggle-game4" class="sr-only peer">
+                <input type="checkbox" id="toggle-game4" onchange="app.saveAdminAccess()" class="sr-only peer">
                 <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
               </label>
             </div>
           </div>
-          <div class="mt-3 text-right"><button onclick="app.saveAdminAccess()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition">設定を反映</button></div>
+          <div class="mt-3 text-right"><button onclick="app.saveAdminAccess()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition">設定を保存・即時同期</button></div>
         </div>
         
         <div class="w-full flex-1 flex flex-col min-h-[300px] mt-2">
@@ -664,7 +664,7 @@
           <div class="flex-1 bg-slate-900 rounded-xl border border-slate-700 overflow-y-auto custom-scrollbar relative">
             <table class="w-full text-left text-xs text-slate-300">
               <thead class="bg-slate-800 text-slate-400 font-mono sticky top-0 z-10 shadow-md">
-                <tr><th class="p-2 w-12 text-center">ID</th><th class="p-2 w-12 text-center">Gr.</th><th class="p-2 w-16 text-center">マーク</th><th class="p-2 w-32">タイトル</th><th class="p-2">問題文</th><th class="p-2 w-24 text-center">操作</th></tr>
+                <tr><th class="p-2 w-12 text-center">ID</th><th class="p-2 w-16 text-center">Gr.</th><th class="p-2 w-20 text-center">マーク</th><th class="p-2 w-32">タイトル</th><th class="p-2">問題文</th><th class="p-2 w-24 text-center">操作</th></tr>
               </thead>
               <tbody id="admin-card-table-body" class="divide-y divide-slate-800/80"></tbody>
             </table>
@@ -720,34 +720,34 @@
       }
     };
 
-    socket.on('connect', () => { state.me.id = socket.id; });
+    socket.on('connect', () => {
+      state.me.id = socket.id;
+      socket.emit('request_admin_state');
+    });
     
+    // 🆕 他の管理室から変更されたアクセス権限を即座に全端末のゲーム選択＆管理室トグルへ反映
     socket.on('update_access', (data) => {
       if(data) {
         currentGameAccess = data;
         saveAccess(currentGameAccess);
         app.renderPortal();
-        const adminModal = document.getElementById('modal-admin');
-        if (adminModal && !adminModal.classList.contains('hidden')) {
-          const g1 = document.getElementById('toggle-game1'); if(g1) g1.checked = currentGameAccess.game1;
-          const g2 = document.getElementById('toggle-game2'); if(g2) g2.checked = currentGameAccess.game2;
-          const g3 = document.getElementById('toggle-game3'); if(g3) g3.checked = currentGameAccess.game3;
-          const g4 = document.getElementById('toggle-game4'); if(g4) g4.checked = currentGameAccess.game4;
-        }
-        utils.showToast('<i data-lucide="shield-alert" class="w-4 h-4 inline mr-1 text-cyan-400"></i>管理システムにより出動権限が更新されました');
+        const g1 = document.getElementById('toggle-game1'); if(g1) g1.checked = !!currentGameAccess.game1;
+        const g2 = document.getElementById('toggle-game2'); if(g2) g2.checked = !!currentGameAccess.game2;
+        const g3 = document.getElementById('toggle-game3'); if(g3) g3.checked = !!currentGameAccess.game3;
+        const g4 = document.getElementById('toggle-game4'); if(g4) g4.checked = !!currentGameAccess.game4;
         if(window.lucide) lucide.createIcons();
       }
     });
 
+    // 🆕 他の管理室から変更されたカードDBを即座に全端末のDB＆管理室テーブルへ反映
     socket.on('update_cards', (dbData) => {
-      if(dbData) {
+      if(Array.isArray(dbData)) {
         currentCardDB = dbData;
         saveDB(currentCardDB);
         const adminModal = document.getElementById('modal-admin');
         if (adminModal && !adminModal.classList.contains('hidden')) {
           app.renderAdminCards();
         }
-        utils.showToast('<i data-lucide="database" class="w-4 h-4 inline mr-1 text-cyan-400"></i>問題カードDBが同期されました');
         if(window.lucide) lucide.createIcons();
       }
     });
@@ -859,9 +859,11 @@
         const input = document.getElementById('game-chat-input');
         const msg = input ? input.value.trim() : '';
         if(!msg) return;
+        const lobbyInput = document.getElementById('input-player-name');
+        const senderName = state.me.name || (lobbyInput ? lobbyInput.value.trim() : '') || '救急隊員';
         socket.emit('send_chat', {
-          roomCode: state.room.code || 'GENERAL',
-          name: state.me.name,
+          roomCode: 'GLOBAL',
+          name: senderName,
           message: msg
         });
         input.value = '';
@@ -991,6 +993,7 @@
       },
 
       createRoom: () => {
+        app.clearAllTimers(); state.phase = 'waiting';
         app.readConfig();
         state.room = { code: Math.floor(100000 + Math.random() * 900000).toString(), isHost: true, isSolo: false };
         const codeDisplay = document.getElementById('room-code-display');
@@ -1173,6 +1176,7 @@
         }, 1000);
       },
 
+      // 🆕 修正：小さなカードでもめくられた位置と文字内容がくっきり読めるデザインに改善
       renderMemoryGameTable: () => {
         const grid = document.getElementById('memory-cards-grid');
         const turnInfo = document.getElementById('memory-turn-info');
@@ -1209,7 +1213,7 @@
         grid.innerHTML = '';
         state.memoryState.cards.forEach((card, idx) => {
           if (card.isMatched) {
-            grid.innerHTML += `<div class="aspect-[3/4] w-full rounded-2xl border border-dashed border-slate-700/20 opacity-10 pointer-events-none"></div>`;
+            grid.innerHTML += `<div class="aspect-[3/4] w-full rounded-xl border border-dashed border-slate-700/20 opacity-10 pointer-events-none"></div>`;
             return;
           }
           const isFlipped = card.isFlipped;
@@ -1229,23 +1233,22 @@
             </div>
           `;
 
+          // 小さいカードでも文字が最大限大きく見やすくなるようレイアウトを最適化
           const showDisease = state.config.showMemoryDisease ?? true;
           const cardFrontHtml = `
             <div class="w-full h-full flex flex-col justify-between overflow-hidden">
-              <div class="flex items-center justify-between w-full leading-none mb-0.5">
-                <span class="${SUIT_COLORS[card.suit]||''} text-xs">${SUIT_ICONS[card.suit]||'🧠'}</span>
-                <span class="font-mono bg-cyan-100 text-cyan-900 px-1 py-0.5 rounded text-[9px] font-black">Gr.${card.num}</span>
+              <div class="flex items-center justify-between w-full leading-none px-0.5 mb-0.5">
+                <span class="font-mono bg-amber-400 text-slate-950 px-1 py-0.5 rounded text-[9px] sm:text-[10px] font-black leading-none shadow-sm">Gr.${card.num}</span>
+                ${showDisease ? `<span class="text-[9px] sm:text-[10px] font-extrabold text-indigo-900 truncate ml-1">${utils.escapeHtml(card.title)}</span>` : ''}
               </div>
-              <div class="w-full flex-1 flex flex-col items-center justify-center text-center px-1 py-0.5 bg-white rounded-lg border border-slate-300 shadow-inner overflow-hidden my-0.5">
-                ${showDisease ? `<div class="text-[10px] font-black text-slate-900 leading-tight mb-0.5 line-clamp-1 w-full break-all">${utils.escapeHtml(card.title)}</div>` : ''}
-                <div class="text-[9px] font-bold text-slate-800 leading-tight line-clamp-4 w-full break-words">${utils.escapeHtml(card.desc)}</div>
+              <div class="w-full flex-1 flex flex-col items-center justify-center text-center p-1 bg-white rounded-lg border border-slate-300 shadow-inner overflow-y-auto custom-scrollbar">
+                <div class="text-[10px] sm:text-[11px] font-extrabold text-slate-900 leading-snug break-words w-full">${utils.escapeHtml(card.desc)}</div>
               </div>
-              <div class="text-[8px] text-slate-500 text-right font-mono leading-none w-full">ID:${card.id}</div>
             </div>
           `;
 
           grid.innerHTML += `
-            <div onclick="app.handleMemoryCardClick(${idx})" class="aspect-[3/4] w-full rounded-2xl border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between p-1.5 shadow-[0_10px_20px_rgba(0,0,0,0.6)] select-none relative overflow-hidden ${isFlipped ? 'bg-slate-100 text-slate-900 border-indigo-500 z-20 shadow-[0_0_20px_rgba(99,102,241,0.5)]' : `bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 ${guideClass} hover:scale-105 z-10 text-slate-100'}`}>
+            <div onclick="app.handleMemoryCardClick(${idx})" class="aspect-[3/4] w-full rounded-xl border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between p-1 shadow-[0_10px_20px_rgba(0,0,0,0.6)] select-none relative overflow-hidden ${isFlipped ? 'bg-amber-50 text-slate-900 border-amber-400 ring-4 ring-amber-400/60 z-20 scale-[1.03] shadow-[0_0_25px_rgba(251,191,36,0.7)]' : `bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 ${guideClass} hover:scale-105 z-10 text-slate-100`}">
               ${isFlipped ? cardFrontHtml : ecgCardBackHtml}
             </div>
           `;
@@ -1255,7 +1258,7 @@
 
         if (currentP && currentP.isAI && (state.room.isHost || state.room.isSolo) && !state.memoryState.isProcessingTurn) {
           state.memoryState.isProcessingTurn = true;
-          setTimeout(app.processAiMemoryTurn, 1800);
+          setTimeout(app.processAiMemoryTurn, 1400);
         }
       },
 
@@ -1312,16 +1315,26 @@
         });
       },
 
+      // 🆕 修正：カードをめくった本人（人間プレイヤー）にのみ拡大ポップアップを表示し、他の人は盤面上で確認する
       showMemoryPopupCard: (card, actorP, callback) => {
+        const isActorMe = (actorP && !actorP.isAI && actorP.id === state.me.id);
+        if (!isActorMe) {
+          if(state.timers.popupTimer) clearTimeout(state.timers.popupTimer);
+          state.timers.popupTimer = setTimeout(() => {
+            if(callback) callback();
+          }, 1500);
+          return;
+        }
+
         const modal = document.getElementById('modal-memory-popup');
         const header = document.getElementById('memory-popup-header');
         const content = document.getElementById('memory-popup-content');
 
-        if(header) header.textContent = `${actorP ? actorP.name : 'プレイヤー'} がめくった問題カード`;
+        if(header) header.textContent = `あなたがめくった問題カード`;
         const showDisease = state.config.showMemoryDisease ?? true;
         if(content) {
           content.innerHTML = `
-            <div class="w-44 aspect-[3/4] bg-slate-100 text-slate-900 border-4 border-indigo-400 rounded-2xl p-3 flex flex-col justify-between shadow-2xl text-left">
+            <div class="w-48 aspect-[3/4] bg-slate-100 text-slate-900 border-4 border-indigo-400 rounded-2xl p-3 flex flex-col justify-between shadow-2xl text-left">
               <div class="flex items-center justify-between text-xs font-bold"><span class="${SUIT_COLORS[card.suit]||''} text-base">${SUIT_ICONS[card.suit]||'🧠'}</span><span class="font-mono bg-cyan-200 text-cyan-900 px-1.5 py-0.5 rounded text-[10px] font-black">Gr.${card.num}</span></div>
               <div class="my-auto py-2 px-2 bg-white rounded-xl border border-slate-300 shadow-inner text-center">
                 ${showDisease ? `<div class="text-xs font-black text-slate-900 mb-1">${utils.escapeHtml(card.title)}</div>` : ''}
@@ -1337,7 +1350,7 @@
         state.timers.popupTimer = setTimeout(() => {
           modal?.classList.add('hidden');
           if(callback) callback();
-        }, 2500);
+        }, 2000);
       },
 
       processMemoryPairResult: (actorP) => {
@@ -1360,10 +1373,10 @@
               state.memoryState.playerBoards[currentP.id][sIdx] = { filled: true, color: currentP.color || '#f43f5e', cards: [c1, c2] };
             }
           }
-          utils.showToast(`🎯 問題ペア成立！ボードの疾患枠にはめ込めます！`);
+          utils.showToast(`🎯 問題ペア成立 (Gr.${c1.num})！`);
           app.addLogMessage(`${currentP.name} が問題ペア (Gr.${c1.num}) を獲得しました。`);
         } else {
-          utils.showToast('不一致です');
+          if(currentP.id === state.me.id) utils.showToast('不一致です');
         }
 
         app.showMemoryMatchResultBanner(c1, c2, isMatch, currentP, () => {
@@ -1387,13 +1400,20 @@
         });
       },
 
+      // 🆕 修正：ペア判定のでかいポップアップも引いた本人のみに表示し、他プレイヤーには出さない
       showMemoryMatchResultBanner: (c1, c2, isMatch, actorP, onComplete) => {
+        const isActorMe = (actorP && !actorP.isAI && actorP.id === state.me.id);
+        if (!isActorMe) {
+          if(state.timers.matchTimer) clearTimeout(state.timers.matchTimer);
+          state.timers.matchTimer = setTimeout(onComplete, 1600);
+          return;
+        }
+
         const modal = document.getElementById('modal-memory-popup');
         const header = document.getElementById('memory-popup-header');
         const content = document.getElementById('memory-popup-content');
 
         if(header) header.textContent = isMatch ? '✨ 問題ペア成立！（2枚1組獲得）' : '❌ 不一致...';
-        const isActorMe = (actorP && actorP.id === state.me.id && !actorP.isAI);
         const showDisease = state.config.showMemoryDisease ?? true;
 
         if(content) {
@@ -1409,7 +1429,7 @@
                   <div class="my-auto py-1.5 px-1 bg-white rounded-lg text-center">${showDisease ? `<div class="text-[10px] font-black text-slate-900 mb-0.5">${utils.escapeHtml(c2.title)}</div>` : ''}<div class="text-[10px] font-bold text-slate-800 leading-tight">${utils.escapeHtml(c2.desc)}</div></div>
                 </div>
               </div>
-              ${isActorMe ? '<button id="btn-skip-memory-result" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md">確認完了 (ボードへ進む / スキップ)</button>' : '<div class="text-xs text-slate-400 italic">判定確認中...</div>'}
+              <button id="btn-skip-memory-result" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md">確認完了 (次へ進む)</button>
             </div>
           `;
         }
@@ -1428,7 +1448,7 @@
         if(skipBtn) skipBtn.onclick = finish;
 
         if(state.timers.matchTimer) clearTimeout(state.timers.matchTimer);
-        state.timers.matchTimer = setTimeout(finish, 6000);
+        state.timers.matchTimer = setTimeout(finish, 4500);
       },
 
       advanceMemoryTurnCounterclockwise: () => {
@@ -1466,6 +1486,18 @@
         state.memoryState.selectedCardIndices.push(idx1);
         app.renderMemoryGameTable();
 
+        socket.emit('game_action', {
+          roomCode: state.room.code,
+          type: 'memory_sync',
+          mode: 'memory',
+          turnIdx: state.turnIdx,
+          memoryState: {
+            cards: state.memoryState.cards,
+            boardSlots: state.memoryState.boardSlots,
+            playerBoards: state.memoryState.playerBoards
+          }
+        });
+
         app.showMemoryPopupCard(card1, currentP, () => {
           const remainingUnflipped = state.memoryState.cards.map((c, idx) => (!c.isFlipped && !c.isMatched) ? idx : null).filter(x => x !== null);
           if(remainingUnflipped.length === 0) {
@@ -1477,6 +1509,18 @@
           card2.isFlipped = true;
           state.memoryState.selectedCardIndices.push(idx2);
           app.renderMemoryGameTable();
+
+          socket.emit('game_action', {
+            roomCode: state.room.code,
+            type: 'memory_sync',
+            mode: 'memory',
+            turnIdx: state.turnIdx,
+            memoryState: {
+              cards: state.memoryState.cards,
+              boardSlots: state.memoryState.boardSlots,
+              playerBoards: state.memoryState.playerBoards
+            }
+          });
 
           app.showMemoryPopupCard(card2, currentP, () => {
             app.processMemoryPairResult(currentP);
@@ -2311,8 +2355,10 @@
       },
       rematch: () => state.room.isSolo ? app.startSoloAI() : app.returnToPortal(),
 
+      // 🆕 管理室を開くたびにサーバーから最新の状態を取得して全端末で完全一致させる
       adminClicks: 0, adminTimer: null,
       openAdmin: () => { 
+        socket.emit('request_admin_state');
         document.getElementById('admin-auth-box')?.classList.remove('hidden'); 
         document.getElementById('admin-content-box')?.classList.add('hidden'); 
         const pinInput = document.getElementById('admin-pin-input');
@@ -2323,12 +2369,13 @@
       checkAdminPin: () => {
         const pinInput = document.getElementById('admin-pin-input');
         if(pinInput && pinInput.value === '7248') {
+          socket.emit('request_admin_state');
           document.getElementById('admin-auth-box')?.classList.add('hidden'); 
           document.getElementById('admin-content-box')?.classList.remove('hidden');
-          const g1 = document.getElementById('toggle-game1'); if(g1) g1.checked=currentGameAccess.game1;
-          const g2 = document.getElementById('toggle-game2'); if(g2) g2.checked=currentGameAccess.game2;
-          const g3 = document.getElementById('toggle-game3'); if(g3) g3.checked=currentGameAccess.game3;
-          const g4 = document.getElementById('toggle-game4'); if(g4) g4.checked=currentGameAccess.game4;
+          const g1 = document.getElementById('toggle-game1'); if(g1) g1.checked = !!currentGameAccess.game1;
+          const g2 = document.getElementById('toggle-game2'); if(g2) g2.checked = !!currentGameAccess.game2;
+          const g3 = document.getElementById('toggle-game3'); if(g3) g3.checked = !!currentGameAccess.game3;
+          const g4 = document.getElementById('toggle-game4'); if(g4) g4.checked = !!currentGameAccess.game4;
           app.renderAdminCards(); utils.showToast('<i data-lucide="unlock" class="w-4 h-4 inline mr-1"></i>認証成功'); if(window.lucide) lucide.createIcons();
         } else {
           utils.showToast('<i data-lucide="alert-circle" class="w-4 h-4 inline mr-1 text-rose-400"></i>認証エラー'); 
@@ -2343,7 +2390,7 @@
         saveAccess(currentGameAccess);
         socket.emit('admin_update_access', currentGameAccess);
         app.renderPortal(); 
-        utils.showToast('<i data-lucide="save" class="w-4 h-4 inline mr-1"></i>設定を全プレイヤーに即時反映しました'); 
+        utils.showToast('<i data-lucide="save" class="w-4 h-4 inline mr-1"></i>設定を全端末のゲーム＆管理室に即時反映しました'); 
         if(window.lucide) lucide.createIcons();
       },
       renderAdminCards: () => {
@@ -2360,8 +2407,17 @@
         d.forEach(c => {
           tb.innerHTML += `<tr class="hover:bg-slate-800/50 transition border-b border-slate-800/50">
             <td class="p-2 font-mono font-bold text-center text-slate-400">${c.id}</td>
-            <td class="p-2 font-mono text-center">${c.num===0?'⚡':c.num}</td>
-            <td class="p-2 font-bold text-center ${SUIT_COLORS[c.suit]||''}">${SUIT_ICONS[c.suit]||c.suit}</td>
+            <td class="p-2 font-mono text-center"><span id="nv-${c.id}">${c.num===0?'⚡':c.num}</span><input id="ne-${c.id}" type="number" min="0" max="99" class="hidden w-12 bg-slate-950 border border-slate-700 p-1 rounded text-xs text-center text-white focus:border-cyan-500 focus:outline-none" value="${c.num}"></td>
+            <td class="p-2 font-bold text-center ${SUIT_COLORS[c.suit]||''}"><span id="sv-${c.id}">${SUIT_ICONS[c.suit]||c.suit}</span>
+              <select id="se-${c.id}" class="hidden bg-slate-950 border border-slate-700 p-1 rounded text-xs text-white focus:border-cyan-500 focus:outline-none">
+                <option value="C" ${c.suit==='C'?'selected':''}>♣(C)</option>
+                <option value="S" ${c.suit==='S'?'selected':''}>♠(S)</option>
+                <option value="H" ${c.suit==='H'?'selected':''}>♥(H)</option>
+                <option value="D" ${c.suit==='D'?'selected':''}>♦(D)</option>
+                <option value="M" ${c.suit==='M'?'selected':''}>🧠(M)</option>
+                <option value="JOKER" ${c.suit==='JOKER'?'selected':''}>⚡(JOKER)</option>
+              </select>
+            </td>
             <td class="p-2"><span id="tv-${c.id}">${utils.escapeHtml(c.title)}</span><input id="te-${c.id}" class="hidden w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-white focus:border-cyan-500 focus:outline-none" value="${utils.escapeHtml(c.title)}"></td>
             <td class="p-2"><span id="dv-${c.id}">${utils.escapeHtml(c.desc)}</span><textarea id="de-${c.id}" class="hidden w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-white h-12 focus:border-cyan-500 focus:outline-none">${utils.escapeHtml(c.desc)}</textarea></td>
             <td class="p-2 text-center flex items-center justify-center gap-1">
@@ -2373,6 +2429,10 @@
         });
       },
       editCard: (id) => { 
+        document.getElementById(`nv-${id}`)?.classList.add('hidden'); 
+        document.getElementById(`ne-${id}`)?.classList.remove('hidden'); 
+        document.getElementById(`sv-${id}`)?.classList.add('hidden'); 
+        document.getElementById(`se-${id}`)?.classList.remove('hidden'); 
         document.getElementById(`tv-${id}`)?.classList.add('hidden'); 
         document.getElementById(`te-${id}`)?.classList.remove('hidden'); 
         document.getElementById(`dv-${id}`)?.classList.add('hidden'); 
@@ -2381,21 +2441,33 @@
         document.getElementById(`bs-${id}`)?.classList.remove('hidden'); 
       },
       saveCard: (id) => {
-        const t = document.getElementById(`te-${id}`)?.value || '', d = document.getElementById(`de-${id}`)?.value || '';
-        const c = currentCardDB.find(x=>x.id===id); if(c){ c.title=t; c.desc=d; } 
+        const nVal = parseInt(document.getElementById(`ne-${id}`)?.value ?? 1, 10);
+        const sVal = document.getElementById(`se-${id}`)?.value || 'C';
+        const t = document.getElementById(`te-${id}`)?.value || '';
+        const d = document.getElementById(`de-${id}`)?.value || '';
+        const c = currentCardDB.find(x=>x.id===id);
+        if(c){
+          c.num = isNaN(nVal) ? c.num : nVal;
+          c.suit = sVal;
+          c.title = t;
+          c.desc = d;
+        } 
         saveDB(currentCardDB); 
         socket.emit('admin_update_cards', currentCardDB);
         app.renderAdminCards(); 
-        utils.showToast('<i data-lucide="check" class="w-4 h-4 inline mr-1"></i>保存しました'); if(window.lucide) lucide.createIcons();
+        utils.showToast('<i data-lucide="check" class="w-4 h-4 inline mr-1"></i>保存し全端末に同期しました'); if(window.lucide) lucide.createIcons();
       },
       addNewCardPrompt: () => {
+        const selector = document.getElementById('admin-deck-selector');
+        const f = selector ? selector.value : 'all';
+        const defaultSuit = (f === 'babanuki' || f === 'jinuki') ? 'C' : 'M';
         const newId = currentCardDB.length > 0 ? Math.max(...currentCardDB.map(c => c.id)) + 1 : 1;
-        const newCard = { id: newId, suit: "M", num: 1, title: "新規疾患項目", desc: "ここに問題文を入力してください" };
+        const newCard = { id: newId, suit: defaultSuit, num: 1, title: "新規項目", desc: "ここに問題文を入力してください" };
         currentCardDB.push(newCard);
         saveDB(currentCardDB);
         socket.emit('admin_update_cards', currentCardDB);
         app.renderAdminCards();
-        utils.showToast('新規カードを追加しました');
+        utils.showToast('新規カードを追加し全端末に同期しました');
       },
       deleteCard: (id) => {
         if(currentCardDB.length <= 10) return utils.showToast('これ以上削除できません');
@@ -2403,14 +2475,14 @@
         saveDB(currentCardDB);
         socket.emit('admin_update_cards', currentCardDB);
         app.renderAdminCards();
-        utils.showToast('カードを削除しました');
+        utils.showToast('カードを削除し全端末に同期しました');
       },
       resetDB: () => { 
         currentCardDB = JSON.parse(JSON.stringify(DEFAULT_EMS_CARDS)); 
         saveDB(currentCardDB); 
         socket.emit('admin_update_cards', currentCardDB);
         app.renderAdminCards(); 
-        utils.showToast('<i data-lucide="rotate-ccw" class="w-4 h-4 inline mr-1"></i>初期化完了'); if(window.lucide) lucide.createIcons(); 
+        utils.showToast('<i data-lucide="rotate-ccw" class="w-4 h-4 inline mr-1"></i>初期化し全端末に同期しました'); if(window.lucide) lucide.createIcons(); 
       }
     };
 

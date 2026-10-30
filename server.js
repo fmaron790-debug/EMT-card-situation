@@ -15,7 +15,11 @@ app.get('/', (req, res) => {
 
 const rooms = {};
 
-// 🆕 プレイヤーごとに割り当てるカラーパレット（視認性の高い10色）
+// 🆕 管理室（CMS）の最新設定をサーバー側で一元保持（どの端末から入っても同じ内容に同期）
+let globalAccessState = { game1: true, game2: true, game3: true, game4: false };
+let globalCardDB = null;
+
+// プレイヤーごとに割り当てるカラーパレット（視認性の高い10色）
 const PLAYER_COLORS = [
   '#38bdf8', // スカイブルー
   '#f43f5e', // ローズレッド
@@ -31,6 +35,20 @@ const PLAYER_COLORS = [
 
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
+
+  // 🆕 接続した端末へ現在の管理室設定・カードDBを即座に同期
+  socket.emit('update_access', globalAccessState);
+  if (globalCardDB) {
+    socket.emit('update_cards', globalCardDB);
+  }
+
+  // 🆕 管理室を開いた際などの最新状態リクエストに応答
+  socket.on('request_admin_state', () => {
+    socket.emit('update_access', globalAccessState);
+    if (globalCardDB) {
+      socket.emit('update_cards', globalCardDB);
+    }
+  });
 
   socket.on('join_room', (data) => {
     const { roomCode, playerName, config } = data;
@@ -48,7 +66,6 @@ io.on('connection', (socket) => {
 
     let player = rooms[roomCode].players.find(p => p.id === socket.id);
     if (!player) {
-      // 🆕 ルーム内でまだ使われていない色からランダムで1色選ぶ
       const usedColors = rooms[roomCode].players.map(p => p.color);
       const availableColors = PLAYER_COLORS.filter(c => !usedColors.includes(c));
       const pool = availableColors.length > 0 ? availableColors : PLAYER_COLORS;
@@ -100,21 +117,26 @@ io.on('connection', (socket) => {
     io.to(roomCode).emit('game_action', data);
   });
 
+  // 🆕 管理室での出動権限変更をサーバーに保存し、全端末へ即時配信
   socket.on('admin_update_access', (accessData) => {
-    io.emit('update_access', accessData);
-  });
-
-  socket.on('admin_update_cards', (dbData) => {
-    io.emit('update_cards', dbData);
-  });
-
-  socket.on('send_chat', (data) => {
-    const { roomCode, name, message } = data;
-    if (roomCode && rooms[roomCode]) {
-      io.to(roomCode).emit('receive_chat', { name, message });
-    } else {
-      io.emit('receive_chat', { name, message });
+    if (accessData && typeof accessData === 'object') {
+      globalAccessState = { ...globalAccessState, ...accessData };
+      io.emit('update_access', globalAccessState);
     }
+  });
+
+  // 🆕 管理室でのカードDB変更をサーバーに保存し、全端末へ即時配信
+  socket.on('admin_update_cards', (dbData) => {
+    if (Array.isArray(dbData)) {
+      globalCardDB = dbData;
+      io.emit('update_cards', globalCardDB);
+    }
+  });
+
+  // 🆕 チャットを全プレイヤー公開に変更（誰が打っても全員が見られる）
+  socket.on('send_chat', (data) => {
+    const { name, message } = data;
+    io.emit('receive_chat', { name, message });
   });
 
   socket.on('disconnect', () => {
