@@ -676,7 +676,7 @@
 
     const state = {
       mode: 'babanuki',
-      phase: 'idle', // 🔒 開始前・確認中は絶対にカードを引けない状態
+      phase: 'idle',
       room: { code: '', isHost: false, isSolo: false },
       config: { maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true },
       me: { id: 'p_' + Math.random().toString(36).substring(2, 9), name: '救急隊員' },
@@ -744,7 +744,7 @@
         chatContent.scrollTop = chatContent.scrollHeight;
       }
       if(badgeDot && document.getElementById('modal-chat')?.classList.contains('hidden')) {
-        badgeDot.classList.add('hidden');
+        badgeDot.classList.remove('hidden');
       }
     });
 
@@ -755,24 +755,45 @@
       app.updateRoomUI();
     });
 
+    // 🆕 修正：game_action 受信時の処理（draw時にprocessTurnを呼んでフラグをリセットしてしまうバグを完全解消）
     socket.on('game_action', (actionData) => {
       if(actionData.players) state.players = actionData.players;
       if(actionData.discardPile) state.discardPile = actionData.discardPile;
       if(actionData.turnIdx !== undefined) state.turnIdx = actionData.turnIdx;
       if(actionData.hasDrawnThisTurn !== undefined) state.hasDrawnThisTurn = actionData.hasDrawnThisTurn;
+      if(actionData.hiddenCard !== undefined) state.hiddenCard = actionData.hiddenCard;
+      if(actionData.ranks !== undefined) state.ranks = actionData.ranks;
       
       if(actionData.type === 'start') {
         state.phase = 'initial_discard';
+        state.hasDrawnThisTurn = false;
+        state.lastDrawnId = null;
+        state.selectedMyCards = [];
         app.showScreen('view-game');
         document.getElementById('btn-initial-ready')?.classList.remove('hidden');
         document.getElementById('btn-end-turn')?.classList.add('hidden');
-      }
-      if(actionData.type === 'ready') {
+        const banner = document.getElementById('game-announcement-banner');
+        if(banner) banner.textContent = '初期手札のペアを破棄し、「手札確認完了」を押してください';
+        app.renderTable();
+      } else if(actionData.type === 'player_ready') {
+        app.renderTable();
+      } else if(actionData.type === 'ready') {
+        // 全員の手札確認が完了し、正式にゲーム開始
         state.phase = 'playing';
-      }
-      app.renderTable();
-      if(state.phase === 'playing') {
+        state.hasDrawnThisTurn = false;
+        document.getElementById('btn-initial-ready')?.classList.add('hidden');
         app.processTurn();
+      } else if(actionData.type === 'next_turn') {
+        // 次のターンへ移行したときだけ processTurn を呼ぶ
+        state.phase = 'playing';
+        state.hasDrawnThisTurn = false;
+        app.processTurn();
+      } else if(actionData.type === 'draw' || actionData.type === 'discard') {
+        // カードを引いた時やペアを破棄した時は、フラグをリセットせずテーブル再描画とクリア判定のみ行う
+        app.renderTable();
+        app.checkClears();
+      } else {
+        app.renderTable();
       }
     });
 
@@ -917,7 +938,7 @@
         state.room = { code: Math.floor(100000 + Math.random() * 900000).toString(), isHost: true, isSolo: false };
         const codeDisplay = document.getElementById('room-code-display');
         if(codeDisplay) codeDisplay.textContent = state.room.code;
-        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, rank: 0, team: 1, color: '#38bdf8' }];
+        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: '#38bdf8' }];
         socket.emit('join_room', { roomCode: state.room.code, playerName: state.me.name, config: state.config });
         document.getElementById('btn-start-game')?.classList.remove('hidden'); 
         document.getElementById('host-ai-controls')?.classList.remove('hidden');
@@ -927,7 +948,7 @@
       startSoloAI: () => {
         app.readConfig(); state.room = { code: 'SOLO-AI', isHost: true, isSolo: true };
         state.config.autoFillAI = true; 
-        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, rank: 0, team: 1, color: '#38bdf8' }];
+        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: '#38bdf8' }];
         app.startGame(); 
       },
 
@@ -958,7 +979,7 @@
         if(state.players.length >= state.config.maxPlayers) return utils.showToast('定員です');
         const bIdx = state.players.filter(p=>p.isAI).length;
         const colors = ['#38bdf8', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
-        state.players.push({ id: `ai_${Date.now()}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, rank: 0, team: (state.players.length % 3) + 1, color: colors[state.players.length % colors.length] });
+        state.players.push({ id: `ai_${Date.now()}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: colors[state.players.length % colors.length] });
         app.updateRoomUI(); utils.showToast('AI隊員を追加しました');
       },
 
@@ -973,7 +994,7 @@
           const colors = ['#38bdf8', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
           while(state.players.length < state.config.maxPlayers) {
             const bIdx = state.players.filter(p=>p.isAI).length;
-            state.players.push({ id: `ai_${Date.now()}_${bIdx}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, rank: 0, team: (state.players.length % 3) + 1, color: colors[state.players.length % colors.length] });
+            state.players.push({ id: `ai_${Date.now()}_${bIdx}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: colors[state.players.length % colors.length] });
           }
         }
         if(state.players.length < 2) return utils.showToast('最低2名必要です');
@@ -1384,8 +1405,22 @@
       },
 
       startStandardCardGameSession: () => {
-        state.phase = 'idle'; state.discardPile = []; state.ranks = []; state.hiddenCard = null; state.selectedMyCards = []; state.lastDrawnId = null; state.hasDrawnThisTurn = false;
+        // 🆕 修正：開始時は initial_discard フェーズにし、手札のペア破棄ができるようにする（他人のカードは引けない）
+        state.phase = 'initial_discard';
+        state.discardPile = [];
+        state.ranks = [];
+        state.hiddenCard = null;
+        state.selectedMyCards = [];
+        state.lastDrawnId = null;
+        state.hasDrawnThisTurn = false;
         
+        state.players.forEach(p => {
+          p.hand = [];
+          p.isCleared = false;
+          p.rank = 0;
+          p.isReady = p.isAI ? true : false;
+        });
+
         let deck = state.mode === 'babanuki' ? currentCardDB.filter(c => c.id !== 54 && c.suit !== 'M') : currentCardDB.filter(c => c.suit !== 'M');
         deck.sort(() => Math.random() - 0.5);
         if(state.mode === 'jinuki') state.hiddenCard = deck.pop();
@@ -1395,7 +1430,16 @@
 
         state.players.forEach(p => { if(p.isAI) app.autoDiscard(p); });
         
-        socket.emit('game_action', { roomCode: state.room.code, type: 'start', players: state.players, discardPile: state.discardPile, turnIdx: state.turnIdx, hasDrawnThisTurn: false });
+        socket.emit('game_action', {
+          roomCode: state.room.code,
+          type: 'start',
+          players: state.players,
+          discardPile: state.discardPile,
+          turnIdx: state.turnIdx,
+          hasDrawnThisTurn: false,
+          hiddenCard: state.hiddenCard,
+          ranks: state.ranks
+        });
 
         app.showScreen('view-game');
         document.getElementById('btn-initial-ready')?.classList.remove('hidden');
@@ -1404,32 +1448,55 @@
         app.renderTable();
       },
 
+      // 🆕 修正：全員が「手札確認完了」を押すまで待機し、全員完了したら一斉にスタートする
       humanReady: () => {
         document.getElementById('btn-initial-ready')?.classList.add('hidden');
+        const myP = state.players.find(p => p.id === state.me.id);
+        if (myP) myP.isReady = true;
+
         utils.showToast('<i data-lucide="check-circle" class="w-4 h-4 inline mr-1"></i>手札確認完了！');
         if (window.lucide) lucide.createIcons();
-        
-        state.phase = 'playing'; // 🔓 確認完了後に初めてプレイ開始
-        
-        const activePlayers = state.players.filter(p => !p.isCleared);
-        if(activePlayers.length > 0) {
+
+        const allReady = state.players.every(p => p.isAI || p.isReady);
+
+        if (allReady) {
+          state.phase = 'playing';
+          state.hasDrawnThisTurn = false;
+          const activePlayers = state.players.filter(p => !p.isCleared && p.hand.length > 0);
+          if(activePlayers.length > 0) {
             const randomP = activePlayers[Math.floor(Math.random() * activePlayers.length)];
             state.turnIdx = state.players.findIndex(p => p.id === randomP.id);
-        } else {
+          } else {
             state.turnIdx = 0;
-        }
+          }
 
-        socket.emit('game_action', {
-          roomCode: state.room.code,
-          type: 'ready',
-          players: state.players,
-          discardPile: state.discardPile,
-          turnIdx: state.turnIdx,
-          hasDrawnThisTurn: false
-        });
-        
-        app.renderTable();
-        setTimeout(app.processTurn, 1500);
+          socket.emit('game_action', {
+            roomCode: state.room.code,
+            type: 'ready',
+            players: state.players,
+            discardPile: state.discardPile,
+            turnIdx: state.turnIdx,
+            hasDrawnThisTurn: false,
+            ranks: state.ranks
+          });
+
+          if (state.room.isSolo) {
+            app.processTurn();
+          }
+        } else {
+          const banner = document.getElementById('game-announcement-banner');
+          if(banner) banner.textContent = '他のプレイヤーの手札確認完了を待っています...';
+          socket.emit('game_action', {
+            roomCode: state.room.code,
+            type: 'player_ready',
+            players: state.players,
+            discardPile: state.discardPile,
+            turnIdx: state.turnIdx,
+            hasDrawnThisTurn: false,
+            ranks: state.ranks
+          });
+          app.renderTable();
+        }
       },
 
       processTurn: () => {
@@ -1447,6 +1514,8 @@
         app.renderTable();
         const banner = document.getElementById('game-announcement-banner');
         const subTimer = document.getElementById('game-sub-timer');
+        const endTurnBtn = document.getElementById('btn-end-turn');
+        endTurnBtn?.classList.add('hidden');
 
         if (currentP && currentP.id === state.me.id) {
           if(banner) banner.innerHTML = `<span class="text-cyan-400 font-bold">${utils.escapeHtml(targetP?.name || '')}</span> からカードを引いてください`;
@@ -1464,7 +1533,8 @@
           if(banner) banner.innerHTML = `<span class="text-cyan-400 font-bold">${utils.escapeHtml(currentP?.name || '')}</span> の手番です（待機中...）`;
           if(subTimer) subTimer.textContent = '待機中...';
           
-          if (currentP && currentP.isAI) {
+          // AIのターンはホスト（またはソロプレイヤー）のみが代表して進行させる
+          if (currentP && currentP.isAI && (state.room.isHost || state.room.isSolo)) {
             state.timers.aiDelay = setTimeout(() => {
               if(targetP) app.drawCardFrom(targetP.id, Math.floor(Math.random() * targetP.hand.length));
             }, 1500); 
@@ -1473,35 +1543,42 @@
       },
 
       drawCardFrom: async (targetId, cIdx) => {
-        // 🔒 【絶対ガード】ゲーム未開始、既にドロー済み、または自分のターンでない場合は一切実行させない
+        // 🔒 【絶対ガード】ゲームプレイ中以外、または既にこのターンで1枚引いている場合は絶対に引かせない
         if (state.phase !== 'playing' || state.hasDrawnThisTurn) return;
         const currentP = state.players[state.turnIdx];
-        if (!currentP || currentP.id !== state.me.id) return;
+        if (!currentP) return;
 
-        state.hasDrawnThisTurn = true; // ⚡ クリックされた瞬間に即座にロック（連打・複数ドロー完全防止）
+        // 自分のターンか、ホストがAIのターンを代行している場合のみ許可
+        const isMyTurn = (currentP.id === state.me.id && !currentP.isAI);
+        const isAiTurnHandledByMe = (currentP.isAI && (state.room.isHost || state.room.isSolo));
+        if (!isMyTurn && !isAiTurnHandledByMe) return;
 
+        // ⚡ 1枚引いた瞬間にロック！
+        state.hasDrawnThisTurn = true;
         app.clearAllTimers();
+
         const targetP = state.players.find(p => p.id === targetId);
-        
         if(!targetP || targetP.hand.length === 0) return app.nextTurn();
         
-        const drawn = targetP.hand.splice(cIdx, 1)[0];
+        const safeIdx = Math.min(Math.max(0, cIdx), targetP.hand.length - 1);
+        const drawn = targetP.hand.splice(safeIdx, 1)[0];
         currentP.hand.unshift(drawn);
         state.lastDrawnId = drawn.id;
         
         app.addLogMessage(`${currentP.name} が ${targetP.name} からカードを引いた`);
-        utils.showToast(`カード獲得`);
+        if (isMyTurn) utils.showToast(`カード獲得`);
         
+        app.renderTable(); // 即座に「?」ボタンを消去
+
         socket.emit('game_action', { 
           roomCode: state.room.code, 
           type: 'draw', 
           players: state.players, 
           discardPile: state.discardPile, 
           turnIdx: state.turnIdx, 
-          hasDrawnThisTurn: true 
+          hasDrawnThisTurn: true,
+          ranks: state.ranks
         });
-
-        app.renderTable(); // 即座に画面を更新して「?」ボタンを消失させる
 
         if(app.checkClears()) return; 
         
@@ -1509,29 +1586,53 @@
         const banner = document.getElementById('game-announcement-banner');
         const endTurnBtn = document.getElementById('btn-end-turn');
 
-        if (currentP.id === state.me.id) {
-          if(banner) banner.innerHTML = `ペアを確認して破棄し、右上の<span class="text-amber-400 font-bold">ターン終了</span>を押してください`;
+        if (currentP.isAI) {
+          const defibTriggered = app.autoDiscard(currentP);
+          socket.emit('game_action', { 
+            roomCode: state.room.code, 
+            type: 'discard', 
+            players: state.players, 
+            discardPile: state.discardPile, 
+            turnIdx: state.turnIdx, 
+            hasDrawnThisTurn: true,
+            ranks: state.ranks
+          });
+          app.renderTable();
+
+          if (defibTriggered) {
+             if(subTimer) subTimer.textContent = '除細動実行中';
+             app.addLogMessage('【除細動成功】VF＋DCペア破棄！');
+             await app.playDefibAnimation();
+          } else {
+            await new Promise(r => setTimeout(r, 1200));
+          }
+          if(app.checkClears()) return;
+          app.nextTurn();
+        } else if (isMyTurn) {
+          if(banner) banner.innerHTML = `ペアがあれば破棄し、右上の<span class="text-amber-400 font-bold">ターン終了</span>を押してください`;
           endTurnBtn?.classList.remove('hidden');
-        }
           
-        let timeLeft = state.config.turnTimeLimit;
-        const displayTime = () => { if(subTimer) subTimer.textContent = timeLeft >= 900 ? '無制限' : `残り ${timeLeft} 秒`; };
-        displayTime();
-        
-        if(timeLeft < 900) {
-          state.timers.turn = setInterval(() => {
-            timeLeft--; displayTime();
-            if(timeLeft <= 0) { 
-              app.clearAllTimers(); 
-              app.humanEndTurn();
-            }
-          }, 1000);
+          let timeLeft = state.config.turnTimeLimit;
+          const displayTime = () => { if(subTimer) subTimer.textContent = timeLeft >= 900 ? '無制限' : `残り ${timeLeft} 秒`; };
+          displayTime();
+          
+          if(timeLeft < 900) {
+            state.timers.turn = setInterval(() => {
+              timeLeft--; displayTime();
+              if(timeLeft <= 0) { 
+                app.clearAllTimers(); 
+                app.humanEndTurn();
+              }
+            }, 1000);
+          }
         }
       },
 
       humanEndTurn: () => {
+        app.clearAllTimers();
         document.getElementById('btn-end-turn')?.classList.add('hidden');
-        state.selectedMyCards = []; state.lastDrawnId = null; state.hasDrawnThisTurn = false;
+        state.selectedMyCards = [];
+        state.lastDrawnId = null;
         app.nextTurn();
       },
 
@@ -1547,10 +1648,13 @@
           players: state.players,
           discardPile: state.discardPile,
           turnIdx: state.turnIdx,
-          hasDrawnThisTurn: false
+          hasDrawnThisTurn: false,
+          ranks: state.ranks
         });
 
-        app.processTurn();
+        if (state.room.isSolo) {
+          app.processTurn();
+        }
       },
 
       isPairMatch: (c1, c2) => {
@@ -1578,9 +1682,12 @@
         return triggeredDefib;
       },
       
+      // 🆕 修正：初期手札確認中（initial_discard）も自分のターン中も、自分のカードを選択してペア破棄できるように復旧
       handleMyCardClick: (cId) => {
-        if(state.phase !== 'playing' || state.players[state.turnIdx].id !== state.me.id) return;
-        const myP = state.players.find(p=>p.id===state.me.id); const clicked = myP.hand.find(c=>c.id===cId); if(!clicked) return;
+        if(state.phase !== 'initial_discard' && (state.phase !== 'playing' || state.players[state.turnIdx]?.id !== state.me.id)) return;
+        const myP = state.players.find(p=>p.id===state.me.id);
+        const clicked = myP?.hand.find(c=>c.id===cId);
+        if(!clicked) return;
         
         const idx = state.selectedMyCards.findIndex(c => c.id === cId);
         if (idx >= 0) {
@@ -1613,7 +1720,8 @@
                   players: state.players, 
                   discardPile: state.discardPile, 
                   turnIdx: state.turnIdx,
-                  hasDrawnThisTurn: state.hasDrawnThisTurn
+                  hasDrawnThisTurn: state.hasDrawnThisTurn,
+                  ranks: state.ranks
               });
 
               app.renderTable();
@@ -1630,19 +1738,27 @@
       },
       
       checkClears: () => {
+        if (state.phase !== 'playing') return false;
         let anyoneCleared = false;
         state.players.forEach(p => {
           if(!p.isCleared && p.hand.length === 0) {
-            p.isCleared = true; state.ranks.push(p.id); p.rank = state.ranks.length;
+            p.isCleared = true;
+            if(!state.ranks.includes(p.id)) state.ranks.push(p.id);
+            p.rank = state.ranks.indexOf(p.id) + 1;
             app.addLogMessage(`🎉 ${p.name} があがりました（${p.rank}位）`);
-            utils.showToast(`🎉 ${p.name} あがり（${p.rank}位）`); anyoneCleared = true;
+            utils.showToast(`🎉 ${p.name} あがり（${p.rank}位）`);
+            anyoneCleared = true;
           }
         });
         
         const active = state.players.filter(p => !p.isCleared);
         if(active.length <= 1 && state.phase === 'playing') {
           app.clearAllTimers(); state.phase = 'ended';
-          if(active.length === 1) { active[0].isCleared = true; state.ranks.push(active[0].id); active[0].rank = active[0].rank || state.ranks.length; }
+          if(active.length === 1) {
+            active[0].isCleared = true;
+            if(!state.ranks.includes(active[0].id)) state.ranks.push(active[0].id);
+            active[0].rank = state.ranks.indexOf(active[0].id) + 1;
+          }
           setTimeout(() => { state.mode === 'jinuki' ? app.showJinukiQuiz() : app.showResults(); }, 1200);
           return true;
         }
@@ -1723,21 +1839,21 @@
         const others = state.players.filter(p => p.id !== state.me.id);
         const currentId = state.players[state.turnIdx]?.id;
         const targetId = state.players[app.getTargetIdx(state.turnIdx)]?.id;
-        const isMyTurn = currentId === state.me.id;
+        const isMyTurn = (state.phase === 'playing' && currentId === state.me.id);
 
         others.forEach(p => {
-          const isCur = currentId === p.id;
-          const isTgt = state.phase === 'playing' && isMyTurn && targetId === p.id;
+          const isCur = (state.phase === 'playing' && currentId === p.id);
+          const isTgt = (isMyTurn && targetId === p.id);
           
-          let h = `<div class="p-3 rounded-2xl border flex flex-col justify-between ${isCur?'bg-cyan-950/40 border-cyan-500 shadow-md':isTgt?'bg-amber-950/40 border-amber-500/80 animate-pulse':'bg-slate-900/80 border-slate-800'}">
+          let h = `<div class="p-3 rounded-2xl border flex flex-col justify-between ${isCur?'bg-cyan-950/40 border-cyan-500 shadow-md':isTgt && !state.hasDrawnThisTurn?'bg-amber-950/40 border-amber-500/80 animate-pulse':'bg-slate-900/80 border-slate-800'}">
                     <div class="flex items-center justify-between"><span class="text-xs font-bold text-white">${utils.escapeHtml(p.name)}</span><span class="text-[10px] bg-slate-800 px-2 rounded-full text-slate-300 font-mono">${p.hand.length}枚</span></div>`;
           if (p.isCleared) h += '<span class="text-xs font-bold text-emerald-400 mt-2">🎉 クリア</span>';
           else {
             h += '<div class="flex flex-wrap gap-1 mt-2">';
             p.hand.forEach((_, cIdx) => { 
-              // 🔒 【完全ブロック】プレイ中かつ自分のターン、かつまだ引いていない場合のみボタンを描画
-              if(state.phase === 'playing' && isTgt && !state.hasDrawnThisTurn) {
-                h += `<button onclick="app.drawCardFrom('${p.id}', ${cIdx})" class="w-6 h-9 bg-amber-700 border-2 border-amber-300 rounded-lg text-white font-bold text-[10px] shadow hover:scale-110 active:scale-95 transition">?</button>`;
+              // 🔒 自分のターンかつ未ドローのときだけ「?」ボタンを表示し、1枚引いたら即座に普通の裏面表示に切り替える
+              if(isTgt && !state.hasDrawnThisTurn) {
+                h += `<button onclick="this.disabled=true; app.drawCardFrom('${p.id}', ${cIdx})" class="w-6 h-9 bg-amber-700 border-2 border-amber-300 rounded-lg text-white font-bold text-[10px] shadow hover:scale-110 active:scale-95 transition">?</button>`;
               } else {
                 h += `<div class="w-5 h-8 bg-slate-800 border border-slate-700 rounded-md"></div>`;
               }
@@ -1896,20 +2012,20 @@
         const r = document.getElementById('jinuki-quiz-result');
         if(!r) return;
 
-        const isCorrect = guess !== null && (guess === 'joker' ? (h.id === 53 || h.id === 54) : (h.num === guess));
+        const isCorrect = guess !== null && h && (guess === 'joker' ? (h.id === 53 || h.id === 54) : (h.num === guess));
         state.quizResultCorrect = isCorrect;
 
         r.classList.remove('hidden');
         if(guess === null) {
           r.className = 'text-sm font-bold p-3 rounded-xl mb-4 bg-slate-800 text-slate-300 border border-slate-700';
-          r.innerHTML = `⏱ 制限時間切れです！ 正解は [${utils.escapeHtml(h.title)}] でした（加点なし）。`;
+          r.innerHTML = `⏱ 制限時間切れです！ 正解は [${utils.escapeHtml(h ? h.title : '不明')}] でした（加点なし）。`;
         } else if(isCorrect){ 
           r.className = 'text-sm font-bold p-3 rounded-xl mb-4 bg-emerald-950/80 text-emerald-300 border border-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.3)]'; 
-          r.innerHTML = `🎯 正解！ 封印は [${utils.escapeHtml(h.title)}]！（特別表彰・加点対象）`; 
+          r.innerHTML = `🎯 正解！ 封印は [${utils.escapeHtml(h ? h.title : '')}]！（特別表彰・加点対象）`; 
           if(window.confetti) confetti(); 
         } else { 
           r.className = 'text-sm font-bold p-3 rounded-xl mb-4 bg-rose-950/80 text-rose-300 border border-rose-600 shadow-[0_0_15px_rgba(225,29,72,0.3)]'; 
-          r.innerHTML = `❌ 不正解... 実際は [${utils.escapeHtml(h.title)}] でした（加点なし）。`; 
+          r.innerHTML = `❌ 不正解... 実際は [${utils.escapeHtml(h ? h.title : '不明')}] でした（加点なし）。`; 
         }
 
         const buttons = document.querySelectorAll('#jinuki-quiz-options button');

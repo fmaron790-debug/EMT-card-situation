@@ -27,6 +27,7 @@ io.on('connection', (socket) => {
         players: [],
         discardPile: [],
         turnIdx: 0,
+        hasDrawnThisTurn: false,
         config: config || {}
       };
     }
@@ -39,6 +40,7 @@ io.on('connection', (socket) => {
         isAI: false,
         hand: [],
         isCleared: false,
+        isReady: false,
         rank: 0,
         team: 1,
         color: '#38bdf8'
@@ -53,19 +55,20 @@ io.on('connection', (socket) => {
     });
   });
 
-  // 厳格なゲームアクション管理
+  // ゲーム内アクションの同期
   socket.on('game_action', (data) => {
     const { roomCode, type, players, discardPile, turnIdx, hasDrawnThisTurn } = data;
     const room = rooms[roomCode];
     
     if (room) {
-      // 🔒 【サーバー側の絶対ガード】対人戦での複数ドローを完全に防ぐ
+      // すでにこのターンでカードが引かれている場合の重複ドローをサーバー側でもブロック
       if (type === 'draw') {
-        const currentP = room.players[room.turnIdx];
-        // 送信者が現在のターンプレイヤーではない場合、または既に引いている場合は即座に拒否
-        if (!currentP || currentP.id !== socket.id) {
-          return;
-        }
+        if (room.hasDrawnThisTurn) return;
+        room.hasDrawnThisTurn = true;
+      } else if (type === 'next_turn' || type === 'ready' || type === 'start') {
+        room.hasDrawnThisTurn = false;
+      } else if (hasDrawnThisTurn !== undefined) {
+        room.hasDrawnThisTurn = hasDrawnThisTurn;
       }
 
       if (players) room.players = players;
