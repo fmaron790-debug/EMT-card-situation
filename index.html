@@ -214,6 +214,15 @@
     const SUIT_ICONS = { C: '♣', S: '♠', H: '♥', D: '♦', M: '🧠', JOKER: '⚡' };
     const SUIT_COLORS = { C: 'text-emerald-400', S: 'text-indigo-400', H: 'text-rose-400', D: 'text-amber-400', M: 'text-cyan-400', JOKER: 'text-amber-300' };
     const BOT_NAME_POOL = ['救急隊員α', '救急隊員β', '救急隊員γ', '指導救命士', '機関員', '通信指令員'];
+    // 🆕 プレイヤーカラーパレット（全10色）
+    const PLAYER_COLOR_PALETTE = ['#38bdf8', '#f43f5e', '#10b981', '#f59e0b', '#a855f7', '#ec4899', '#84cc16', '#f97316', '#06b6d4', '#6366f1'];
+
+    function pickUnusedColor(playersList) {
+      const used = (playersList || []).map(p => p.color);
+      const avail = PLAYER_COLOR_PALETTE.filter(c => !used.includes(c));
+      const pool = avail.length > 0 ? avail : PLAYER_COLOR_PALETTE;
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
 
     function loadDB() { 
       try { 
@@ -410,6 +419,7 @@
         <div class="w-full max-w-4xl bg-slate-900/95 border border-slate-800/90 rounded-3xl p-4 shadow-2xl flex flex-col items-center relative mt-2">
           <div class="w-full flex items-center justify-between mb-2">
             <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full" id="my-color-dot" style="background-color: #38bdf8;"></span>
               <span class="text-sm font-bold text-white">あなたの手札</span>
               <span id="my-card-count-badge" class="text-xs font-mono px-2 py-0.5 rounded-full bg-slate-800 text-cyan-400 border border-slate-700">0 枚</span>
             </div>
@@ -555,7 +565,6 @@
     </div>
   </div>
 
-  <!-- 🆕 修正：6桁コード参加モーダル内でも名前を入力・変更できるように追加 -->
   <div id="modal-join-room" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl">
       <h3 class="text-lg font-bold text-white mb-4">出動ルームに参加</h3>
@@ -977,7 +986,8 @@
         if(countEl) countEl.textContent = `${state.players.length} / ${state.config.maxPlayers} 名`;
         
         state.players.forEach((p, i) => {
-          list.innerHTML += `<div class="flex items-center p-3 rounded-xl bg-slate-950 border border-slate-800"><span class="w-6 h-6 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs mr-3 font-mono">${i + 1}</span><span class="text-sm font-semibold text-white mr-2">${utils.escapeHtml(p.name)}</span>${p.id === state.me.id ? '<span class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800 px-2 py-0.5 rounded-full">あなた</span>' : ''}${p.isAI ? '<span class="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded-full">救急AI</span>' : ''}</div>`;
+          const pColor = p.color || '#38bdf8';
+          list.innerHTML += `<div class="flex items-center p-3 rounded-xl bg-slate-950 border border-slate-800"><span class="w-6 h-6 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs mr-3 font-mono">${i + 1}</span><span class="w-3 h-3 rounded-full mr-2.5 flex-shrink-0" style="background-color: ${pColor}; box-shadow: 0 0 8px ${pColor}"></span><span class="text-sm font-semibold text-white mr-2">${utils.escapeHtml(p.name)}</span>${p.id === state.me.id ? '<span class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800 px-2 py-0.5 rounded-full">あなた</span>' : ''}${p.isAI ? '<span class="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded-full">救急AI</span>' : ''}</div>`;
         });
       },
 
@@ -986,7 +996,8 @@
         state.room = { code: Math.floor(100000 + Math.random() * 900000).toString(), isHost: true, isSolo: false };
         const codeDisplay = document.getElementById('room-code-display');
         if(codeDisplay) codeDisplay.textContent = state.room.code;
-        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: '#38bdf8' }];
+        const myColor = pickUnusedColor([]);
+        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: myColor }];
         socket.emit('join_room', { roomCode: state.room.code, playerName: state.me.name, config: state.config });
         document.getElementById('btn-start-game')?.classList.remove('hidden'); 
         document.getElementById('host-ai-controls')?.classList.remove('hidden');
@@ -996,11 +1007,11 @@
       startSoloAI: () => {
         app.readConfig(); state.room = { code: 'SOLO-AI', isHost: true, isSolo: true };
         state.config.autoFillAI = true; 
-        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: '#38bdf8' }];
+        const myColor = pickUnusedColor([]);
+        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: myColor }];
         app.startGame(); 
       },
 
-      // 🆕 参加モーダルを開いたとき、現在のロビーの名前入力欄の値を引き継いで表示する
       showJoinModal: () => {
         const lobbyName = document.getElementById('input-player-name')?.value.trim();
         const joinNameInput = document.getElementById('input-join-player-name');
@@ -1011,7 +1022,6 @@
       },
       closeJoinModal: () => document.getElementById('modal-join-room')?.classList.add('hidden'),
       
-      // 🆕 参加モーダルで入力した名前を反映してルームに合流する
       executeJoin: () => {
         const codeInput = document.getElementById('input-join-code');
         const code = codeInput ? codeInput.value.trim() : ''; 
@@ -1048,8 +1058,8 @@
       addBot: () => {
         if(state.players.length >= state.config.maxPlayers) return utils.showToast('定員です');
         const bIdx = state.players.filter(p=>p.isAI).length;
-        const colors = ['#38bdf8', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
-        state.players.push({ id: `ai_${Date.now()}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: colors[state.players.length % colors.length] });
+        const botColor = pickUnusedColor(state.players);
+        state.players.push({ id: `ai_${Date.now()}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: botColor });
         app.updateRoomUI(); utils.showToast('AI隊員を追加しました');
       },
 
@@ -1061,10 +1071,10 @@
 
       startGame: () => {
         if(state.room.isHost && state.config.autoFillAI) {
-          const colors = ['#38bdf8', '#f43f5e', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
           while(state.players.length < state.config.maxPlayers) {
             const bIdx = state.players.filter(p=>p.isAI).length;
-            state.players.push({ id: `ai_${Date.now()}_${bIdx}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: colors[state.players.length % colors.length] });
+            const botColor = pickUnusedColor(state.players);
+            state.players.push({ id: `ai_${Date.now()}_${bIdx}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: botColor });
           }
         }
         if(state.players.length < 2) return utils.showToast('最低2名必要です');
@@ -1174,6 +1184,10 @@
         const isMyTurn = (currentP && !currentP.isAI && currentP.id === state.me.id && !state.memoryState.isProcessingTurn);
         if(turnInfo) turnInfo.textContent = `現在の手番: ${currentP ? currentP.name : ''} ${isMyTurn ? '(あなた)' : ''}`;
 
+        const myP = state.players.find(p => p.id === state.me.id);
+        const miniDot = document.getElementById('mini-board-color-dot');
+        if (miniDot && myP?.color) miniDot.style.backgroundColor = myP.color;
+
         if (state.phase === 'memory_playing') {
           app.startMemoryTimer();
         }
@@ -1251,9 +1265,11 @@
         if(!mini) return;
         mini.innerHTML = '';
         const myBoard = state.memoryState.playerBoards[state.me.id] || {};
+        const myP = state.players.find(p => p.id === state.me.id);
+        const myColor = myP?.color || '#38bdf8';
         state.memoryState.boardSlots.forEach((slot, sIdx) => {
           const isFilled = myBoard[sIdx]?.filled;
-          const color = myBoard[sIdx]?.color || '#1e293b';
+          const color = myBoard[sIdx]?.color || myColor;
           mini.innerHTML += `<div class="w-3.5 h-3.5 rounded-sm border border-slate-700" style="background-color: ${isFilled ? color : '#1e293b'}"></div>`;
         });
       },
@@ -1565,7 +1581,8 @@
 
         stocks.splice(activeIdx, 1);
         state.memoryState.selectedStockIdx = 0;
-        myBoard[sIdx] = { filled: true, color: '#38bdf8', cards: activePair.cards };
+        const myP = state.players.find(p => p.id === state.me.id);
+        myBoard[sIdx] = { filled: true, color: myP?.color || '#38bdf8', cards: activePair.cards };
 
         utils.showToast(`🎉 正解！「${slot.title}」の枠に2枚のカードをはめ込みました！`);
         app.addLogMessage(`${state.me.name} がボードの「${slot.title}」を完成させました！`);
@@ -2043,9 +2060,10 @@
         others.forEach(p => {
           const isCur = (state.phase === 'playing' && currentId === p.id);
           const isTgt = (isMyTurn && targetId === p.id);
+          const pColor = p.color || '#38bdf8';
           
           let h = `<div class="p-3 rounded-2xl border flex flex-col justify-between ${isCur?'bg-cyan-950/40 border-cyan-500 shadow-md':isTgt && !state.hasDrawnThisTurn?'bg-amber-950/40 border-amber-500/80 animate-pulse':'bg-slate-900/80 border-slate-800'}">
-                    <div class="flex items-center justify-between"><span class="text-xs font-bold text-white">${utils.escapeHtml(p.name)}</span><span class="text-[10px] bg-slate-800 px-2 rounded-full text-slate-300 font-mono">${p.hand.length}枚</span></div>`;
+                    <div class="flex items-center justify-between"><div class="flex items-center gap-1.5 truncate"><span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${pColor}"></span><span class="text-xs font-bold text-white truncate">${utils.escapeHtml(p.name)}</span></div><span class="text-[10px] bg-slate-800 px-2 rounded-full text-slate-300 font-mono flex-shrink-0">${p.hand.length}枚</span></div>`;
           if (p.isCleared) h += '<span class="text-xs font-bold text-emerald-400 mt-2">🎉 クリア</span>';
           else {
             h += '<div class="flex flex-wrap gap-1 mt-2">';
@@ -2082,6 +2100,9 @@
         }
 
         const myP = state.players.find(p=>p.id===state.me.id);
+        const myDot = document.getElementById('my-color-dot');
+        if (myDot && myP?.color) myDot.style.backgroundColor = myP.color;
+
         const myC = document.getElementById('my-cards-container'); 
         if(!myC) return;
         myC.innerHTML = '';
@@ -2268,7 +2289,7 @@
           list.innerHTML += `<div class="text-xs font-bold text-slate-400 mb-1 border-b border-slate-800 pb-1">🏆 あがり順位表彰</div>`;
           state.ranks.forEach((pId, idx) => {
             const p = state.players.find(x=>x.id===pId); if(!p) return;
-            list.innerHTML += `<div class="flex items-center justify-between p-2.5 rounded-xl border ${p.id===state.me.id?'bg-cyan-950/40 border-cyan-500/60':'bg-slate-900 border-slate-800'}"><div class="flex items-center gap-2"><span class="text-lg w-6 text-center">${['🥇','🥈','🥉','🏅','🏅','⚡'][idx]||`${idx+1}`}</span><span class="text-xs font-bold text-white">${utils.escapeHtml(p.name)}</span></div><span class="text-[11px] font-mono font-bold ${idx===0?'text-amber-400':'text-slate-400'}">${idx===0?'WINNER':'CLEAR'}</span></div>`;
+            list.innerHTML += `<div class="flex items-center justify-between p-2.5 rounded-xl border ${p.id===state.me.id?'bg-cyan-950/40 border-cyan-500/60':'bg-slate-900 border-slate-800'}"><div class="flex items-center gap-2"><span class="text-lg w-6 text-center">${['🥇','🥈','🥉','🏅','🏅','⚡'][idx]||`${idx+1}`}</span><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${p.color || '#38bdf8'}"></span><span class="text-xs font-bold text-white">${utils.escapeHtml(p.name)}</span></div><span class="text-[11px] font-mono font-bold ${idx===0?'text-amber-400':'text-slate-400'}">${idx===0?'WINNER':'CLEAR'}</span></div>`;
           });
 
           if (state.mode === 'jinuki') {
