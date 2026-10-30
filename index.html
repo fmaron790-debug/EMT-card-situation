@@ -428,7 +428,7 @@
       <section id="view-memory-game" class="w-full flex-1 flex flex-col items-center justify-start hidden animate-fade-in">
         <div class="w-full max-w-5xl bg-slate-900/95 border border-blue-500/50 rounded-2xl p-3 mb-3 flex items-center justify-between shadow-lg">
           <div class="flex items-center gap-3">
-            <span class="text-xs px-3 py-1.5 rounded-full bg-blue-950 text-blue-300 border border-blue-600 font-bold">救急神経衰弱バトル</span>
+            <span class="text-xs px-3 py-1.5 rounded-full bg-blue-950 text-blue-300 border border-blue-600 font-bold">改訂長谷川子規簡易知能評価スケールに引っかかるな</span>
             <span id="memory-turn-info" class="text-xs text-white font-bold">手番: プレイヤー</span>
           </div>
           <div class="flex items-center gap-3">
@@ -842,8 +842,8 @@
         c.innerHTML = '';
         const games = [
           { id: 'game1', code: 'babanuki', lbl: 'GAME 01', title: '致死性不整脈を回避せよ！', icon: 'activity', desc: '【救急ババ抜き】除細動が不可欠な「心室細動（VF）」を最後まで抱え持っていた者が敗北！', col: 'rose' },
-          { id: 'game2', code: 'memory', lbl: 'GAME 02', title: '救急神経衰弱バトル', icon: 'brain', desc: '【救急神経衰弱】全40疾患グループ対応の神経衰弱バトル！', col: 'blue' },
-          { id: 'game3', code: 'jinuki', lbl: 'GAME 03', title: '救急 隠れたものを当てろ', icon: 'search', desc: '【救急ジジ抜き＋VF/DCペア】全54枚から1枚が事前封印！孤立カードから病態を推理せよ！', col: 'amber' },
+          { id: 'game2', code: 'memory', lbl: 'GAME 02', title: '改訂長谷川式簡易知能評価スケールに引っかかるな', icon: 'brain', desc: '【救急神経衰弱】全40疾患グループ対応の神経衰弱バトル！', col: 'blue' },
+          { id: 'game3', code: 'jinuki', lbl: 'GAME 03', title: ' 隠れた疾患を当てろ', icon: 'search', desc: '【救急ジジ抜き＋VF/DCペア】全54枚から1枚が事前封印！孤立カードから病態を推理せよ！', col: 'amber' },
           { id: 'game4', code: 'jack', lbl: 'GAME 04', title: '99ジャック', icon: 'crosshair', desc: '【SpO2＆血圧コントロール】合計点「99」を目指す救急版ブラックジャック。', col: 'teal' }
         ];
         games.forEach(g => {
@@ -1080,7 +1080,7 @@
         }, 1000);
       },
 
-      renderMemoryGameTable: () => {
+     renderMemoryGameTable: () => {
         const grid = document.getElementById('memory-cards-grid');
         const turnInfo = document.getElementById('memory-turn-info');
         const ring = document.getElementById('table-players-ring');
@@ -1112,41 +1112,46 @@
         grid.innerHTML = '';
         state.memoryState.cards.forEach((card, idx) => {
           if (card.isMatched) {
-            grid.innerHTML += `<div class="aspect-[3/4] w-full rounded-2xl border border-dashed border-slate-700/20 opacity-10 pointer-events-none flex-shrink-0"></div>`;
+            grid.innerHTML += `<div class="aspect-[3/4] w-full rounded-2xl border border-dashed border-slate-700/20 opacity-10 pointer-events-none"></div>`;
             return;
           }
           const isFlipped = card.isFlipped;
-          const guideClass = isMyTurn ? 'border-cyan-400 ring-4 ring-cyan-400/40' : 'border-cyan-900/60 hover:border-cyan-600';
+          const guideClass = isMyTurn ? 'border-cyan-400 ring-2 ring-cyan-400/40' : 'border-cyan-900/60 hover:border-cyan-600';
 
+          // 裏面（心電図モニター風）
           const ecgCardBackHtml = `
-            <div class="m-auto flex flex-col items-center justify-center w-full px-1">
-              <div class="w-full flex items-center justify-between text-[9px] text-cyan-400 font-mono mb-1 px-1">
+            <div class="w-full h-full flex flex-col items-center justify-between p-1">
+              <div class="w-full flex items-center justify-between text-[9px] text-cyan-400 font-mono">
                 <span class="font-bold flex items-center gap-0.5"><span>⚡</span> ECG</span>
               </div>
-              <div class="w-full h-8 bg-slate-950/90 rounded-lg border border-cyan-500/40 flex items-center justify-center overflow-hidden shadow-inner">
+              <div class="w-full h-8 bg-slate-950/90 rounded-lg border border-cyan-500/40 flex items-center justify-center overflow-hidden shadow-inner my-auto">
                 <svg class="w-full h-full opacity-90" viewBox="0 0 100 30" preserveAspectRatio="none">
                   <path d="M 0 15 L 18 15 L 23 5 L 28 25 L 33 15 L 55 15 L 60 3 L 65 27 L 70 15 L 100 15" fill="none" stroke="#22d3ee" stroke-width="2.5"/>
                 </svg>
               </div>
-              <div class="text-[8px] text-slate-400 font-mono mt-1 tracking-wider">EMS MONITOR</div>
+              <div class="text-[8px] text-slate-400 font-mono tracking-wider">EMS MONITOR</div>
             </div>
           `;
 
+          // 表面（1枚のカード枠内にヘッダー・本文・IDを完全に閉じ込める構造）
           const showDisease = state.config.showMemoryDisease ?? true;
           const cardFrontHtml = `
-            <div class="flex items-center justify-between text-[11px] px-1 font-bold">
-              <span class="${SUIT_COLORS[card.suit]||''} text-sm">${SUIT_ICONS[card.suit]||'♠'}</span>
-              <span class="font-mono bg-cyan-100 text-cyan-900 px-1.5 py-0.5 rounded text-[10px] font-black">Gr.${card.num}</span>
+            <div class="w-full h-full flex flex-col justify-between overflow-hidden">
+              <div class="flex items-center justify-between w-full leading-none mb-0.5">
+                <span class="${SUIT_COLORS[card.suit]||''} text-xs">${SUIT_ICONS[card.suit]||'🧠'}</span>
+                <span class="font-mono bg-cyan-100 text-cyan-900 px-1 py-0.5 rounded text-[9px] font-black">Gr.${card.num}</span>
+              </div>
+              <div class="w-full flex-1 flex flex-col items-center justify-center text-center px-1 py-0.5 bg-white rounded-lg border border-slate-300 shadow-inner overflow-hidden my-0.5">
+                ${showDisease ? `<div class="text-[10px] font-black text-slate-900 leading-tight mb-0.5 line-clamp-1 w-full break-all">${utils.escapeHtml(card.title)}</div>` : ''}
+                <div class="text-[9px] font-bold text-slate-700 leading-tight line-clamp-3 w-full break-words">${utils.escapeHtml(card.desc)}</div>
+              </div>
+              <div class="text-[8px] text-slate-500 text-right font-mono leading-none w-full">ID:${card.id}</div>
             </div>
-            <div class="text-center my-auto px-1 py-1 bg-white/90 rounded-xl border border-slate-300 shadow-inner">
-              ${showDisease ? `<div class="text-xs font-black text-slate-900 mb-1">${utils.escapeHtml(card.title)}</div>` : ''}
-              <div class="text-[11px] font-bold text-slate-800 leading-tight line-clamp-3">${utils.escapeHtml(card.desc)}</div>
-            </div>
-            <div class="text-[9px] text-slate-500 text-right font-mono pr-1">ID:${card.id}</div>
           `;
 
+          // 1マス分のカード外枠（overflow-hidden で枠外への飛び出しを完全防止）
           grid.innerHTML += `
-            <div onclick="app.handleMemoryCardClick(${idx})" class="aspect-[3/4] w-full rounded-2xl border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between p-2.5 shadow-[0_10px_20px_rgba(0,0,0,0.6)] select-none relative flex-shrink-0 ${isFlipped ? 'bg-slate-100 text-slate-900 border-indigo-500 z-20 shadow-[0_0_20px_rgba(99,102,241,0.5)]' : `bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 ${guideClass} hover:scale-105 z-10 text-slate-100'}`}>
+            <div onclick="app.handleMemoryCardClick(${idx})" class="aspect-[3/4] w-full rounded-2xl border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between p-1.5 shadow-[0_10px_20px_rgba(0,0,0,0.6)] select-none relative overflow-hidden ${isFlipped ? 'bg-slate-100 text-slate-900 border-indigo-500 z-20 shadow-[0_0_20px_rgba(99,102,241,0.5)]' : `bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 ${guideClass} hover:scale-105 z-10 text-slate-100`}">
               ${isFlipped ? cardFrontHtml : ecgCardBackHtml}
             </div>
           `;
