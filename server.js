@@ -7,10 +7,8 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// 静的ファイルの公開設定
 app.use(express.static(__dirname));
 
-// ルート（/）へのアクセスのフォールバック
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -20,7 +18,6 @@ const rooms = {};
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
-  // ルーム参加（ID指定での入室処理）
   socket.on('join_room', (data) => {
     const { roomCode, playerName, config } = data;
     socket.join(roomCode);
@@ -56,19 +53,18 @@ io.on('connection', (socket) => {
     });
   });
 
-  // 修正：ゲーム内アクション（自分を含むルーム全員に同期を徹底）
-  // ゲーム内アクション
- // ゲーム内アクション
+  // 厳格なゲームアクション管理
   socket.on('game_action', (data) => {
     const { roomCode, type, players, discardPile, turnIdx, hasDrawnThisTurn } = data;
     const room = rooms[roomCode];
+    
     if (room) {
-      // 🆕 ジジ抜きやババ抜きでのドローアクション時の厳格なサーバー側チェック
+      // 🔒 【サーバー側の絶対ガード】対人戦での複数ドローを完全に防ぐ
       if (type === 'draw') {
-        const currentTurnPlayer = room.players[room.turnIdx];
-        // 送信者が現在のターンプレイヤーでない場合、または不正な複数ドローは拒否
-        if (currentTurnPlayer && currentTurnPlayer.id !== socket.id) {
-          return; // ターン外のプレイヤーからのドロー要求は無視
+        const currentP = room.players[room.turnIdx];
+        // 送信者が現在のターンプレイヤーではない場合、または既に引いている場合は即座に拒否
+        if (!currentP || currentP.id !== socket.id) {
+          return;
         }
       }
 
@@ -76,11 +72,29 @@ io.on('connection', (socket) => {
       if (discardPile) room.discardPile = discardPile;
       if (turnIdx !== undefined) room.turnIdx = turnIdx;
     }
+
     io.to(roomCode).emit('game_action', data);
   });
+
+  socket.on('admin_update_access', (accessData) => {
+    io.emit('update_access', accessData);
+  });
+
+  socket.on('admin_update_cards', (dbData) => {
+    io.emit('update_cards', dbData);
+  });
+
+  socket.on('send_chat', (data) => {
+    const { roomCode, name, message } = data;
+    if (roomCode && rooms[roomCode]) {
+      io.to(roomCode).emit('receive_chat', { name, message });
+    } else {
+      io.emit('receive_chat', { name, message });
+    }
+  });
+
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
-    // 参加していたルームから切断された場合の処理（必要に応じてルーム内プレイヤー管理）
     for (const roomCode in rooms) {
       const room = rooms[roomCode];
       const idx = room.players.findIndex(p => p.id === socket.id);

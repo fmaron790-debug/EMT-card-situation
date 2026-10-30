@@ -676,7 +676,7 @@
 
     const state = {
       mode: 'babanuki',
-      phase: 'idle', // 🔒 ゲーム開始前・確認中は 'idle' でブロック
+      phase: 'idle', // 🔒 開始前・確認中は絶対にカードを引けない状態
       room: { code: '', isHost: false, isSolo: false },
       config: { maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true },
       me: { id: 'p_' + Math.random().toString(36).substring(2, 9), name: '救急隊員' },
@@ -744,7 +744,7 @@
         chatContent.scrollTop = chatContent.scrollHeight;
       }
       if(badgeDot && document.getElementById('modal-chat')?.classList.contains('hidden')) {
-        badgeDot.classList.remove('hidden');
+        badgeDot.classList.add('hidden');
       }
     });
 
@@ -767,7 +767,6 @@
         document.getElementById('btn-initial-ready')?.classList.remove('hidden');
         document.getElementById('btn-end-turn')?.classList.add('hidden');
       }
-      // 🆕 参加者全員が「ready（手札確認完了）」を受信したらプレイ状態にする
       if(actionData.type === 'ready') {
         state.phase = 'playing';
       }
@@ -1410,7 +1409,7 @@
         utils.showToast('<i data-lucide="check-circle" class="w-4 h-4 inline mr-1"></i>手札確認完了！');
         if (window.lucide) lucide.createIcons();
         
-        state.phase = 'playing'; // 🔓 ここで初めてゲームプレイ（カードドロースタート）が許可される
+        state.phase = 'playing'; // 🔓 確認完了後に初めてプレイ開始
         
         const activePlayers = state.players.filter(p => !p.isCleared);
         if(activePlayers.length > 0) {
@@ -1474,12 +1473,12 @@
       },
 
       drawCardFrom: async (targetId, cIdx) => {
-        // 🔒 最速の即時ロック：この関数が呼ばれた瞬間にフラグを立てて、2回目以降の実行を完全にシャットアウト
+        // 🔒 【絶対ガード】ゲーム未開始、既にドロー済み、または自分のターンでない場合は一切実行させない
         if (state.phase !== 'playing' || state.hasDrawnThisTurn) return;
         const currentP = state.players[state.turnIdx];
         if (!currentP || currentP.id !== state.me.id) return;
 
-        state.hasDrawnThisTurn = true; // ← サーバーからの返事を待たずに即座にロック！
+        state.hasDrawnThisTurn = true; // ⚡ クリックされた瞬間に即座にロック（連打・複数ドロー完全防止）
 
         app.clearAllTimers();
         const targetP = state.players.find(p => p.id === targetId);
@@ -1501,47 +1500,32 @@
           turnIdx: state.turnIdx, 
           hasDrawnThisTurn: true 
         });
-        
-        app.renderTable(); // すぐに画面を再描画して「?」ボタンを消去・無効化
-        
-        // （以下続く...） 
+
+        app.renderTable(); // 即座に画面を更新して「?」ボタンを消失させる
+
+        if(app.checkClears()) return; 
         
         const subTimer = document.getElementById('game-sub-timer');
         const banner = document.getElementById('game-announcement-banner');
         const endTurnBtn = document.getElementById('btn-end-turn');
 
-        if (currentP.isAI) {
-          app.renderTable();
-          const defibTriggered = app.autoDiscard(currentP);
-          if (defibTriggered) {
-             if(subTimer) subTimer.textContent = '除細動実行中';
-             app.addLogMessage('【除細動成功】VF＋DCペア破棄！');
-             await app.playDefibAnimation();
-          } else {
-            await new Promise(r => setTimeout(r, 1200));
-          }
-          if(app.checkClears()) return;
-          app.nextTurn();
-        } else {
-          if (currentP.id === state.me.id) {
-            if(banner) banner.innerHTML = `ペアを確認して破棄し、右上の<span class="text-amber-400 font-bold">ターン終了</span>を押してください`;
-            endTurnBtn?.classList.remove('hidden');
-          }
-          app.renderTable();
+        if (currentP.id === state.me.id) {
+          if(banner) banner.innerHTML = `ペアを確認して破棄し、右上の<span class="text-amber-400 font-bold">ターン終了</span>を押してください`;
+          endTurnBtn?.classList.remove('hidden');
+        }
           
-          let timeLeft = state.config.turnTimeLimit;
-          const displayTime = () => { if(subTimer) subTimer.textContent = timeLeft >= 900 ? '無制限' : `残り ${timeLeft} 秒`; };
-          displayTime();
-          
-          if(timeLeft < 900) {
-            state.timers.turn = setInterval(() => {
-              timeLeft--; displayTime();
-              if(timeLeft <= 0) { 
-                app.clearAllTimers(); 
-                app.humanEndTurn();
-              }
-            }, 1000);
-          }
+        let timeLeft = state.config.turnTimeLimit;
+        const displayTime = () => { if(subTimer) subTimer.textContent = timeLeft >= 900 ? '無制限' : `残り ${timeLeft} 秒`; };
+        displayTime();
+        
+        if(timeLeft < 900) {
+          state.timers.turn = setInterval(() => {
+            timeLeft--; displayTime();
+            if(timeLeft <= 0) { 
+              app.clearAllTimers(); 
+              app.humanEndTurn();
+            }
+          }, 1000);
         }
       },
 
@@ -1751,9 +1735,9 @@
           else {
             h += '<div class="flex flex-wrap gap-1 mt-2">';
             p.hand.forEach((_, cIdx) => { 
-              // 🔒 【完全ブロック】ゲームが 'playing' 状態かつ自分の手番であり、まだこのターンで引いていない場合のみボタンを出す
+              // 🔒 【完全ブロック】プレイ中かつ自分のターン、かつまだ引いていない場合のみボタンを描画
               if(state.phase === 'playing' && isTgt && !state.hasDrawnThisTurn) {
-                h += `<button onclick="this.disabled=true; app.drawCardFrom('${p.id}', ${cIdx})" class="w-6 h-9 bg-amber-700 border-2 border-amber-300 rounded-lg text-white font-bold text-[10px] shadow hover:scale-110 active:scale-95 transition">?</button>`;
+                h += `<button onclick="app.drawCardFrom('${p.id}', ${cIdx})" class="w-6 h-9 bg-amber-700 border-2 border-amber-300 rounded-lg text-white font-bold text-[10px] shadow hover:scale-110 active:scale-95 transition">?</button>`;
               } else {
                 h += `<div class="w-5 h-8 bg-slate-800 border border-slate-700 rounded-md"></div>`;
               }
