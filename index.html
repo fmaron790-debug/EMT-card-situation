@@ -806,8 +806,8 @@
           state.lastDrawnId = null;
           state.selectedMyCards = [];
           app.showScreen('view-game');
-          document.getElementById('btn-initial-ready')?.classList.remove('hidden');
-          document.getElementById('btn-end-turn')?.classList.add('hidden');
+        const subTimer = document.getElementById('game-sub-timer'); if(subTimer) subTimer.textContent = '無制限'; // 🆕 開始前は時間無制限表示
+        document.getElementById('btn-initial-ready')?.classList.remove('hidden');
           const banner = document.getElementById('game-announcement-banner');
           if(banner) banner.textContent = '初期手札のペアを破棄し、「手札確認完了」を押してください';
           app.renderTable();
@@ -992,6 +992,8 @@
       },
 
       createRoom: () => {
+        app.readConfig();createRoom: () => {
+        app.clearAllTimers(); state.phase = 'waiting'; // 🆕 待機中はタイマー無制限（停止）
         app.readConfig();
         state.room = { code: Math.floor(100000 + Math.random() * 900000).toString(), isHost: true, isSolo: false };
         const codeDisplay = document.getElementById('room-code-display');
@@ -1722,7 +1724,8 @@
 
       processTurn: () => {
         app.clearAllTimers();
-        if(app.checkClears()) return; 
+        if(state.phase !== 'playing') return; // 🆕 ゲーム開始前はタイマーを動かさない（無制限）
+        if(app.checkClears()) return;
 
         state.lastDrawnId = null; 
         state.hasDrawnThisTurn = false; 
