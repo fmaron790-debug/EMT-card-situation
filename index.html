@@ -214,7 +214,6 @@
     const SUIT_ICONS = { C: '♣', S: '♠', H: '♥', D: '♦', M: '🧠', JOKER: '⚡' };
     const SUIT_COLORS = { C: 'text-emerald-400', S: 'text-indigo-400', H: 'text-rose-400', D: 'text-amber-400', M: 'text-cyan-400', JOKER: 'text-amber-300' };
     const BOT_NAME_POOL = ['救急隊員α', '救急隊員β', '救急隊員γ', '指導救命士', '機関員', '通信指令員'];
-    // 🆕 プレイヤーカラーパレット（全10色）
     const PLAYER_COLOR_PALETTE = ['#38bdf8', '#f43f5e', '#10b981', '#f59e0b', '#a855f7', '#ec4899', '#84cc16', '#f97316', '#06b6d4', '#6366f1'];
 
     function pickUnusedColor(playersList) {
@@ -395,7 +394,7 @@
         <div class="w-full max-w-4xl bg-slate-900/90 border border-slate-800 rounded-2xl p-3 mb-3 flex flex-wrap items-center justify-between gap-3 shadow-lg">
           <div class="flex items-center gap-3">
             <span id="game-turn-text" class="text-xs px-3 py-1.5 rounded-full bg-rose-950 text-rose-300 border border-rose-700 font-bold">不整脈を回避せよ！</span>
-            <span id="game-sub-timer" class="text-xs font-mono text-amber-400 font-bold w-20 text-center"></span>
+            <span id="game-sub-timer" class="text-xs font-mono text-amber-400 font-bold w-20 text-center">無制限</span>
           </div>
           <div class="flex items-center gap-2">
             <button id="btn-initial-ready" onclick="app.humanReady()" class="hidden bg-emerald-600 text-white text-xs font-extrabold px-4 py-2 rounded-xl hover:scale-105 transition shadow-[0_0_15px_rgba(16,185,129,0.4)]">手札確認完了</button>
@@ -806,8 +805,8 @@
           state.lastDrawnId = null;
           state.selectedMyCards = [];
           app.showScreen('view-game');
-        const subTimer = document.getElementById('game-sub-timer'); if(subTimer) subTimer.textContent = '無制限'; // 🆕 開始前は時間無制限表示
-        document.getElementById('btn-initial-ready')?.classList.remove('hidden');
+          document.getElementById('btn-initial-ready')?.classList.remove('hidden');
+          document.getElementById('btn-end-turn')?.classList.add('hidden');
           const banner = document.getElementById('game-announcement-banner');
           if(banner) banner.textContent = '初期手札のペアを破棄し、「手札確認完了」を押してください';
           app.renderTable();
@@ -992,8 +991,6 @@
       },
 
       createRoom: () => {
-        app.readConfig();createRoom: () => {
-        app.clearAllTimers(); state.phase = 'waiting'; // 🆕 待機中はタイマー無制限（停止）
         app.readConfig();
         state.room = { code: Math.floor(100000 + Math.random() * 900000).toString(), isHost: true, isSolo: false };
         const codeDisplay = document.getElementById('room-code-display');
@@ -1248,7 +1245,7 @@
           `;
 
           grid.innerHTML += `
-            <div onclick="app.handleMemoryCardClick(${idx})" class="aspect-[3/4] w-full rounded-2xl border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between p-1.5 shadow-[0_10px_20px_rgba(0,0,0,0.6)] select-none relative overflow-hidden ${isFlipped ? 'bg-slate-100 text-slate-900 border-indigo-500 z-20 shadow-[0_0_20px_rgba(99,102,241,0.5)]' : `bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 ${guideClass} hover:scale-105 z-10 text-slate-100`}">
+            <div onclick="app.handleMemoryCardClick(${idx})" class="aspect-[3/4] w-full rounded-2xl border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between p-1.5 shadow-[0_10px_20px_rgba(0,0,0,0.6)] select-none relative overflow-hidden ${isFlipped ? 'bg-slate-100 text-slate-900 border-indigo-500 z-20 shadow-[0_0_20px_rgba(99,102,241,0.5)]' : `bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 ${guideClass} hover:scale-105 z-10 text-slate-100'}`}>
               ${isFlipped ? cardFrontHtml : ecgCardBackHtml}
             </div>
           `;
@@ -1666,6 +1663,7 @@
         });
 
         app.showScreen('view-game');
+        const subTimer = document.getElementById('game-sub-timer'); if(subTimer) subTimer.textContent = '無制限';
         document.getElementById('btn-initial-ready')?.classList.remove('hidden');
         document.getElementById('btn-end-turn')?.classList.add('hidden');
         app.addLogMessage('出動演習が開始されました（手札確認中）。');
@@ -1724,8 +1722,8 @@
 
       processTurn: () => {
         app.clearAllTimers();
-        if(state.phase !== 'playing') return; // 🆕 ゲーム開始前はタイマーを動かさない（無制限）
-        if(app.checkClears()) return;
+        if(state.phase !== 'playing') return;
+        if(app.checkClears()) return; 
 
         state.lastDrawnId = null; 
         state.hasDrawnThisTurn = false; 
