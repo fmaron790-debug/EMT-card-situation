@@ -573,6 +573,7 @@
     </div>
   </div>
 
+  <!-- 管理者用画面（CMSモダル） -->
   <div id="modal-admin" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="w-full max-w-4xl bg-slate-900 border border-rose-500/50 rounded-3xl p-6 flex flex-col max-h-[95vh] shadow-[0_0_50px_rgba(225,29,72,0.2)]">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
@@ -675,7 +676,7 @@
 
     const state = {
       mode: 'babanuki',
-      phase: 'idle', // 🆕 初期状態は 'idle'（ゲーム開始前はカードを絶対に引けない）
+      phase: 'idle', // 🔒 ゲーム開始前・確認中は 'idle' でブロック
       room: { code: '', isHost: false, isSolo: false },
       config: { maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true },
       me: { id: 'p_' + Math.random().toString(36).substring(2, 9), name: '救急隊員' },
@@ -765,6 +766,10 @@
         app.showScreen('view-game');
         document.getElementById('btn-initial-ready')?.classList.remove('hidden');
         document.getElementById('btn-end-turn')?.classList.add('hidden');
+      }
+      // 🆕 参加者全員が「ready（手札確認完了）」を受信したらプレイ状態にする
+      if(actionData.type === 'ready') {
+        state.phase = 'playing';
       }
       app.renderTable();
       if(state.phase === 'playing') {
@@ -1380,7 +1385,7 @@
       },
 
       startStandardCardGameSession: () => {
-        state.phase = 'initial_discard'; state.discardPile = []; state.ranks = []; state.hiddenCard = null; state.selectedMyCards = []; state.lastDrawnId = null; state.hasDrawnThisTurn = false;
+        state.phase = 'idle'; state.discardPile = []; state.ranks = []; state.hiddenCard = null; state.selectedMyCards = []; state.lastDrawnId = null; state.hasDrawnThisTurn = false;
         
         let deck = state.mode === 'babanuki' ? currentCardDB.filter(c => c.id !== 54 && c.suit !== 'M') : currentCardDB.filter(c => c.suit !== 'M');
         deck.sort(() => Math.random() - 0.5);
@@ -1396,7 +1401,7 @@
         app.showScreen('view-game');
         document.getElementById('btn-initial-ready')?.classList.remove('hidden');
         document.getElementById('btn-end-turn')?.classList.add('hidden');
-        app.addLogMessage('出動演習が開始されました。');
+        app.addLogMessage('出動演習が開始されました（手札確認中）。');
         app.renderTable();
       },
 
@@ -1405,8 +1410,7 @@
         utils.showToast('<i data-lucide="check-circle" class="w-4 h-4 inline mr-1"></i>手札確認完了！');
         if (window.lucide) lucide.createIcons();
         
-        // 🆕 手札確認完了ボタンを押したプレイヤーだけがゲームプレイ状態に入る
-        state.phase = 'playing';
+        state.phase = 'playing'; // 🔓 ここで初めてゲームプレイ（カードドロースタート）が許可される
         
         const activePlayers = state.players.filter(p => !p.isCleared);
         if(activePlayers.length > 0) {
@@ -1470,11 +1474,9 @@
       },
 
       drawCardFrom: async (targetId, cIdx) => {
-        // 🆕 【厳格なガード】ゲーム開始前（初期捨札確認中）や、既に引いている場合は絶対に引かせない
+        // 🔒 絶対ガード：ゲームが playing 状態でない、すでに引いている、または自分のターンではない場合は一切引けない
         if (state.phase !== 'playing' || state.hasDrawnThisTurn) return;
-
         const currentP = state.players[state.turnIdx];
-        // 自分のターンであるか、またはAIのターンを代行している場合のみ許可
         if (!currentP || (currentP.id !== state.me.id && !currentP.isAI)) return;
 
         app.clearAllTimers();
@@ -1485,7 +1487,7 @@
         const drawn = targetP.hand.splice(cIdx, 1)[0];
         currentP.hand.unshift(drawn);
         state.lastDrawnId = drawn.id;
-        state.hasDrawnThisTurn = true; // 🔒 ロック！
+        state.hasDrawnThisTurn = true; // 🔒 1枚引いた瞬間にロック
         
         app.addLogMessage(`${currentP.name} が ${targetP.name} からカードを引いた`);
         if (currentP.id === state.me.id) utils.showToast(`カード獲得`);
@@ -1590,7 +1592,7 @@
       },
       
       handleMyCardClick: (cId) => {
-        if(state.phase !== 'initial_discard' && (state.phase !== 'playing' || state.players[state.turnIdx].id !== state.me.id)) return;
+        if(state.phase !== 'playing' || state.players[state.turnIdx].id !== state.me.id) return;
         const myP = state.players.find(p=>p.id===state.me.id); const clicked = myP.hand.find(c=>c.id===cId); if(!clicked) return;
         
         const idx = state.selectedMyCards.findIndex(c => c.id === cId);
@@ -1651,7 +1653,7 @@
         });
         
         const active = state.players.filter(p => !p.isCleared);
-        if(active.length <= 1 && (state.phase === 'playing' || state.phase === 'initial_discard')) {
+        if(active.length <= 1 && state.phase === 'playing') {
           app.clearAllTimers(); state.phase = 'ended';
           if(active.length === 1) { active[0].isCleared = true; state.ranks.push(active[0].id); active[0].rank = active[0].rank || state.ranks.length; }
           setTimeout(() => { state.mode === 'jinuki' ? app.showJinukiQuiz() : app.showResults(); }, 1200);
@@ -1746,12 +1748,11 @@
           else {
             h += '<div class="flex flex-wrap gap-1 mt-2">';
             p.hand.forEach((_, cIdx) => { 
-              // 🆕 「自分のターンである」かつ「まだこのターンでカードを引いていない」場合のみ、1回押したら消えるボタンにする
+              // 🔒 【完全ブロック】ゲームが 'playing' 状態かつ自分の手番であり、まだこのターンで引いていない場合のみボタンを出す
               if(state.phase === 'playing' && isTgt && !state.hasDrawnThisTurn) {
-                h += `<button onclick="if(state.hasDrawnThisTurn) return; state.hasDrawnThisTurn=true; app.drawCardFrom('${p.id}', ${cIdx});" class="w-6 h-9 bg-amber-700 border-2 border-amber-300 rounded-lg text-white font-bold text-[10px] shadow hover:scale-110 active:scale-95 transition">?</button>`;
+                h += `<button onclick="this.disabled=true; app.drawCardFrom('${p.id}', ${cIdx})" class="w-6 h-9 bg-amber-700 border-2 border-amber-300 rounded-lg text-white font-bold text-[10px] shadow hover:scale-110 active:scale-95 transition">?</button>`;
               } else {
-                // すでに引いた後、または自分のターンではない場合は、ボタンすら表示せずただのカードの裏面（または空き枠）にする
-                h += `<div class="w-5 h-8 bg-slate-800 border border-slate-700 rounded-md opacity-40"></div>`;
+                h += `<div class="w-5 h-8 bg-slate-800 border border-slate-700 rounded-md"></div>`;
               }
             });
             h += '</div>';
