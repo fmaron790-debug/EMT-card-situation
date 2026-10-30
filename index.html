@@ -573,7 +573,6 @@
     </div>
   </div>
 
-  <!-- 管理者用画面（CMSモダル） -->
   <div id="modal-admin" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="w-full max-w-4xl bg-slate-900 border border-rose-500/50 rounded-3xl p-6 flex flex-col max-h-[95vh] shadow-[0_0_50px_rgba(225,29,72,0.2)]">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
@@ -676,7 +675,7 @@
 
     const state = {
       mode: 'babanuki',
-      phase: 'idle',
+      phase: 'idle', // 🆕 初期状態は 'idle'（ゲーム開始前はカードを絶対に引けない）
       room: { code: '', isHost: false, isSolo: false },
       config: { maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true },
       me: { id: 'p_' + Math.random().toString(36).substring(2, 9), name: '救急隊員' },
@@ -685,7 +684,7 @@
       discardPile: [],
       hiddenCard: null,
       lastDrawnId: null,
-      hasDrawnThisTurn: false, // 🆕 追加：1ターン1枚制限の厳格なフラグ
+      hasDrawnThisTurn: false,
       selectedMyCards: [], 
       ranks: [],
       quizResultCorrect: false,
@@ -759,16 +758,8 @@
       if(actionData.players) state.players = actionData.players;
       if(actionData.discardPile) state.discardPile = actionData.discardPile;
       if(actionData.turnIdx !== undefined) state.turnIdx = actionData.turnIdx;
+      if(actionData.hasDrawnThisTurn !== undefined) state.hasDrawnThisTurn = actionData.hasDrawnThisTurn;
       
-      // 🆕 自分のターンであれば、現在の自分のドロー状態を再評価
-      const currentP = state.players[state.turnIdx];
-      if (currentP && currentP.id === state.me.id) {
-        // 自分のターンに切り替わったばかりのときは、まだ引いていない状態にする
-        if (actionData.type === 'next_turn' || actionData.type === 'ready') {
-          state.hasDrawnThisTurn = false;
-        }
-      }
-
       if(actionData.type === 'start') {
         state.phase = 'initial_discard';
         app.showScreen('view-game');
@@ -1411,9 +1402,10 @@
 
       humanReady: () => {
         document.getElementById('btn-initial-ready')?.classList.add('hidden');
-        utils.showToast('<i data-lucide="check-circle" class="w-4 h-4 inline mr-1"></i>出動開始！');
+        utils.showToast('<i data-lucide="check-circle" class="w-4 h-4 inline mr-1"></i>手札確認完了！');
         if (window.lucide) lucide.createIcons();
-        app.checkClears(); 
+        
+        // 🆕 手札確認完了ボタンを押したプレイヤーだけがゲームプレイ状態に入る
         state.phase = 'playing';
         
         const activePlayers = state.players.filter(p => !p.isCleared);
@@ -1442,14 +1434,12 @@
         if(app.checkClears()) return; 
 
         state.lastDrawnId = null; 
-        state.hasDrawnThisTurn = false; // 🆕 自分の手番が処理されるときに確実にリセット！
+        state.hasDrawnThisTurn = false; 
         state.selectedMyCards = [];
         
         const currentP = state.players[state.turnIdx];
         const targetIdx = app.getTargetIdx(state.turnIdx);
         const targetP = state.players[targetIdx];
-        
-        // （以下続く...）
 
         app.renderTable();
         const banner = document.getElementById('game-announcement-banner');
@@ -1480,13 +1470,12 @@
       },
 
       drawCardFrom: async (targetId, cIdx) => {
-        // 🆕 【絶対的なガード】
-        // 1. いま自分のターンではない場合は絶対に引かせない
-        // 2. すでにこのターンでカードを引いている場合は引かせない
+        // 🆕 【厳格なガード】ゲーム開始前（初期捨札確認中）や、既に引いている場合は絶対に引かせない
+        if (state.phase !== 'playing' || state.hasDrawnThisTurn) return;
+
         const currentP = state.players[state.turnIdx];
-        if (!currentP || currentP.id !== state.me.id || state.hasDrawnThisTurn) {
-          return;
-        }
+        // 自分のターンであるか、またはAIのターンを代行している場合のみ許可
+        if (!currentP || (currentP.id !== state.me.id && !currentP.isAI)) return;
 
         app.clearAllTimers();
         const targetP = state.players.find(p => p.id === targetId);
@@ -1496,10 +1485,10 @@
         const drawn = targetP.hand.splice(cIdx, 1)[0];
         currentP.hand.unshift(drawn);
         state.lastDrawnId = drawn.id;
-        state.hasDrawnThisTurn = true; // 🔒 自分のターンで引いた瞬間にロック
+        state.hasDrawnThisTurn = true; // 🔒 ロック！
         
         app.addLogMessage(`${currentP.name} が ${targetP.name} からカードを引いた`);
-        utils.showToast(`カード獲得`);
+        if (currentP.id === state.me.id) utils.showToast(`カード獲得`);
         
         socket.emit('game_action', { 
           roomCode: state.room.code, 
@@ -1509,8 +1498,6 @@
           turnIdx: state.turnIdx, 
           hasDrawnThisTurn: true 
         });
-
-        // （以降の処理はそのまま続きます）
 
         if(app.checkClears()) return; 
         
@@ -1563,7 +1550,7 @@
         if(state.phase === 'ended') return;
         state.turnIdx = app.getNextActiveIdx(state.turnIdx + 1);
         state.lastDrawnId = null;
-        state.hasDrawnThisTurn = false; // 🔓 ターン交代時に確実にロック解除
+        state.hasDrawnThisTurn = false; 
         
         socket.emit('game_action', {
           roomCode: state.room.code,
@@ -1759,17 +1746,12 @@
           else {
             h += '<div class="flex flex-wrap gap-1 mt-2">';
             p.hand.forEach((_, cIdx) => { 
-              // 🆕 まだこのターンで引いていない場合のみボタンを有効化
-              // 修正前:
-
-if(isTgt && state.phase === 'playing') {
-  if (!state.hasDrawnThisTurn) {
-    h += `<button onclick="this.disabled=true; app.drawCardFrom('${p.id}', ${cIdx})" class="w-6 h-9 bg-amber-700 border-2 border-amber-300 rounded-lg text-white font-bold text-[10px] shadow hover:scale-110 active:scale-95 transition">?</button>`;
-  } else {
-    h += `<div class="w-6 h-9 bg-slate-800 border border-slate-700 rounded-lg opacity-40 flex items-center justify-center text-[10px] text-slate-500">済</div>`;
-  }
-}
-              else h += `<div class="w-5 h-8 bg-slate-800 border border-slate-700 rounded-md"></div>`;
+              // 🆕 【厳格な表示制限】ゲームが 'playing' 状態かつ、自分の手番であり、まだこのターンで引いていない場合のみドローボタンを表示する
+              if(state.phase === 'playing' && isTgt && !state.hasDrawnThisTurn) {
+                h += `<button onclick="this.disabled=true; app.drawCardFrom('${p.id}', ${cIdx})" class="w-6 h-9 bg-amber-700 border-2 border-amber-300 rounded-lg text-white font-bold text-[10px] shadow hover:scale-110 active:scale-95 transition">?</button>`;
+              } else {
+                h += `<div class="w-5 h-8 bg-slate-800 border border-slate-700 rounded-md"></div>`;
+              }
             });
             h += '</div>';
           }
