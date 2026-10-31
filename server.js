@@ -15,6 +15,7 @@ app.get('/', (req, res) => {
 
 const rooms = {};
 
+// ▼ 17行目付近：game4 を true に変更
 let globalAccessState = { game1: true, game2: true, game3: true, game4: true };
 let globalCardDB = null;
 let globalAnnouncements = [];
@@ -64,6 +65,7 @@ io.on('connection', (socket) => {
       const pool = availableColors.length > 0 ? availableColors : PLAYER_COLORS;
       const randomColor = pool[Math.floor(Math.random() * pool.length)];
 
+      // ▼ 58行目付近：join_room 内の player 作成部分に下3行を追加
       player = {
         id: socket.id,
         name: playerName || '救急隊員',
@@ -74,8 +76,9 @@ io.on('connection', (socket) => {
         rank: 0,
         team: (rooms[roomCode].players.length % 3) + 1,
         color: randomColor,
-        jackScore: 0,
-        jackStatus: 'active'
+        totalInternal: 0, // 🆕 追加
+        isStayed: false,  // 🆕 追加
+        isBusted: false   // 🆕 追加
       };
       rooms[roomCode].players.push(player);
     } else if (playerName) {
