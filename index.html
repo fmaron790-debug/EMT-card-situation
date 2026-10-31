@@ -540,6 +540,11 @@
               <span id="lobby-mode-tag" class="text-xs font-mono px-2.5 py-1 rounded-md font-bold">GAME XX</span>
               <h2 id="lobby-mode-title" class="text-xl font-bold text-white mt-1">TITLE</h2>
             </div>
+            <!-- 🆕 ここに説明書を開くアイコンボタンを追加 -->
+            <button onclick="app.openManualModal()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 transition flex items-center gap-1.5 text-xs font-bold" title="遊び方・説明書">
+              <i data-lucide="book-open" class="w-4 h-4"></i>
+              <span class="hidden sm:inline">説明書</span>
+            </button>
           </div>
           <div class="mb-5">
             <label class="block text-xs font-semibold text-slate-300 mb-2">あなたの名前（隊員コールサイン）</label>
@@ -995,6 +1000,35 @@
     </div>
   </div>
 
+<!-- 他のモーダルたち (例: チャットや管理者画面など) -->
+  <div id="modal-chat" class="...">...</div>
+  <div id="modal-admin" class="...">...</div>
+  <div id="modal-card-detail" class="...">...</div>
+
+  <!-- 🆕 ここに今コピーした説明書モーダルを貼り付ける！ -->
+  <div id="modal-manual" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="w-full max-w-lg bg-slate-900 border border-cyan-500/50 rounded-3xl p-6 shadow-2xl flex flex-col max-h-[85vh]">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="book-open" class="w-5 h-5 text-cyan-400"></i>
+          <span id="manual-modal-title">訓練ミッション説明書</span>
+        </h3>
+        <button onclick="app.closeManualModal()" class="p-2 bg-slate-800 text-slate-400 rounded-xl hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div id="manual-modal-body" class="flex-1 overflow-y-auto custom-scrollbar space-y-4 text-xs sm:text-sm text-slate-300 pr-1 leading-relaxed">
+        <!-- JSで現在のゲームモードに応じた説明文がここに切り替わります -->
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-800 text-right">
+        <button onclick="app.closeManualModal()" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold px-6 py-2.5 rounded-xl transition shadow-md">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 画面下部の3連通信ドックなどのパーツ -->
+  <div class="fixed bottom-3 left-1/2 ...">...</div>
+
   <!-- 管理者用画面（CMSモダル） -->
   <div id="modal-admin" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="w-full max-w-4xl bg-slate-900 border border-rose-500/50 rounded-3xl p-6 flex flex-col max-h-[95vh] shadow-[0_0_50px_rgba(225,29,72,0.2)]">
@@ -1326,6 +1360,72 @@
     });
 
     const app = {
+
+
+openManualModal: () => {
+        const modal = document.getElementById('modal-manual');
+        const titleEl = document.getElementById('manual-modal-title');
+        const bodyEl = document.getElementById('manual-modal-body');
+        if(!modal || !bodyEl) return;
+
+        let titleTxt = '救急トランプ総合演習 ガイド';
+        let htmlTxt = '';
+
+        if (state.mode === 'babanuki') {
+          titleTxt = 'GAME 01: 致死性不整脈を回避せよ！（救急ババ抜き）';
+          htmlTxt = `
+            <div class="p-3 bg-rose-950/30 border border-rose-900/50 rounded-2xl mb-3"><strong class="text-rose-300">【ゲームの目的】</strong><br>除細動が直ちに必要な「心室細動（VF）」のカードを最後まで手元に抱え持たないようにするゲームです。</div>
+            <ul class="list-disc list-inside space-y-2 text-slate-200">
+              <li>自分の番になったら、隣のプレイヤーの手札から1枚カードを引きます。</li>
+              <li>同じグループの数字・疾患ペアが手札に揃ったら、「ペアを破棄」ボタンで場に捨てることができます。</li>
+              <li>最後までVFカードを持っていたプレイヤーが敗北（最下位）となります。</li>
+            </ul>
+          `;
+        } else if (state.mode === 'memory') {
+          titleTxt = 'GAME 02: 救急神経衰弱バトル';
+          htmlTxt = `
+            <div class="p-3 bg-blue-950/30 border border-blue-900/50 rounded-2xl mb-3"><strong class="text-blue-300">【ゲームの目的】</strong><br>全40疾患グループの問題文カードからペアをいち早く見つけ出し、自分の救急疾患ボードを完成させるゲームです。</div>
+            <ul class="list-disc list-inside space-y-2 text-slate-200">
+              <li>自分の番に裏向きのカードを2枚めくり、同じ疾患グループであればペア獲得となります。</li>
+              <li>獲得したペアを自陣ボードの正しい疾患スロットにはめていきます。</li>
+              <li>制限時間内に多くの疾患を埋めたプレイヤーが勝利します。</li>
+            </ul>
+          `;
+        } else if (state.mode === 'jinuki') {
+          titleTxt = 'GAME 03: 救急 隠れたものを当てろ（ジジ抜き）';
+          htmlTxt = `
+            <div class="p-3 bg-amber-950/30 border border-amber-900/50 rounded-2xl mb-3"><strong class="text-amber-300">【ゲームの目的】</strong><br>全54枚から1枚がランダムに事前封印された状態で進行するジジ抜きです。</div>
+            <ul class="list-disc list-inside space-y-2 text-slate-200">
+              <li>「推理シート」を活用して、どのカードが封印されているかを予測します。</li>
+              <li>ゲーム終了後には、封印されたカードの本来のペアを当てる3択クイズ（制限60秒）が発生します。</li>
+            </ul>
+          `;
+        } else if (state.mode === 'jack') {
+          titleTxt = 'GAME 04: 99ジャック';
+          htmlTxt = `
+            <div class="p-3 bg-teal-950/30 border border-teal-900/50 rounded-2xl mb-3"><strong class="text-teal-300">【ゲームの目的】</strong><br>合計点が上限の <strong class="text-teal-300">98.99</strong> を超えない範囲で、より99に近づける救急版ブラックジャックです。</div>
+            <ul class="list-disc list-inside space-y-2 text-slate-200">
+              <li>山札からカードを引くと、小数第2位までの疾患3択クイズ（制限60秒）が出題されます。</li>
+              <li><strong class="text-emerald-400">正解</strong>すると「手札に加算するか、破棄するか」を選べます。<br><strong class="text-rose-400">不正解や時間切れ</strong>になると、手札へ強制加算されます。</li>
+              <li>手札の合計値が <strong class="text-rose-400">99.00以上</strong> になると急変（バースト：瞳孔散大・心拍呼吸停止）で敗北となります。</li>
+              <li>超える前に「ステイアンドプレイ」を宣言して安全に勝負を確定させましょう！</li>
+            </ul>
+          `;
+        } else {
+          titleTxt = '総合ガイド';
+          htmlTxt = `<p>各ゲームのロビー画面にある「説明書」アイコンから、いつでも詳しいルールを確認できます。</p>`;
+        }
+
+        if(titleEl) titleEl.textContent = titleTxt;
+        if(bodyEl) bodyEl.innerHTML = htmlTxt;
+        modal.classList.remove('hidden');
+        if(window.lucide) lucide.createIcons();
+      },
+
+      closeManualModal: () => {
+        document.getElementById('modal-manual')?.classList.add('hidden');
+      },
+
       init: () => {
         try {
           const savedName = localStorage.getItem('ems_player_name');
