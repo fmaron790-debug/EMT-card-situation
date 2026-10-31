@@ -1730,7 +1730,7 @@
                 ${statusHtml}
               </div>
               <div class="flex items-center justify-between text-xs bg-slate-950/90 px-2.5 py-1.5 rounded-xl border border-slate-800/80">
-                <span class="text-slate-400 text-[10px]">手札 ${p.hand.length}枚</span>
+                <span class="text-slate-400 text-[10px]">手札 ${p.hand.length} / 10枚</span>
                 <span class="font-mono font-black ${p.isBusted && showTotal ? 'text-rose-400' : 'text-teal-300'}">計: ${totalStr}</span>
               </div>
             </div>
@@ -1993,13 +1993,13 @@
             bustedPlayerId = currentP.id;
             app.addLogMessage(`💀 ${currentP.name} が 99.00 を超過し急変（バースト）しました！`);
             app.showJackBustModal(currentP);
+          } else if(currentP.hand.length >= 10) {
+            currentP.isStayed = true;
+            utils.showToast('🎴 手札上限（10枚）に達したため自動ステイとなります！');
+            app.addLogMessage(`🛡 ${currentP.name} が手札上限（10枚）に達しステイとなりました。`);
           } else {
-            app.addLogMessage(`${currentP.name} がカードを手札に加算しました。`);
+            app.addLogMessage(`${currentP.name} がカードを手札に加算しました（${currentP.hand.length}/10枚）。`);
           }
-        } else {
-          state.discardPile.push(card);
-          app.addLogMessage(`${currentP.name} が正解し、カードを加算せず破棄しました。`);
-        }
 
         state.jackState.currentCard = null;
         state.jackState.isProcessing = false;
@@ -2021,9 +2021,15 @@
         if(state.phase !== 'jack_playing' || !aiPlayer) return;
 
         // AIの判断ロジック：現在値が82.00（8200）以上ならステイ確率を高め、88.00（8800）以上なら確実にステイ
-        if(aiPlayer.totalInternal >= 8800 || (aiPlayer.totalInternal >= 7800 && Math.random() < 0.6) || state.jackState.deck.length === 0) {
+        if(aiPlayer.hand.length >= 10 || aiPlayer.totalInternal >= 8800 || (aiPlayer.totalInternal >= 7800 && Math.random() < 0.6) || state.jackState.deck.length === 0) {
           aiPlayer.isStayed = true;
           app.addLogMessage(`🛡 ${aiPlayer.name} がステイアンドプレイを宣言しました。`);
+if(!aiPlayer.isBusted && aiPlayer.hand.length >= 10) aiPlayer.isStayed = true;
+currentP.drawCount = (currentP.drawCount || 0) + 1;
+        if (!currentP.isBusted && currentP.drawCount >= 10) {
+          currentP.isStayed = true;
+          utils.showToast('🎴 ドロー上限（10回）に達したため自動ステイとなります！');
+        }
           state.jackState.isProcessing = false;
           app.advanceJackTurn(null);
           return;
