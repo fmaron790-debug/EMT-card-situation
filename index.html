@@ -1048,7 +1048,7 @@
               </label>
             </div>
             <div class="flex justify-between items-center p-3 bg-slate-900 rounded-xl border border-slate-800">
-              <span class="text-xs font-bold text-amber-300">GAME 03: 救急 隠れたものを当てろ</span>
+              <span class="text-xs font-bold text-amber-300">GAME 03: 救急 隠れた疾患を当てろ</span>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="toggle-game3" onchange="app.saveAdminAccess()" class="sr-only peer">
                 <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
@@ -1390,8 +1390,8 @@
         c.innerHTML = '';
         const games = [
           { id: 'game1', code: 'babanuki', lbl: 'GAME 01', title: '致死性不整脈を回避せよ！', icon: 'activity', desc: '【救急ババ抜き】除細動が不可欠な「心室細動（VF）」を最後まで抱え持っていた者が敗北！', col: 'rose' },
-          { id: 'game2', code: 'memory', lbl: 'GAME 02', title: '救急神経衰弱バトル', icon: 'brain', desc: '【救急神経衰弱】全40疾患グループ対応の神経衰弱バトル！', col: 'blue' },
-          { id: 'game3', code: 'jinuki', lbl: 'GAME 03', title: '救急 隠れたものを当てろ', icon: 'search', desc: '【救急ジジ抜き＋VF/DCペア】全54枚から1枚が事前封印！孤立カードから病態を推理せよ！', col: 'amber' },
+          { id: 'game2', code: 'memory', lbl: 'GAME 02', title: '改訂長谷川簡易知能評価スケールに引っかかるな！', icon: 'brain', desc: '【救急神経衰弱】全40疾患グループ対応の神経衰弱バトル！', col: 'blue' },
+          { id: 'game3', code: 'jinuki', lbl: 'GAME 03', title: '救急 隠れた疾患を当てろ', icon: 'search', desc: '【救急ジジ抜き＋VF/DCペア】全54枚から1枚が事前封印！孤立カードから病態を推理せよ！', col: 'amber' },
           { id: 'game4', code: 'jack', lbl: 'GAME 04', title: '99ジャック', icon: 'crosshair', desc: '【救急ブラックジャック】3択クイズに答えて98.99を目指せ！99.00を超えると急変（バースト）！', col: 'teal' }
         ];
         games.forEach(g => {
@@ -1454,7 +1454,7 @@
           aiRow?.classList.remove('hidden');
           if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（AI演習）';
         } else if (mode === 'jinuki') {
-          if(tag) tag.textContent = 'GAME 03'; if(title) title.textContent = '救急 隠れたものを当てろ';
+          if(tag) tag.textContent = 'GAME 03'; if(title) title.textContent = '救急 隠れた疾患を当てろ';
           if(badge) { badge.textContent = '隠れカード推理'; badge.className = 'text-xs px-2 py-0.5 rounded-full bg-amber-900/60 text-amber-300 border border-amber-700'; }
           if(turnBadge) { turnBadge.textContent = '隠れカードを当てろ'; turnBadge.className = 'text-xs px-3 py-1.5 rounded-full bg-amber-950 text-amber-300 border border-amber-700 font-bold'; }
           document.getElementById('btn-open-jinuki-tracker')?.classList.remove('hidden');
@@ -3399,7 +3399,7 @@
           if(badge) { badge.className='text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block bg-amber-900/60 text-amber-300 border border-amber-600'; badge.textContent='1ST PLACE'; }
           if(title) title.textContent = state.mode === 'jack' ? '99ジャック 制覇！' : '最速クリア達成！'; 
           if(window.confetti) confetti();
-        } else if ((state.mode === 'jack' && myP?.isBusted) || myP?.rank === state.players.length) {
+        } else if (state.mode === 'jack' ? myP?.isBusted : myP?.rank === state.players.length) {
           if(iconBox) { iconBox.className='w-20 h-20 rounded-3xl flex items-center justify-center mb-4 bg-rose-500/20 text-rose-400 border-2 border-rose-500 mx-auto'; iconBox.innerHTML='<i data-lucide="zap-off" class="w-12 h-12"></i>'; }
           if(badge) { badge.className='text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block bg-rose-900/60 text-rose-300 border border-rose-600'; badge.textContent=state.mode==='babanuki'?'VF保持':state.mode==='jack'?'OVER 99.00 (CPA)':'孤立カード保持'; }
           if(title) title.textContent=state.mode==='babanuki'?'VFを回避できず！':state.mode==='jack'?'99超過…急変（バースト）':'作戦完了';
