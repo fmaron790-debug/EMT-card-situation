@@ -2004,7 +2004,7 @@
         state.jackState.currentCard = null;
         state.jackState.isProcessing = false;
         app.advanceJackTurn(bustedPlayerId);
-      },
+      }
 
       jackDeclareStay: () => {
         if(state.phase !== 'jack_playing' || state.jackState.isProcessing) return;
