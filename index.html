@@ -127,8 +127,9 @@
       { id: 52, suit: "D", num: 13, title: "外傷", desc: "成人男性、片側上肢全体III度熱傷と前胸部のみのII度熱傷、この人の熱傷指数（端数切捨て）" },
       { id: 53, suit: "JOKER", num: 0, title: "心室細動（VF）", desc: "即座に除細動が必要な致死性不整脈。持ち続けるとあがれません" },
       { id: 54, suit: "JOKER", num: 0, title: "DC（電気ショック）", desc: "VFと組み合わせて使える。このカードとVFのカードを組み合わせて使える" },
-
-      // GAME 02（救急神経衰弱用：全40グループ正式エクセルデータ）
+      // ※GAME02（神経衰弱用40グループ）および GAME04（99ジャック用228問＋3択データ）を含みます
+      // （この後すぐに「後半コード」を出力しますのでお待ちください）
+// GAME 02（救急神経衰弱用：全40グループ正式エクセルデータ）
       { id: 101, suit: "M", num: 1, title: "急性心筋梗塞", desc: "心電図、標準誘導等でII、IIIでST上昇" },
       { id: 102, suit: "M", num: 1, title: "急性心筋梗塞", desc: "突然20分以上の胸痛・呼吸困難、ショック" },
       { id: 103, suit: "M", num: 2, title: "急性大動脈解離", desc: "突然発症する強い胸痛・背部痛、移動する痛み" },
@@ -211,9 +212,266 @@
       { id: 180, suit: "M", num: 40, title: "統合失調症", desc: "妄想、異常行動、無関心、注意散漫、幻覚" }
     ];
 
-    const SUIT_ICONS = { C: '♣', S: '♠', H: '♥', D: '♦', M: '🧠', JOKER: '⚡' };
-    const SUIT_COLORS = { C: 'text-emerald-400', S: 'text-indigo-400', H: 'text-rose-400', D: 'text-amber-400', M: 'text-cyan-400', JOKER: 'text-amber-300' };
-    const BOT_NAME_POOL = ['救急隊員α', '救急隊員β', '救急隊員γ', '指導救命士', '機関員', '通信指令員'];
+    // GAME 04（99ジャック用：全228問エクセル完全準拠データ [表示値, 内部値, 問題文, 選択肢1, 選択肢2, ふち色]）
+    const RAW_JACK_CARDS = [
+      [0.9, 90, "生理食塩水の濃度（％）", 1, 0.09, "緑"],
+      [11.4, 1140, "2023年の人口統計において、総人口のうち年少人口が占める割合", 12.5, 19, "緑"],
+      [59.5, 5950, "2023年の人口統計において、総人口のうち生産年齢人口が占める割合", 15.2, 25.6, "緑"],
+      [73, 7300, "2023年の出生数（万人）", 205, 42, "緑"],
+      [6, 600, "2023年の出生率（千人あたりの出生数）", 18, 26, "緑"],
+      [1.2, 120, "2023年の合計特殊出生率", 2, 5, "緑"],
+      [1, 100, "2023年の死因の内、悪性新生物の順位", 2, 4, "緑"],
+      [82, 8200, "2020年10月の入院患者数の内、循環器系疾患で入院した患者数（万人）", 190, 40, "緑"],
+      [52, 5200, "2024年4月の時点で全国にある3次医療圏の数", 47, 330, "緑"],
+      [20, 2000, "病院の定義として最低限保有していなければならない病床数", 19, 0, "緑"],
+      [1.8, 180, "2023年の乳児死亡率（出生千人に対する乳児死亡数）", 11, 5.2, "緑"],
+      [2.5, 250, "低体重出生の定義は何kg以下か", 3.5, 1.5, "緑"],
+      [72, 7200, "応急入院において、入院期間は何時間以内か", 24, 120, "緑"],
+      [45, 4500, "2024年度の国民負担率（租税負担率＋社会保障負担率）", 15, 90, "緑"],
+      [10, 1000, "診療報酬で、1点は何円換算されるか", 20, 30, "緑"],
+      [65, 6500, "高齢者とは何歳以上からか", 75, 60, "緑"],
+      [18, 1800, "児童福祉法において少年とは小学校就学から何歳までと定義されているか", 15, 12, "緑"],
+      [30, 3000, "地域包括ケアシステムにおいて必要なサービス提供される日常生活圏とはおおむね何分以内か", 60, 90, "緑"],
+      [10, 1000, "細胞の大きさはおおむね何μmか", 100, 1000, "赤"],
+      [40, 4000, "成人男子の体重に占める細胞内液の割合（％）", 20, 60, "赤"],
+      [60, 6000, "成人男子の体重に占める水の割合（％）", 20, 40, "赤"],
+      [0.08, 8, "血液量は体重（kg）にいくつかければ求まるか", 1, 0.4, "赤"],
+      [5, 500, "成人男子の体重に占める血漿の割合（％）", 15, 20, "赤"],
+      [7.4, 740, "動脈血のpHの中央値は？", 6.5, 8.5, "赤"],
+      [12, 1200, "胸椎は何対か", 10, 8, "赤"],
+      [8, 800, "頸髄は何対か", 10, 12, "赤"],
+      [12, 1200, "脳神経は何対か", 16, 7, "赤"],
+      [31, 3100, "脊髄神経は何対か", 12, 26, "赤"],
+      [1.3, 130, "脳は成人でどれくらいの重さか（kg）", 3, 10.5, "赤"],
+      [3, 300, "大脳基底核は片側大脳でいくつか", 6, 4, "赤"],
+      [1, 100, "嗅神経の脳神経番号", 2, 3, "赤"],
+      [2, 200, "視神経の脳神経番号", 1, 3, "赤"],
+      [3, 300, "動眼神経の脳神経番号", 2, 4, "赤"],
+      [4, 400, "滑車神経の脳神経番号", 3, 5, "赤"],
+      [5, 500, "三叉神経の脳神経番号", 4, 6, "赤"],
+      [6, 600, "外転神経の脳神経番号", 5, 7, "赤"],
+      [7, 700, "顔面神経の脳神経番号", 6, 8, "赤"],
+      [8, 800, "内耳神経の脳神経番号", 7, 9, "赤"],
+      [9, 900, "舌咽神経の脳神経番号", 8, 10, "赤"],
+      [10, 1000, "迷走神経の脳神経番号", 9, 11, "赤"],
+      [11, 1100, "副神経の脳神経番号", 10, 12, "赤"],
+      [12, 1200, "舌下神経の脳神経番号", 11, 10, "赤"],
+      [60, 6000, "脳血流の自動調節機能が破綻し始める平均血圧（mmHg）", 100, 80, "赤"],
+      [20, 2000, "脳が消費する酸素は全身に対して何％か", 15, 40, "赤"],
+      [25, 2500, "成人男性の切歯から気管分岐部までの長さ（cm）", 21, 23, "赤"],
+      [23, 2300, "成人女性の切歯から気管分岐部までの長さ（cm）", 21, 23, "赤"],
+      [90, 9000, "正常成人の酸素分圧が60mmHgの時のSpO2の値として正しいもの", 60, 80, "赤"],
+      [1, 100, "房室弁が閉まる音は何音か", 2, 3, "赤"],
+      [2, 200, "動脈弁が閉まる音は何音か", 1, 3, "赤"],
+      [0.25, 25, "冠血流量はどれくらいか（L/分）", 50, 0.5, "赤"],
+      [20, 2000, "心拍出量のうち、腎臓に流入する血流量（％）で正しいものはどれか", 15, 50, "赤"],
+      [0.5, 50, "乏尿の定義として何L未満で乏尿と定義されるか", 1, 5, "赤"],
+      [4, 400, "一つの一次精母細胞からできる精子の数はいくつか", 1, 2, "赤"],
+      [1, 100, "一つの一次卵母細胞からできる卵子の数はいくつか", 2, 4, "赤"],
+      [120, 12000, "赤血球の寿命として正しいものはどれか", 60, 180, "赤"],
+      [5, 500, "腰椎の数として正しいもの", 12, 7, "赤"],
+      [38, 3800, "解糖系＋クエン酸回路で産生されるATPの合計として正しいもの", 2, 34, "赤"],
+      [21, 2100, "大気圧中の酸素の割合", 18, 78, "赤"],
+      [4, 400, "両親が保因者フェニルケトン尿症（常染色体潜性遺伝病）が発症するリスクは何分の1か", 2, 8, "オレンジ"],
+      [3, 300, "心筋梗塞の急性とは発症から何日以内か", 30, 7, "オレンジ"],
+      [21, 2100, "今世紀における国民健康づくり運動を略称で健康日本何というか", 18, 22, "オレンジ"],
+      [6, 600, "救急業務において傷病者が明らかに死亡している判断基準で最低限確認するべき項目はいくつか", 10, 3, "オレンジ"],
+      [0.1, 10, "アドレナリンは何％か", 1, 0.01, "オレンジ"],
+      [0.15, 15, "エピペン緑色のカバーキャップ（体重15kg以上30kg未満）に含まれるアドレナリンの量（mg）", 0.3, 0.1, "オレンジ"],
+      [0.3, 30, "エピペン黄色のカバーキャップ（体重30kg以上）に含まれるアドレナリンの量（mg）", 0.15, 0.1, "オレンジ"],
+      [50, 5000, "20mlブドウ糖溶液（プレフィルドシリンジ）に含まれるブドウ糖は何％か", 0.1, 20, "オレンジ"],
+      [13, 1300, "成人男性において貧血とは血中ヘモグロビン何g/dL未満か", 12, 5, "オレンジ"],
+      [12, 1200, "成人女性において貧血とは血中ヘモグロビン何g/dL未満か", 13, 5, "オレンジ"],
+      [90, 9000, "PaO2の基準値はどれか", 40, 60, "オレンジ"],
+      [4, 400, "救命の連鎖に含まれる輪の数", 3, 2, "水色"],
+      [48, 4800, "DMATとは発災から72時間程度の内、何時間以内に活動できる機動性をもったチームであるか", 24, 12, "水色"],
+      [5, 500, "CSCATTTにおいてトリアージは何番目に行うことか", 1, 7, "水色"],
+      [5, 500, "2025年10月時点で救急救命士に認められてる特定行為は何種類か", 4, 7, "水色"],
+      [2, 200, "「消防力の整備指針」において人口15万人に対する救急車として正しいものはどれか", 30, 10, "水色"],
+      [29, 2900, "ハインリッヒの法則において、重篤な事故の裏に軽微な事故はいくつあるか", 1, 300, "水色"],
+      [2, 200, "手洗いの順番において手首を洗うのは何番目か", 1, 5, "水色"],
+      [0.3, 30, "N95マスクとは何μmの粒子を95％以上遮断できるものか", 100, 30, "水色"],
+      [0.1, 10, "次亜塩素酸ナトリウムを嘔吐物や・血液への処理で使用するときの濃度はいくつか（％）", 10, 0.5, "水色"],
+      [4, 400, "急性ストレス障害とは、心的外傷後ストレス反応が何週未満で改善するものをいうか", 12, 16, "水色"],
+      [5, 500, "救急医療において一般的にバイタルサインはいくつあるか", 4, 6, "黄色"],
+      [10, 1000, "NRSにおいて、最大の痛みはいくつであらわされるか", 100, 2, "黄色"],
+      [60, 6000, "徐脈とは脈拍数が何回未満のものをいうか", 50, 20, "黄色"],
+      [0, 0, "JCSにおいて、最良の意識清明のレベルはいくつか", 1, 2, "黄色"],
+      [1, 100, "JCSにおいて、いまいちはっきりしない時のレベルはいくつか", 2, 0, "黄色"],
+      [2, 200, "JCSにおいて、見当識障害があるレベルはいくつか", 1, 3, "黄色"],
+      [3, 300, "JCSにおいて、認知機能障害のレベルはいくつか", 1, 2, "黄色"],
+      [10, 1000, "JCSにおいて、普通の呼びかけで開眼するレベルはいくつか", 20, 30, "黄色"],
+      [20, 2000, "JCSにおいて、大声や体を揺さぶる等強く刺激することで開眼するレベルはいくつか", 10, 30, "黄色"],
+      [30, 3000, "JCSにおいて、痛み刺激を加えつつ呼びかけるとかろうじて開眼するレベルはいくつか", 20, 10, "黄色"],
+      [4, 400, "GCSにおいて、自発的に開眼する点数はいくつか", 3, 2, "黄色"],
+      [3, 300, "GCSにおいて、呼びかけにより開眼するの点数はいくつか", 4, 2, "黄色"],
+      [2, 200, "GCSにおいて、痛み刺激（圧迫）により開眼するの点数はいくつか", 3, 1, "黄色"],
+      [1, 100, "GCSにおいて、開眼しないの点数はいくつか", 2, 3, "黄色"],
+      [5, 500, "GCSにおいて、見当識があるの点数はいくつか", 4, 3, "黄色"],
+      [4, 400, "GCSにおいて、錯乱状態の点数はいくつか", 5, 3, "黄色"],
+      [3, 300, "GCSにおいて、不適当な言葉で応答するの点数はいくつか", 4, 2, "黄色"],
+      [2, 200, "GCSにおいて、理解できない声で応答するの点数はいくつか", 3, 1, "黄色"],
+      [1, 100, "GCSにおいて、発声が認められないの点数はいくつか", 2, 3, "黄色"],
+      [6, 600, "GCSにおいて、命令に従うの点数はいくつか", 5, 4, "黄色"],
+      [5, 500, "GCSにおいて、痛み刺激部位に手を持ってくるの点数はいくつか", 6, 4, "黄色"],
+      [4, 400, "GCSにおいて、四肢を屈曲逃避するときの点数はいくつか", 5, 3, "黄色"],
+      [3, 300, "GCSにおいて、四肢を異常屈曲（除皮質肢位）するときの点数はいくつか", 4, 2, "黄色"],
+      [2, 200, "GCSにおいて、四肢伸展（除脳肢位）の点数はいくつか", 3, 1, "黄色"],
+      [1, 100, "GCSにおいて、全く動かさないの点数はいくつか", 2, 3, "黄色"],
+      [15, 1500, "GCSにおいて、最良の合計点数はいくつか", 14, 8, "黄色"],
+      [3, 300, "GCSにおいて、最悪の合計点数はいくつか", 3, 8, "黄色"],
+      [2, 200, "ツルゴール観察において、脱力と判断する秒数は何秒以上か", 1, 4, "黄色"],
+      [5, 500, "瞳孔観察において何mm以上を散瞳と評価するか", 2, 7, "黄色"],
+      [2, 200, "瞳孔観察において何mm以下を縮瞳と評価するか", 5, 4, "黄色"],
+      [1, 100, "左右何mm以上の差を瞳孔不同と評価するか", 2, 4, "黄色"],
+      [90, 9000, "座位の状態で行うバレー徴候は閉眼させ、両上肢を何度まで挙上させるか", 100, 45, "黄色"],
+      [45, 4500, "仰臥位の状態で行うバレー徴候は閉眼させ、両上肢を何度まで挙上させるか", 180, 90, "黄色"],
+      [6, 600, "救急業務における脳主幹動脈閉塞による脳卒中観察基準（ELVOスクリーン）は何項目評価か", 3, 9, "黄色"],
+      [90, 9000, "バイタルサイン測定において、SpO2は何％未満を緊急度高1として判断するか", 60, 92, "黄色"],
+      [40, 4000, "正常なEtCO2の中央値はいくつか", 20, 50, "黄色"],
+      [10, 1000, "適切な胸骨圧迫実施時に少なくとも何mmHg以上のEtCO2を得られていれば良いか", 40, 30, "黄色"],
+      [1, 100, "12誘導心電図の胸部誘導において、第4肋間胸骨右縁誘導の数字はいくつか", 2, 3, "黄色"],
+      [2, 200, "12誘導心電図の胸部誘導において、第4肋間胸骨左縁誘導の数字はいくつか", 3, 4, "黄色"],
+      [3, 300, "12誘導心電図の胸部誘導において、V2とV4の中間点にある数字はいくつか", 4, 5, "黄色"],
+      [4, 400, "12誘導心電図の胸部誘導において、第5肋間左鎖骨中線の数字はいくつか", 5, 6, "黄色"],
+      [5, 500, "12誘導心電図の胸部誘導において、第5肋間左前腋下線の数字はいくつか", 6, 4, "黄色"],
+      [6, 600, "12誘導心電図の胸部誘導において、第5肋間左中腋下線の数字はいくつか", 1, 2, "黄色"],
+      [50, 5000, "血糖測定結果が何mg/dL未満の時ブドウ糖投与適応となるか", 30, 70, "黄色"],
+      [4, 400, "成人の身長155-180cmに使用するLTのサイズはいくつか", 5, 3, "黄色"],
+      [7, 700, "成人女性に使用する気管チューブの標準的なサイズはいくつか", 7.5, 8, "黄色"],
+      [36, 3600, "2L酸素ボンベで充填圧力18MPaで、残圧0まで流量10L/分で使用したときの使用可能時間は何分間か", 48, 18, "黄色"],
+      [110, 11000, "胸骨圧迫のリズムの中央値は何回/分か", 90, 140, "黄色"],
+      [60, 6000, "小児の胸骨圧迫で、循環不全を認め、かつ何回/分未満の脈拍数であれば胸骨圧迫を開始するか", 50, 120, "黄色"],
+      [80, 8000, "適切な胸骨圧迫を行うにあたって、目指すべきCCF（胸骨圧迫比）は何％以上か", 70, 60, "黄色"],
+      [20, 2000, "輪状甲状間膜穿刺の針は何G以上と決められているか", 30, 60, "黄色"],
+      [20, 2000, "輸液回路の成人用では1ml何滴と決められているか", 60, 40, "黄色"],
+      [90, 9000, "静脈路確保において、穿刺から駆血帯の確認をするまで何秒以内を目安に行うか", 30, 120, "黄色"],
+      [8, 800, "アドレナリン投与適応は何歳以上の心肺機能停止傷病者であるか", 15, 9, "黄色"],
+      [12, 1200, "ブドウ糖は生理食塩水と比べ何倍の浸透圧を持ってるか", 1.2, 120, "黄色"],
+      [80, 8000, "一般的に、橈骨動脈触知可能の時、収縮期血圧は何mmHg以上あると判断できるか", 70, 60, "黄色"],
+      [60, 6000, "一般的に、総頸動脈触知可能の時、収縮期血圧は何mmHg以上あると判断できるか", 70, 80, "黄色"],
+      [3, 300, "APGARスコアにおいて重症新生児仮死として判断するのは何点以下か", 5, 8, "黄色"],
+      [15, 1500, "小児のCPRで、救助者が2名の場合、胸骨圧迫と人工呼吸の比は何：2であるか", 30, 3, "黄色"],
+      [60, 6000, "呼吸不全の定義とは、安静時空気呼吸下でPaO2が何mmHg以下であるか", 50, 90, "青"],
+      [45, 4500, "呼吸不全の定義とは、安静時空気呼吸下でPaCO2が何mmHg以上であるか", 45, 60, "青"],
+      [60, 6000, "低酸素血症とは一般的にPaO2が何mmHg以下の状態をいうか", 90, 50, "青"],
+      [45, 4500, "高二酸化炭素血症とは一般的にPaCO2が何mmHg以上か", 45, 35, "青"],
+      [13, 1300, "体温が1℃上昇すると全身の代謝量は何％上昇するか", 6, 10, "青"],
+      [70, 7000, "閉塞性換気障害とは1秒率が何％以下になる状態か", 80, 60, "青"],
+      [1, 100, "血圧100/80mmHg、心拍数100回/分のショック指数はいくつか", 80, 0.9, "青"],
+      [8, 800, "頭部外傷で重症と判断するGCSは何点以下か", 3, 12, "エメラルド"],
+      [5, 500, "けいれん重積と判断するのは、けいれん持続が何分以上の時か", 10, 2, "エメラルド"],
+      [2, 200, "けいれん重積と判断するのは、けいれん反復が何回以上の時か", 4, 6, "エメラルド"],
+      [38, 3800, "高熱と判断するのは何℃以上か", 36, 40, "エメラルド"],
+      [40.5, 4050, "不可逆的な脳障害が発生し始める中枢温は何℃か", 41.5, 39.5, "エメラルド"],
+      [4.5, 450, "脳卒中に対するt-PA（血栓溶解療法）は発症から概ね何時間以内に行うことが目標であるか", 8, 6, "紫"],
+      [8, 800, "脳卒中に対する機械的血栓回収療法は発症から概ね何時間以内に行うことが目標であるか", 4.5, 5, "紫"],
+      [90, 9000, "COPDに対する酸素投与はSpO2値が何％を目標に行うか", 80, 95, "紫"],
+      [20, 2000, "肺塞栓の緊急度が高いと判断する項目の内、呼吸数が何/分以上持続するものを高いと判断するか", 10, 60, "紫"],
+      [120, 12000, "急性心筋梗塞に対するPCIまでの時間（DTBT）は何分以内を目標としているか", 60, 240, "紫"],
+      [180, 18000, "一般的に心拍数が何回/分を超えると奇異動脈で脈を触れなくなるか", 120, 240, "紫"],
+      [6, 600, "多発性期外収縮とは1分間に何回以上期外収縮が出るものをいうか", 12, 18, "紫"],
+      [5.5, 550, "高カリウム血症で、テント状T波が出現するのはおおむね血清カリウム値が何mEq/L以上の時か", 9, 3.5, "紫"],
+      [30, 3000, "胸部大動脈瘤の正常径は何mm以下か", 20, 40, "紫"],
+      [20, 2000, "腹部大動脈瘤の正常径は何mm以下か", 30, 40, "紫"],
+      [3.5, 350, "低カリウム血症は血清カリウム値が何mEq/L以下か", 5.5, 2.5, "紫"],
+      [55, 5500, "一般的に血糖値が何mg/dL未満になると交感神経症状が出現するか", 70, 30, "紫"],
+      [30, 3000, "一般的に血糖値が何mg/dL未満になると中枢神経症状が出現するか", 70, 55, "紫"],
+      [12, 1200, "欠乏すると悪性貧血を引き起こすビタミンBは何番か", 1, 6, "紫"],
+      [1, 100, "欠乏するとウェルニッケ脳症や脚気を起こすビタミンBは何番か", 12, 6, "紫"],
+      [1, 100, "アレルギーの分類の内、即時型アレルギーと呼ばれるものは何型か", 2, 3, "紫"],
+      [2, 200, "アレルギーの分類の内、細胞障害を主体とするものは何型か", 3, 4, "紫"],
+      [3, 300, "アレルギーの分類の内、免疫複合体が主体となるものは何型か", 4, 2, "紫"],
+      [4, 400, "アレルギーの分類の内、遅延型と呼ばれるものは数字では何型か", 1, 2, "紫"],
+      [5, 500, "チアノーゼは血中還元ヘモグロビンが何g/dL以上になると認められるか", 10, 15, "紫"],
+      [7, 700, "プリオン病は感染症分類で第何類に分類されるか", 2, 5, "紫"],
+      [1, 100, "エボラ出血熱は感染症分類で第何類に分類されるか", 2, 5, "紫"],
+      [1, 100, "ペストは感染症分類で第何類に分類されるか", 2, 5, "紫"],
+      [2, 200, "重症急性呼吸器症候群（SARS）は感染症分類で第何類に分類されるか", 1, 5, "紫"],
+      [2, 200, "中東呼吸器症候群（MERS）は感染症分類で第何類に分類されるか", 1, 5, "紫"],
+      [2, 200, "結核は感染症分類で第何類に分類されるか", 1, 5, "紫"],
+      [5, 500, "新型コロナウイルスは2025年10月時点で感染症分類、第何類に分類されるか", 1, 2, "紫"],
+      [5, 500, "インフルエンザ（新型、鳥を除く）は感染症分類で第何類に分類されるか", 1, 2, "紫"],
+      [5, 500, "麻疹は感染症分類で第何類に分類されるか", 1, 2, "紫"],
+      [3, 300, "腸管出血性大腸菌は感染症分類で第何類に分類されるか", 1, 5, "紫"],
+      [50, 5000, "出生時の平均身長は約何cmか", 10, 120, "紫"],
+      [40, 4000, "最終月経から何週目が分娩予定となるか", 36, 44, "紫"],
+      [9, 900, "ネーゲレ概算法で最終月経初日の月数に足す数字", 7, 12, "紫"],
+      [7, 700, "ネーゲレ概算法で最終月経初日の日数に足す数字", 9, 12, "紫"],
+      [22, 2200, "流産とは何週未満での分娩をいうか", 37, 4, "紫"],
+      [1, 100, "陣痛間隔が10分になってから子宮口全開大までを分娩第何期というか", 2, 3, "紫"],
+      [2, 200, "子宮口全開大から胎児娩出までを分娩第何期というか", 1, 3, "紫"],
+      [3, 300, "胎児娩出から胎盤娩出までを分娩第何期というか", 1, 2, "紫"],
+      [20, 2000, "子宮底が臍高になるのは概ね何週以降であるか", 37, 12, "紫"],
+      [28, 2800, "新生児とは出生後何日経過しない児をさすか", 30, 40, "紫"],
+      [60, 6000, "新生児の蘇生において、人工呼吸が必要な児に対して出生から何秒以内で人工呼吸を開始することが目標か", 120, 90, "紫"],
+      [60, 6000, "生後1分の新生児の目標SpO2値はいくつか", 90, 80, "紫"],
+      [90, 9000, "生後10分の新生児の目標SpO2値はいくつか", 70, 80, "紫"],
+      [30, 3000, "新生児蘇生において、蘇生処置を開始後何秒間隔で心拍を評価するか", 60, 120, "紫"],
+      [100, 10000, "新生児蘇生において、自発呼吸があり、心拍が何回/分以上になれば人工呼吸を中止するか", 60, 80, "紫"],
+      [0.5, 50, "予測外死亡とは予測生存率がいくつ以上にも関わらず死亡したものをいうか", 1, 0.1, "黒"],
+      [9, 900, "車両事故において、120km/hで走行中の事故は40km/hで走行中の事故に比べ運動エネルギーは何倍となるか", 3, 80, "黒"],
+      [40, 4000, "外傷の出血において、致命的となるのは循環血液量の何％以上出血した時か", 30, 50, "黒"],
+      [5, 500, "JPTECにおいて、初期評価＋全身観察は何分以内に完了することが目標とされているか", 1, 9, "黒"],
+      [1, 100, "ジェファーソン骨折とは第何頸椎の損傷をいうか", 2, 7, "黒"],
+      [2, 200, "ハングマン骨折とは第何頸椎の損傷をいうか", 1, 7, "黒"],
+      [1, 100, "熱傷深度判定において、疼痛を伴う赤斑は何度であるか", 2, 3, "黒"],
+      [2, 200, "熱傷深度判定において、水泡形成がなされるのは何度であるか", 1, 3, "黒"],
+      [3, 300, "熱傷深度判定において、白色や弾力性のない皮膚が形成されるのは何度であるか", 2, 1, "黒"],
+      [10, 1000, "熱傷指数において、重症と判断するのはいくつ以上か", 100, 20, "黒"],
+      [27, 2700, "20歳男性、両上肢全体III度熱傷、前胸部のみ深達性II度熱傷の熱傷指数(BI)はいくつか", 47, 127, "黒"],
+      [98, 9800, "61歳女性、体幹全体に浅達性II度熱傷、顔面川にIII度熱傷を受傷、この人の熱傷予後指数(PBI)はいくつか", 45, 105, "黒"],
+      [8, 800, "アセトアミノフェン中毒で、NACは可能であれば何時間以内に投与することが求められるか", 24, 10, "黒"],
+      [7.5, 750, "アセトアミノフェン中毒で、肝機能障害が出るのは何g以上の過量服薬をした時か", 1, 4.7, "黒"],
+      [8, 800, "空気呼吸下で、一酸化炭素ヘモグロビンの半減期は大よそ何時間か", 1, 4, "黒"],
+      [4, 400, "溺水傷病者で、全肺野で湿性ラ音を聴取、血圧低下またはショックをきたしている状態のグレード", 5, 6, "黒"],
+      [1, 100, "めまい、立ち眩み、筋肉痛を呈する熱中症分類はいくつか", 2, 3, "黒"],
+      [2, 200, "頭痛、嘔吐、倦怠感等を呈する熱中症分類はいくつか", 1, 3, "黒"],
+      [3, 300, "中枢神経症状、肝・腎機能障害、血液凝固異常の1つ以上を呈する熱中症分類はいくつか", 2, 4, "黒"],
+      [4, 400, "深部体温40℃以上かつGCS≦8点を呈する熱中症分類はいくつか", 3, 2, "黒"],
+      [0.7, 70, "純水溺水の浸透圧はいくつか", 0.9, 1.2, "黒"],
+      [31, 3100, "WBGT値で危険は何℃以上か", 28, 24, "黒"],
+      [32, 3200, "J波が出現するのは何℃以下か", 34, 28, "黒"],
+      [30, 3000, "低体温CPAに対するアドレナリン投与は深部体温が何℃以上に復温されたからが望ましいか", 28, 34, "黒"],
+      [1, 100, "急性放射線障害を呈する全身暴露は何Gy以上か", 100, 0.1, "黒"],
+      [1, 100, "全身照射で、嘔吐・悪心を呈するシーベルト数はいくつか", 4, 10, "黒"],
+      [10, 1000, "全身照射で、1〜2週間でほとんどが死亡するシーベルト数はいくつか", 1, 4, "黒"],
+      [2, 200, "減圧症で骨・関節痛型、中枢神経型、内耳型、呼吸型（チョークス）が分類されるのは数字で何型であるか", 1, 3, "黒"],
+      [18, 1800, "空気中の酸素濃度の安全限界下限は何％か", 21, 12, "黒"],
+      [1, 100, "凍傷分類で、損傷部が表皮までであり、灼熱感・発赤・腫脹を呈するのは何度であるか", 2, 3, "黒"],
+      [2, 200, "凍傷分類で、損傷部が真皮までであり、充血、疼痛、水泡形成を呈するのは何度であるか", 3, 4, "黒"],
+      [3, 300, "凍傷分類で、損傷部が皮下組織までで、暗赤褐色・壊死・潰瘍を呈するのは何度であるか", 4, 2, "黒"],
+      [4, 400, "凍傷分類で、損傷部が骨・筋組織までで、筋・骨・軟骨の壊死を呈するのは何度であるか", 3, 2, "黒"]
+    ];
+
+    RAW_JACK_CARDS.forEach((r, idx) => {
+      DEFAULT_EMS_CARDS.push({
+        id: 201 + idx,
+        suit: "J",
+        num: r[0],
+        internalVal: r[1],
+        title: r[5],
+        desc: r[2],
+        opt1: r[3],
+        opt2: r[4],
+        borderColor: r[5]
+      });
+    });
+
+    const SUIT_ICONS = { C: '♣', S: '♠', H: '♥', D: '♦', M: '🧠', J: '🎯', JOKER: '⚡' };
+    const SUIT_COLORS = { C: 'text-emerald-400', S: 'text-indigo-400', H: 'text-rose-400', D: 'text-amber-400', M: 'text-cyan-400', J: 'text-teal-400', JOKER: 'text-amber-300' };
+    const JACK_BORDER_STYLES = {
+      '緑': 'border-green-500 shadow-[0_0_12px_rgba(34,197,94,0.3)]',
+      '赤': 'border-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.3)]',
+      'オレンジ': 'border-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.3)]',
+      '水色': 'border-sky-400 shadow-[0_0_12px_rgba(56,189,248,0.3)]',
+      '黄色': 'border-yellow-400 shadow-[0_0_12px_rgba(250,204,21,0.3)]',
+      '青': 'border-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.3)]',
+      'エメラルド': 'border-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.3)]',
+      '紫': 'border-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.3)]',
+      '黒': 'border-slate-950 ring-2 ring-slate-500 shadow-[0_0_12px_rgba(15,23,42,0.8)]'
+    };
+    const BOT_NAME_POOL = ['救急隊員α', '救急隊員β', '救急隊員γ', '指導救命士', '機関員', '通信指令員', '救急隊長', '救命医'];
     const PLAYER_COLOR_PALETTE = ['#38bdf8', '#f43f5e', '#10b981', '#f59e0b', '#a855f7', '#ec4899', '#84cc16', '#f97316', '#06b6d4', '#6366f1'];
 
     function pickUnusedColor(playersList) {
@@ -228,7 +486,7 @@
         const s = localStorage.getItem('ems_db'); 
         if(s) {
           const parsed = JSON.parse(s);
-          if(parsed.some(c => c.suit === 'M')) return parsed;
+          if(parsed.some(c => c.suit === 'M') && parsed.some(c => c.suit === 'J')) return parsed;
         }
       } catch(e){} 
       const defaultFull = JSON.parse(JSON.stringify(DEFAULT_EMS_CARDS));
@@ -236,7 +494,7 @@
       return defaultFull;
     }
     function saveDB(data) { localStorage.setItem('ems_db', JSON.stringify(data)); }
-    function loadAccess() { try { const s = localStorage.getItem('ems_acc'); if(s) return JSON.parse(s); } catch(e){} return { game1: true, game2: true, game3: true, game4: false }; }
+    function loadAccess() { try { const s = localStorage.getItem('ems_acc'); if(s) return JSON.parse(s); } catch(e){} return { game1: true, game2: true, game3: true, game4: true }; }
     function saveAccess(data) { localStorage.setItem('ems_acc', JSON.stringify(data)); }
 
     let currentCardDB = loadDB();
@@ -292,7 +550,7 @@
               <div>
                 <label class="block text-[11px] font-semibold text-slate-400 mb-1">最大参加人数</label>
                 <select id="config-max-players" onchange="app.updateLobbyConfigUI()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white">
-                  <option value="2">2 名</option><option value="3">3 名</option><option value="4" selected>4 名 (標準)</option><option value="5">5 名</option><option value="6">6 名 (特別編成)</option>
+                  <option value="2">2 名</option><option value="3">3 名</option><option value="4" selected>4 名 (標準)</option><option value="5">5 名</option><option value="6">6 名 (特別編成)</option><option value="7" class="jack-player-opt hidden">7 名</option><option value="8" class="jack-player-opt hidden">8 名 (最大)</option>
                 </select>
               </div>
               <div>
@@ -306,7 +564,7 @@
             <!-- 神経衰弱用設定 -->
             <div id="memory-only-config" class="hidden pt-3 border-t border-slate-800/80 space-y-3">
               <div>
-                <label class="block text-[11px] font-semibold text-cyan-300 mb-1">神経衰弱 全体ペア数（最大40グループ）</label>
+                <label class="block text-[11px] font-semibold text-cyan-300 mb-1">改訂長谷川式簡易測定知能スケールに引っかかるな！ 全体ペア数（最大40グループ）</label>
                 <select id="config-memory-pairs" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white">
                   <option value="12">12 ペア (24枚)</option>
                   <option value="18">18 ペア (36枚)</option>
@@ -341,7 +599,19 @@
               </label>
             </div>
 
-            <div class="flex items-center justify-between pt-2 border-t border-slate-800/60">
+            <!-- 99ジャック用設定 -->
+            <div id="jack-only-config" class="hidden pt-3 border-t border-slate-800/60 flex items-center justify-between">
+              <div>
+                <span class="text-xs font-bold text-teal-300 block">カードの数字の合計を全員に表示する</span>
+                <span class="text-[10px] text-slate-400">※OFF時は全員の合計が非表示（暗算モード）になります</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input id="config-jack-show-total" type="checkbox" checked class="sr-only peer">
+                <div class="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
+              </label>
+            </div>
+
+            <div id="ai-autofill-config-row" class="flex items-center justify-between pt-2 border-t border-slate-800/60">
               <span class="text-xs font-bold text-slate-200">不足枠の救急AI自動補充</span>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input id="config-auto-fill-ai" type="checkbox" checked class="sr-only peer">
@@ -354,7 +624,7 @@
             <button onclick="app.showJoinModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3.5 px-4 rounded-xl border border-slate-700 transition">6桁コードで参加</button>
           </div>
           <div class="border-t border-slate-800/80 pt-4">
-            <button onclick="app.startSoloAI()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3.5 px-4 rounded-xl transition shadow-[0_0_15px_rgba(8,145,178,0.4)]">すぐ遊ぶ（AI演習）</button>
+            <button id="btn-solo-ai" onclick="app.startSoloAI()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3.5 px-4 rounded-xl transition shadow-[0_0_15px_rgba(8,145,178,0.4)]">すぐ遊ぶ（AI演習）</button>
           </div>
         </div>
       </section>
@@ -385,7 +655,7 @@
         </div>
       </section>
 
-      <!-- VIEW 4: GAME TABLE -->
+      <!-- VIEW 4: GAME TABLE (BABANUKI / JINUKI) -->
       <section id="view-game" class="w-full flex-1 flex flex-col items-center justify-between hidden">
         <div class="w-full max-w-4xl bg-slate-900/90 border border-slate-800 rounded-2xl p-3 mb-3 flex flex-wrap items-center justify-between gap-3 shadow-lg">
           <div class="flex items-center gap-3">
@@ -433,7 +703,7 @@
       <section id="view-memory-game" class="w-full flex-1 flex flex-col items-center justify-start hidden animate-fade-in">
         <div class="w-full max-w-5xl bg-slate-900/95 border border-blue-500/50 rounded-2xl p-3 mb-3 flex items-center justify-between shadow-lg">
           <div class="flex items-center gap-3">
-            <span class="text-xs px-3 py-1.5 rounded-full bg-blue-950 text-blue-300 border border-blue-600 font-bold">救急神経衰弱バトル</span>
+            <span class="text-xs px-3 py-1.5 rounded-full bg-blue-950 text-blue-300 border border-blue-600 font-bold">改訂長谷川式簡易知能評価スケールに引っかかるな！</span>
             <span id="memory-turn-info" class="text-xs text-white font-bold">手番: プレイヤー</span>
           </div>
           <div class="flex items-center gap-3">
@@ -461,6 +731,75 @@
         </div>
       </section>
 
+      <!-- VIEW 4-4: 99 JACK GAME TABLE -->
+      <section id="view-jack-game" class="w-full flex-1 flex flex-col items-center justify-between hidden animate-fade-in">
+        <div class="w-full max-w-5xl bg-slate-900/95 border border-teal-500/50 rounded-2xl p-3 mb-3 flex flex-wrap items-center justify-between gap-3 shadow-lg">
+          <div class="flex items-center gap-3">
+            <span class="text-xs px-3 py-1.5 rounded-full bg-teal-950 text-teal-300 border border-teal-600 font-bold">GAME 04: 99ジャック</span>
+            <span id="jack-turn-info" class="text-xs text-white font-bold">手番: プレイヤー</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono text-slate-300 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">山札残り: <strong id="jack-deck-count" class="text-teal-400">228</strong> 枚</span>
+            <span class="text-xs font-mono text-rose-300 bg-rose-950/60 px-3 py-1.5 rounded-xl border border-rose-800 font-bold">上限: 98.99 (99.00〜CPA)</span>
+          </div>
+        </div>
+
+        <!-- 参加プレイヤー状態一覧（最大8名） -->
+        <div id="jack-players-container" class="w-full max-w-5xl grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-3"></div>
+
+        <!-- 中央：共通山札＆アクションエリア -->
+        <div class="w-full max-w-5xl my-2 bg-gradient-to-br from-slate-900 via-teal-950/30 to-slate-900 border-2 border-teal-800/60 rounded-3xl p-5 flex flex-col items-center justify-center shadow-2xl relative min-h-[210px]">
+          <div id="jack-announcement-banner" class="text-xs sm:text-sm font-bold text-teal-200 mb-4 text-center px-4 py-2 rounded-xl bg-slate-950/80 border border-teal-800/60 w-full max-w-xl">
+            山札からカードを引くか、ステイアンドプレイを宣言してください
+          </div>
+
+          <div class="flex flex-wrap items-center justify-center gap-6">
+            <!-- 共通山札（裏面すべて共通） -->
+            <div onclick="app.jackDrawCard()" id="jack-deck-card" class="w-28 h-40 rounded-2xl border-2 border-cyan-400 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 p-2 flex flex-col items-center justify-between cursor-pointer hover:scale-105 active:scale-95 transition shadow-[0_0_25px_rgba(6,182,212,0.4)] select-none">
+              <div class="w-full flex items-center justify-between text-[9px] text-cyan-400 font-mono">
+                <span class="font-bold">⚡ ECG</span>
+                <span>DECK</span>
+              </div>
+              <div class="w-full h-10 bg-slate-950/90 rounded-lg border border-cyan-500/40 flex items-center justify-center overflow-hidden shadow-inner my-auto">
+                <svg class="w-full h-full opacity-90" viewBox="0 0 100 30" preserveAspectRatio="none">
+                  <path d="M 0 15 L 18 15 L 23 5 L 28 25 L 33 15 L 55 15 L 60 3 L 65 27 L 70 15 L 100 15" fill="none" stroke="#22d3ee" stroke-width="2.5"/>
+                </svg>
+              </div>
+              <div class="text-[10px] text-teal-300 font-extrabold tracking-wider">カードを引く</div>
+            </div>
+
+            <!-- 操作ボタン群 -->
+            <div class="flex flex-col gap-3">
+              <button id="btn-jack-hit" onclick="app.jackDrawCard()" class="bg-teal-600 hover:bg-teal-500 text-white font-extrabold text-xs sm:text-sm px-6 py-3.5 rounded-2xl transition shadow-[0_0_20px_rgba(13,148,136,0.5)] flex items-center justify-center gap-2">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i><span>ドロー（問題に挑戦）</span>
+              </button>
+              <button id="btn-jack-stay" onclick="app.jackDeclareStay()" class="bg-amber-600 hover:bg-amber-500 text-white font-extrabold text-xs sm:text-sm px-6 py-3.5 rounded-2xl transition shadow-[0_0_20px_rgba(217,119,6,0.5)] flex items-center justify-center gap-2">
+                <i data-lucide="shield-check" class="w-4 h-4"></i><span>ステイアンドプレイ宣言</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 自分の手札と合計値エリア -->
+        <div class="w-full max-w-5xl bg-slate-900/95 border border-slate-800 rounded-3xl p-4 shadow-2xl flex flex-col items-center mt-2">
+          <div class="w-full flex flex-wrap items-center justify-between gap-2 mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full" id="jack-my-color-dot" style="background-color: #38bdf8;"></span>
+              <span class="text-sm font-bold text-white">あなたの手札</span>
+              <span id="jack-my-status-badge" class="text-xs px-2.5 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-700 font-bold">プレイ中</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="bg-slate-950 border border-slate-800 px-4 py-1.5 rounded-xl flex items-center gap-2">
+                <span class="text-xs text-slate-400 font-bold">現在合計値:</span>
+                <span id="jack-my-total-display" class="text-lg font-mono font-black text-teal-400">0</span>
+                <span class="text-[11px] text-slate-500 font-mono">/ 98.99</span>
+              </div>
+            </div>
+          </div>
+          <div id="jack-my-cards-container" class="w-full flex items-center gap-3 overflow-x-auto py-3 px-2 custom-scrollbar min-h-[175px]"></div>
+        </div>
+      </section>
+
       <!-- VIEW 5: RESULTS -->
       <section id="view-result" class="w-full max-w-xl flex flex-col items-center py-6 hidden animate-fade-in">
         <div id="result-card-box" class="w-full bg-slate-900/95 border border-slate-800 rounded-3xl p-6 text-center shadow-2xl">
@@ -478,7 +817,7 @@
     </main>
   </div>
 
-  <!-- 🆕 画面下部の3連通信ドック（左：お知らせ、中央：会話ルーム、右：ゲームログ） -->
+  <!-- 画面下部の3連通信ドック（左：お知らせ、中央：会話ルーム、右：ゲームログ） -->
   <div class="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 w-full max-w-md px-4 pointer-events-none">
     <div class="bg-slate-900/95 border border-slate-700/90 backdrop-blur-md rounded-2xl p-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.8)] grid grid-cols-3 gap-1.5 pointer-events-auto">
       <button onclick="app.openCommModal('announce')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-amber-400 border border-slate-700/60 transition active:scale-95 relative">
@@ -500,6 +839,52 @@
   </div>
 
   <!-- MODALS -->
+  <!-- 99ジャック：3択クイズ＆正誤判定モーダル（制限60秒） -->
+  <div id="modal-jack-quiz" class="fixed inset-0 z-50 bg-black/90 hidden flex items-center justify-center p-4 backdrop-blur-md">
+    <div id="jack-quiz-box" class="w-full max-w-lg bg-slate-900 border-4 border-teal-500 rounded-3xl p-6 shadow-[0_0_50px_rgba(20,184,166,0.4)] flex flex-col">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+        <span id="jack-quiz-color-badge" class="text-xs font-extrabold px-3 py-1 rounded-full bg-slate-800 text-teal-300 border border-slate-700">カテゴリ色</span>
+        <span id="jack-quiz-timer" class="text-sm font-mono font-black text-amber-400 bg-slate-950 px-3.5 py-1 rounded-full border border-amber-500/40">残り 60 秒</span>
+      </div>
+
+      <!-- 問題文表示 -->
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 mb-4 text-left shadow-inner">
+        <div class="text-[11px] font-bold text-slate-400 mb-1">【問題】正しい数値を選択して回答ボタンを押してください</div>
+        <div id="jack-quiz-question" class="text-sm sm:text-base font-extrabold text-white leading-relaxed">問題文</div>
+      </div>
+
+      <!-- 3択ボタン（毎回ランダム配置） -->
+      <div id="jack-quiz-options" class="grid grid-cols-3 gap-3 mb-4"></div>
+
+      <!-- 回答確定ボタン -->
+      <button id="btn-jack-submit-answer" onclick="app.submitJackQuizAnswer()" class="w-full bg-teal-600 hover:bg-teal-500 text-white font-extrabold py-3.5 rounded-xl transition shadow-lg opacity-50 pointer-events-none mb-2">
+        回答する
+      </button>
+
+      <!-- 回答後の正誤・正答・問題文まとめ表示＆アクション選択エリア -->
+      <div id="jack-quiz-result-area" class="hidden flex-col gap-3 mt-2 pt-3 border-t border-slate-800">
+        <div id="jack-quiz-verdict-banner" class="p-4 rounded-2xl border-2 text-center"></div>
+        <div id="jack-quiz-action-buttons" class="flex gap-3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 99ジャック：バースト（99.00超え）時の瞳孔散大・心拍呼吸停止アラートモーダル -->
+  <div id="modal-jack-bust" class="fixed inset-0 z-50 bg-rose-950/90 hidden flex items-center justify-center p-4 backdrop-blur-md">
+    <div class="w-full max-w-md bg-slate-950 border-4 border-rose-600 rounded-3xl p-6 text-center shadow-[0_0_70px_rgba(225,29,72,0.8)] animate-bounce">
+      <div class="w-20 h-20 rounded-full bg-rose-600/20 border-2 border-rose-500 flex items-center justify-center mx-auto mb-4 text-rose-500">
+        <i data-lucide="heart-off" class="w-12 h-12"></i>
+      </div>
+      <div class="inline-block px-3 py-1 rounded-full bg-rose-600 text-white text-xs font-black uppercase mb-2">OVER 99.00 - CRITICAL BUST</div>
+      <h3 class="text-2xl font-black text-rose-400 mb-3">【急変】リミット99超過！</h3>
+      <p id="jack-bust-player-name" class="text-sm font-bold text-white mb-2"></p>
+      <div class="bg-rose-950/50 border border-rose-700 rounded-2xl p-4 text-rose-200 font-extrabold text-sm leading-relaxed mb-5">
+        瞳孔散大、心拍、呼吸を感じなくなりました…
+      </div>
+      <button onclick="app.closeJackBustModal()" class="w-full bg-rose-700 hover:bg-rose-600 text-white font-extrabold py-3.5 rounded-xl transition">確認</button>
+    </div>
+  </div>
+
   <div id="modal-memory-popup" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm pointer-events-none">
     <div id="memory-popup-card-box" class="w-80 sm:w-96 bg-slate-900 border-4 border-cyan-400 rounded-3xl p-6 text-center shadow-[0_0_60px_rgba(6,182,212,0.5)] transform scale-105 transition-all pointer-events-auto">
       <div id="memory-popup-header" class="text-sm font-bold text-cyan-300 mb-3">カード公開</div>
@@ -538,7 +923,7 @@
     </div>
   </div>
 
-  <!-- 🆕 3ルーム対応の通信モーダル（左：お知らせ、中：会話ルーム、右：ゲームログ） -->
+  <!-- 3ルーム対応の通信モーダル（左：お知らせ、中：会話ルーム、右：ゲームログ） -->
   <div id="modal-chat" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl flex flex-col h-[500px]">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
@@ -626,7 +1011,6 @@
       </div>
       
       <div id="admin-content-box" class="hidden flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-5 pr-2">
-        <!-- 🆕 リアルタイム接続人数の表示 -->
         <div class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-inner">
           <div class="flex items-center gap-3">
             <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span></span>
@@ -638,7 +1022,6 @@
           </div>
         </div>
 
-        <!-- 🆕 管理室から全体へのお知らせ配信フォーム -->
         <div class="w-full bg-slate-800/40 border border-amber-500/40 rounded-2xl p-4">
           <h4 class="text-sm font-bold text-amber-300 mb-2 flex items-center gap-2"><i data-lucide="megaphone" class="w-4 h-4"></i>全体お知らせ配信（全プレイヤーのお知らせルームへ一斉通知）</h4>
           <div class="flex gap-2">
@@ -658,7 +1041,7 @@
               </label>
             </div>
             <div class="flex justify-between items-center p-3 bg-slate-900 rounded-xl border border-slate-800">
-              <span class="text-xs font-bold text-blue-300">GAME 02: 救急神経衰弱バトル</span>
+              <span class="text-xs font-bold text-blue-300">GAME 02:改訂長谷川簡易知能評価スケールに引っかかるな！</span>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="toggle-game2" onchange="app.saveAdminAccess()" class="sr-only peer">
                 <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
@@ -691,6 +1074,7 @@
                 <option value="babanuki">GAME 01: ババ抜き用</option>
                 <option value="memory">GAME 02: 神経衰弱用 (全40グループ)</option>
                 <option value="jinuki">GAME 03: ジジ抜き用</option>
+                <option value="jack">GAME 04: 99ジャック用 (全228問)</option>
               </select>
               <button onclick="app.addNewCardPrompt()" class="text-xs bg-cyan-700 hover:bg-cyan-600 text-white px-3 py-1.5 rounded-lg transition font-bold">＋カード追加</button>
               <button onclick="app.resetDB()" class="text-xs bg-rose-900/60 hover:bg-rose-800 text-rose-300 border border-rose-800 px-3 py-1.5 rounded-lg transition">初期化</button>
@@ -699,7 +1083,7 @@
           <div class="flex-1 bg-slate-900 rounded-xl border border-slate-700 overflow-y-auto custom-scrollbar relative">
             <table class="w-full text-left text-xs text-slate-300">
               <thead class="bg-slate-800 text-slate-400 font-mono sticky top-0 z-10 shadow-md">
-                <tr><th class="p-2 w-12 text-center">ID</th><th class="p-2 w-16 text-center">Gr.</th><th class="p-2 w-20 text-center">マーク</th><th class="p-2 w-32">タイトル</th><th class="p-2">問題文</th><th class="p-2 w-24 text-center">操作</th></tr>
+                <tr><th class="p-2 w-12 text-center">ID</th><th class="p-2 w-16 text-center">数値/Gr</th><th class="p-2 w-20 text-center">種別</th><th class="p-2 w-36">タイトル / 選択肢・ふち</th><th class="p-2">問題文</th><th class="p-2 w-24 text-center">操作</th></tr>
               </thead>
               <tbody id="admin-card-table-body" class="divide-y divide-slate-800/80"></tbody>
             </table>
@@ -710,8 +1094,7 @@
   </div>
 
   <div id="toast-box" class="fixed bottom-20 z-50 transform -translate-y-2 opacity-0 pointer-events-none transition-all duration-300 bg-slate-800 border border-slate-700 text-white text-xs px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2"><span id="toast-text"></span></div>
-
-  <script>
+<script>
     let socket;
     try { socket = io(); } catch(e) { socket = { emit: () => {}, on: () => {} }; }
 
@@ -722,6 +1105,10 @@
         if(!box || !txt) return;
         txt.innerHTML = msg; box.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2'); box.classList.add('opacity-100', 'translate-y-0');
         setTimeout(() => { box.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2'); box.classList.remove('opacity-100', 'translate-y-0'); }, 2500);
+      },
+      formatJackInternal: (internalVal) => {
+        const v = Number(internalVal || 0);
+        return Number((v / 100).toFixed(2)).toString();
       }
     };
 
@@ -730,7 +1117,7 @@
       phase: 'idle',
       activeCommTab: 'chat',
       room: { code: '', isHost: false, isSolo: false },
-      config: { mode: 'babanuki', maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true },
+      config: { mode: 'babanuki', maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true, jackShowTotal: true },
       me: { id: 'p_' + Math.random().toString(36).substring(2, 9), name: '救急隊員' },
       players: [],
       turnIdx: 0,
@@ -742,7 +1129,7 @@
       ranks: [],
       quizResultCorrect: false,
       quizAnswered: false,
-      timers: { turn: null, aiDelay: null, memoryTimer: null, popupTimer: null, matchTimer: null, quizTimer: null, quizAutoClose: null },
+      timers: { turn: null, aiDelay: null, memoryTimer: null, popupTimer: null, matchTimer: null, quizTimer: null, quizAutoClose: null, jackQuiz: null },
       
       memoryState: {
         cards: [],
@@ -753,6 +1140,15 @@
         playerBoards: {},
         timeLeft: 20,
         isProcessingTurn: false
+      },
+
+      jackState: {
+        deck: [],
+        currentCard: null,
+        selectedOption: null,
+        quizAnswered: false,
+        timeLeft: 60,
+        isProcessing: false
       }
     };
 
@@ -761,13 +1157,11 @@
       socket.emit('request_admin_state');
     });
 
-    // 🆕 リアルタイム接続人数の受信と管理室への即時表示
     socket.on('update_active_users', (count) => {
       const el = document.getElementById('admin-active-users');
       if (el && count !== undefined) el.textContent = count;
     });
 
-    // 🆕 お知らせ履歴の初期同期
     socket.on('init_announcements', (list) => {
       const box = document.getElementById('tab-content-announce');
       if (!box || !Array.isArray(list) || list.length === 0) return;
@@ -778,7 +1172,6 @@
       box.scrollTop = box.scrollHeight;
     });
 
-    // 🆕 管理室からの新規お知らせ受信
     socket.on('receive_announcement', (item) => {
       const box = document.getElementById('tab-content-announce');
       const dot = document.getElementById('badge-dot-announce');
@@ -857,6 +1250,9 @@
         state.memoryState.boardSlots = actionData.memoryState.boardSlots || state.memoryState.boardSlots;
         state.memoryState.playerBoards = actionData.memoryState.playerBoards || state.memoryState.playerBoards;
       }
+      if(actionData.jackDeck !== undefined) {
+        state.jackState.deck = actionData.jackDeck;
+      }
       
       if(actionData.type === 'start') {
         if(state.mode === 'memory') {
@@ -867,6 +1263,12 @@
           state.memoryState.isProcessingTurn = false;
           app.showScreen('view-memory-game');
           app.renderMemoryGameTable();
+        } else if(state.mode === 'jack') {
+          state.phase = 'jack_playing';
+          state.jackState.isProcessing = false;
+          app.showScreen('view-jack-game');
+          app.renderJackTable();
+          app.processJackTurn();
         } else {
           state.phase = 'initial_discard';
           state.hasDrawnThisTurn = false;
@@ -886,6 +1288,23 @@
         }
         state.memoryState.isProcessingTurn = false;
         app.renderMemoryGameTable();
+      } else if(actionData.type === 'jack_sync') {
+        if(state.phase !== 'jack_playing' && state.phase !== 'ended') {
+          state.phase = 'jack_playing';
+          app.showScreen('view-jack-game');
+        }
+        state.jackState.isProcessing = false;
+        if(actionData.bustPlayerId) {
+          const bp = state.players.find(p => p.id === actionData.bustPlayerId);
+          if(bp) app.showJackBustModal(bp);
+        }
+        app.renderJackTable();
+        if(actionData.gameEnded) {
+          state.phase = 'ended';
+          setTimeout(() => app.showResults(), actionData.bustPlayerId ? 2800 : 800);
+        } else {
+          app.processJackTurn();
+        }
       } else if(actionData.type === 'player_ready') {
         app.renderTable();
       } else if(actionData.type === 'ready') {
@@ -902,6 +1321,7 @@
         app.checkClears();
       } else {
         if(state.mode === 'memory') app.renderMemoryGameTable();
+        else if(state.mode === 'jack') app.renderJackTable();
         else app.renderTable();
       }
     });
@@ -947,7 +1367,7 @@
       },
 
       showScreen: (id) => {
-        ['view-portal', 'view-lobby', 'view-room', 'view-game', 'view-memory-game', 'view-result'].forEach(s => {
+        ['view-portal', 'view-lobby', 'view-room', 'view-game', 'view-memory-game', 'view-jack-game', 'view-result'].forEach(s => {
           const el = document.getElementById(s);
           if (el) el.classList.toggle('hidden', s !== id);
         });
@@ -972,7 +1392,7 @@
           { id: 'game1', code: 'babanuki', lbl: 'GAME 01', title: '致死性不整脈を回避せよ！', icon: 'activity', desc: '【救急ババ抜き】除細動が不可欠な「心室細動（VF）」を最後まで抱え持っていた者が敗北！', col: 'rose' },
           { id: 'game2', code: 'memory', lbl: 'GAME 02', title: '救急神経衰弱バトル', icon: 'brain', desc: '【救急神経衰弱】全40疾患グループ対応の神経衰弱バトル！', col: 'blue' },
           { id: 'game3', code: 'jinuki', lbl: 'GAME 03', title: '救急 隠れたものを当てろ', icon: 'search', desc: '【救急ジジ抜き＋VF/DCペア】全54枚から1枚が事前封印！孤立カードから病態を推理せよ！', col: 'amber' },
-          { id: 'game4', code: 'jack', lbl: 'GAME 04', title: '99ジャック', icon: 'crosshair', desc: '【SpO2＆血圧コントロール】合計点「99」を目指す救急版ブラックジャック。', col: 'teal' }
+          { id: 'game4', code: 'jack', lbl: 'GAME 04', title: '99ジャック', icon: 'crosshair', desc: '【救急ブラックジャック】3択クイズに答えて98.99を目指せ！99.00を超えると急変（バースト）！', col: 'teal' }
         ];
         games.forEach(g => {
           const isReady = currentGameAccess[g.id];
@@ -1001,27 +1421,58 @@
         const turnBadge = document.getElementById('game-turn-text');
         const memoryConfig = document.getElementById('memory-only-config');
         const babanukiConfig = document.getElementById('babanuki-only-config');
+        const jackConfig = document.getElementById('jack-only-config');
+        const aiRow = document.getElementById('ai-autofill-config-row');
+        const aiCheck = document.getElementById('config-auto-fill-ai');
+        const soloBtn = document.getElementById('btn-solo-ai');
+        const maxSelect = document.getElementById('config-max-players');
+
+        document.querySelectorAll('.jack-player-opt').forEach(el => {
+          el.classList.toggle('hidden', mode !== 'jack');
+        });
+        if (mode !== 'jack' && maxSelect && parseInt(maxSelect.value, 10) > 6) {
+          maxSelect.value = '6';
+        }
 
         if (mode === 'babanuki') {
           if(tag) tag.textContent = 'GAME 01'; if(title) title.textContent = '致死性不整脈を回避せよ！';
           if(badge) { badge.textContent = '不整脈を回避せよ！'; badge.className = 'text-xs px-2 py-0.5 rounded-full bg-rose-900/60 text-rose-300 border border-rose-700'; }
           if(turnBadge) { turnBadge.textContent = '不整脈を回避せよ！'; turnBadge.className = 'text-xs px-3 py-1.5 rounded-full bg-rose-950 text-rose-300 border border-rose-700 font-bold'; }
           document.getElementById('btn-open-jinuki-tracker')?.classList.add('hidden');
-          if(memoryConfig) memoryConfig.classList.add('hidden');
-          if(babanukiConfig) babanukiConfig.classList.remove('hidden');
+          memoryConfig?.classList.add('hidden');
+          babanukiConfig?.classList.remove('hidden');
+          jackConfig?.classList.add('hidden');
+          aiRow?.classList.remove('hidden');
+          if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（AI演習）';
         } else if (mode === 'memory') {
           if(tag) tag.textContent = 'GAME 02'; if(title) title.textContent = '救急神経衰弱バトル';
           if(badge) { badge.textContent = '神経衰弱バトル'; badge.className = 'text-xs px-2 py-0.5 rounded-full bg-blue-900/60 text-blue-300 border border-blue-600'; }
           document.getElementById('btn-open-jinuki-tracker')?.classList.add('hidden');
-          if(memoryConfig) memoryConfig.classList.remove('hidden');
-          if(babanukiConfig) babanukiConfig.classList.add('hidden');
+          memoryConfig?.classList.remove('hidden');
+          babanukiConfig?.classList.add('hidden');
+          jackConfig?.classList.add('hidden');
+          aiRow?.classList.remove('hidden');
+          if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（AI演習）';
         } else if (mode === 'jinuki') {
           if(tag) tag.textContent = 'GAME 03'; if(title) title.textContent = '救急 隠れたものを当てろ';
           if(badge) { badge.textContent = '隠れカード推理'; badge.className = 'text-xs px-2 py-0.5 rounded-full bg-amber-900/60 text-amber-300 border border-amber-700'; }
           if(turnBadge) { turnBadge.textContent = '隠れカードを当てろ'; turnBadge.className = 'text-xs px-3 py-1.5 rounded-full bg-amber-950 text-amber-300 border border-amber-700 font-bold'; }
           document.getElementById('btn-open-jinuki-tracker')?.classList.remove('hidden');
-          if(memoryConfig) memoryConfig.classList.add('hidden');
-          if(babanukiConfig) babanukiConfig.classList.remove('hidden');
+          memoryConfig?.classList.add('hidden');
+          babanukiConfig?.classList.remove('hidden');
+          jackConfig?.classList.add('hidden');
+          aiRow?.classList.remove('hidden');
+          if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（AI演習）';
+        } else if (mode === 'jack') {
+          if(tag) tag.textContent = 'GAME 04'; if(title) title.textContent = '99ジャック';
+          if(badge) { badge.textContent = '99ジャック'; badge.className = 'text-xs px-2 py-0.5 rounded-full bg-teal-900/60 text-teal-300 border border-teal-600'; }
+          document.getElementById('btn-open-jinuki-tracker')?.classList.add('hidden');
+          memoryConfig?.classList.add('hidden');
+          babanukiConfig?.classList.add('hidden');
+          jackConfig?.classList.remove('hidden');
+          if(aiCheck) aiCheck.checked = false;
+          aiRow?.classList.add('hidden');
+          if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（1 VS 1 救急AI対戦）';
         }
       },
 
@@ -1040,11 +1491,12 @@
         state.config.mode = state.mode;
         state.config.maxPlayers = parseInt(document.getElementById('config-max-players')?.value || 4, 10);
         state.config.turnTimeLimit = parseInt(document.getElementById('config-turn-time')?.value || 20, 10);
-        state.config.autoFillAI = document.getElementById('config-auto-fill-ai')?.checked ?? true;
+        state.config.autoFillAI = state.mode === 'jack' ? false : (document.getElementById('config-auto-fill-ai')?.checked ?? true);
         state.config.memoryPairs = parseInt(document.getElementById('config-memory-pairs')?.value || 40, 10);
         state.config.teamMode = document.getElementById('config-team-mode')?.value || 'solo';
         state.config.showMemoryDisease = document.getElementById('config-memory-show-disease')?.checked ?? true;
         state.config.showGroupNum = document.getElementById('config-show-group-num')?.checked ?? true;
+        state.config.jackShowTotal = document.getElementById('config-jack-show-total')?.checked ?? true;
         state.me.name = document.getElementById('input-player-name')?.value.trim() || '救急隊員';
         try { localStorage.setItem('ems_player_name', state.me.name); } catch(e){}
       },
@@ -1054,8 +1506,8 @@
         const timerEl = document.getElementById('room-summary-timer');
         const aiEl = document.getElementById('room-summary-ai');
         if(maxEl) maxEl.innerHTML = `最大: <strong class="text-cyan-400">${state.config.maxPlayers}名</strong>`;
-        if(timerEl) timerEl.innerHTML = `手番制限: <strong class="text-amber-400">${state.config.turnTimeLimit>=900?'無制限':state.config.turnTimeLimit+'秒'}</strong>`;
-        if(aiEl) aiEl.innerHTML = `AI自動: <strong class="text-emerald-400">${state.config.autoFillAI?'オン':'オフ'}</strong>`;
+        if(timerEl) timerEl.innerHTML = state.mode === 'jack' ? `クイズ制限: <strong class="text-amber-400">60秒</strong>` : `手番制限: <strong class="text-amber-400">${state.config.turnTimeLimit>=900?'無制限':state.config.turnTimeLimit+'秒'}</strong>`;
+        if(aiEl) aiEl.innerHTML = state.mode === 'jack' ? `合計表示: <strong class="text-teal-400">${state.config.jackShowTotal?'表示':'非表示(暗算)'}</strong>` : `AI自動: <strong class="text-emerald-400">${state.config.autoFillAI?'オン':'オフ'}</strong>`;
         
         const list = document.getElementById('room-members-list'); 
         if(!list) return;
@@ -1072,22 +1524,32 @@
       createRoom: () => {
         app.clearAllTimers(); state.phase = 'waiting';
         app.readConfig();
+        if (state.mode === 'jack') state.config.autoFillAI = false;
         state.room = { code: Math.floor(100000 + Math.random() * 900000).toString(), isHost: true, isSolo: false };
         const codeDisplay = document.getElementById('room-code-display');
         if(codeDisplay) codeDisplay.textContent = state.room.code;
         const myColor = pickUnusedColor([]);
-        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: myColor }];
+        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: myColor, totalInternal: 0, isStayed: false, isBusted: false }];
         socket.emit('join_room', { roomCode: state.room.code, playerName: state.me.name, config: state.config });
         document.getElementById('btn-start-game')?.classList.remove('hidden'); 
-        document.getElementById('host-ai-controls')?.classList.remove('hidden');
+        if (state.mode === 'jack') {
+          document.getElementById('host-ai-controls')?.classList.add('hidden');
+        } else {
+          document.getElementById('host-ai-controls')?.classList.remove('hidden');
+        }
         app.updateRoomUI(); app.showScreen('view-room');
       },
 
       startSoloAI: () => {
         app.readConfig(); state.room = { code: 'SOLO-AI', isHost: true, isSolo: true };
-        state.config.autoFillAI = true; 
+        if (state.mode === 'jack') {
+          state.config.maxPlayers = 2;
+          state.config.autoFillAI = true;
+        } else {
+          state.config.autoFillAI = true;
+        }
         const myColor = pickUnusedColor([]);
-        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: myColor }];
+        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: myColor, totalInternal: 0, isStayed: false, isBusted: false }];
         app.startGame(); 
       },
 
@@ -1138,7 +1600,7 @@
         if(state.players.length >= state.config.maxPlayers) return utils.showToast('定員です');
         const bIdx = state.players.filter(p=>p.isAI).length;
         const botColor = pickUnusedColor(state.players);
-        state.players.push({ id: `ai_${Date.now()}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: botColor });
+        state.players.push({ id: `ai_${Date.now()}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: botColor, totalInternal: 0, isStayed: false, isBusted: false });
         app.updateRoomUI(); utils.showToast('AI隊員を追加しました');
       },
 
@@ -1149,11 +1611,18 @@
       },
 
       startGame: () => {
-        if(state.room.isHost && state.config.autoFillAI) {
+        if (state.mode === 'jack') {
+          if (state.room.isSolo) {
+            while(state.players.length < 2) {
+              const botColor = pickUnusedColor(state.players);
+              state.players.push({ id: `ai_${Date.now()}_0`, name: '救急隊員AI', isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: 2, color: botColor, totalInternal: 0, isStayed: false, isBusted: false });
+            }
+          }
+        } else if(state.room.isHost && state.config.autoFillAI) {
           while(state.players.length < state.config.maxPlayers) {
             const bIdx = state.players.filter(p=>p.isAI).length;
             const botColor = pickUnusedColor(state.players);
-            state.players.push({ id: `ai_${Date.now()}_${bIdx}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: botColor });
+            state.players.push({ id: `ai_${Date.now()}_${bIdx}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: botColor, totalInternal: 0, isStayed: false, isBusted: false });
           }
         }
         if(state.players.length < 2) return utils.showToast('最低2名必要です');
@@ -1165,9 +1634,519 @@
         }
 
         if(state.mode === 'memory') app.startMemoryGameSession();
+        else if(state.mode === 'jack') app.startJackGameSession();
         else app.startStandardCardGameSession();
       },
 
+      // ==========================================
+      // GAME 04: 99ジャック 専用ロジック
+      // ==========================================
+      startJackGameSession: () => {
+        app.clearAllTimers();
+        state.phase = 'jack_playing';
+        state.turnIdx = 0;
+        state.ranks = [];
+
+        let deck = currentCardDB.filter(c => c.suit === 'J').map(c => ({
+          ...c,
+          internalVal: c.internalVal !== undefined ? Number(c.internalVal) : Math.round(Number(c.num) * 100)
+        }));
+        for (let i = deck.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+
+        state.jackState.deck = deck;
+        state.jackState.currentCard = null;
+        state.jackState.selectedOption = null;
+        state.jackState.quizAnswered = false;
+        state.jackState.isProcessing = false;
+
+        state.players.forEach(p => {
+          p.hand = [];
+          p.totalInternal = 0;
+          p.isStayed = false;
+          p.isBusted = false;
+          p.isCleared = false;
+          p.rank = 0;
+        });
+
+        socket.emit('game_action', {
+          roomCode: state.room.code,
+          type: 'start',
+          mode: 'jack',
+          config: state.config,
+          players: state.players,
+          turnIdx: state.turnIdx,
+          jackDeck: state.jackState.deck
+        });
+
+        app.showScreen('view-jack-game');
+        app.renderJackTable();
+        app.addLogMessage('GAME 04: 99ジャックが開始されました（初期値 0 スタート）。');
+        app.processJackTurn();
+      },
+
+      renderJackTable: () => {
+        const pContainer = document.getElementById('jack-players-container');
+        const myCardsContainer = document.getElementById('jack-my-cards-container');
+        const deckCountEl = document.getElementById('jack-deck-count');
+        const turnInfoEl = document.getElementById('jack-turn-info');
+        const myTotalEl = document.getElementById('jack-my-total-display');
+        const myStatusBadge = document.getElementById('jack-my-status-badge');
+        const btnHit = document.getElementById('btn-jack-hit');
+        const btnStay = document.getElementById('btn-jack-stay');
+        const deckCardEl = document.getElementById('jack-deck-card');
+        if(!pContainer || !myCardsContainer) return;
+
+        if(deckCountEl) deckCountEl.textContent = state.jackState.deck.length;
+
+        const currentP = state.players[state.turnIdx];
+        const isMyTurn = (state.phase === 'jack_playing' && currentP && !currentP.isAI && currentP.id === state.me.id && !state.jackState.isProcessing);
+        if(turnInfoEl) turnInfoEl.textContent = `現在の手番: ${currentP ? currentP.name : ''} ${isMyTurn ? '(あなた)' : ''}`;
+
+        const showTotal = state.config.jackShowTotal ?? true;
+
+        pContainer.innerHTML = '';
+        state.players.forEach((p, idx) => {
+          const isCur = (state.phase === 'jack_playing' && idx === state.turnIdx);
+          const pColor = p.color || '#38bdf8';
+          const statusHtml = p.isBusted
+            ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-700 font-bold">💀 CPA(99超)</span>'
+            : p.isStayed
+              ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-700 font-bold">🛡 ステイ</span>'
+              : isCur
+                ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-500 font-bold animate-pulse">▶ 手番</span>'
+                : '<span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">待機</span>';
+
+          const totalStr = showTotal ? utils.formatJackInternal(p.totalInternal) : '???';
+
+          pContainer.innerHTML += `
+            <div class="p-3 rounded-2xl border transition-all ${isCur ? 'bg-teal-950/50 border-teal-400 ring-2 ring-teal-400/50 shadow-lg' : p.isBusted ? 'bg-rose-950/20 border-rose-900/60 opacity-75' : 'bg-slate-900/80 border-slate-800'} flex flex-col justify-between">
+              <div class="flex items-center justify-between gap-1 mb-2">
+                <div class="flex items-center gap-1.5 truncate">
+                  <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${pColor}"></span>
+                  <span class="text-xs font-bold text-white truncate">${utils.escapeHtml(p.name)}</span>
+                </div>
+                ${statusHtml}
+              </div>
+              <div class="flex items-center justify-between text-xs bg-slate-950/90 px-2.5 py-1.5 rounded-xl border border-slate-800/80">
+                <span class="text-slate-400 text-[10px]">手札 ${p.hand.length}枚</span>
+                <span class="font-mono font-black ${p.isBusted && showTotal ? 'text-rose-400' : 'text-teal-300'}">計: ${totalStr}</span>
+              </div>
+            </div>
+          `;
+        });
+
+        const myP = state.players.find(p => p.id === state.me.id);
+        const myDot = document.getElementById('jack-my-color-dot');
+        if(myDot && myP?.color) myDot.style.backgroundColor = myP.color;
+
+        if(myTotalEl && myP) {
+          myTotalEl.textContent = showTotal ? utils.formatJackInternal(myP.totalInternal) : '??? (暗算モード)';
+          myTotalEl.className = `text-lg font-mono font-black ${myP.isBusted && showTotal ? 'text-rose-500' : 'text-teal-400'}`;
+        }
+
+        if(myStatusBadge && myP) {
+          if(myP.isBusted) {
+            myStatusBadge.textContent = '💀 99超過 (瞳孔散大・心拍呼吸停止)';
+            myStatusBadge.className = 'text-xs px-2.5 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-600 font-bold';
+          } else if(myP.isStayed) {
+            myStatusBadge.textContent = '🛡 ステイアンドプレイ宣言済';
+            myStatusBadge.className = 'text-xs px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-600 font-bold';
+          } else {
+            myStatusBadge.textContent = isMyTurn ? '🎯 あなたの手番です' : 'プレイ中';
+            myStatusBadge.className = 'text-xs px-2.5 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-700 font-bold';
+          }
+        }
+
+        if(btnHit && btnStay && deckCardEl) {
+          if(isMyTurn && myP && !myP.isStayed && !myP.isBusted) {
+            btnHit.classList.remove('opacity-40', 'pointer-events-none');
+            btnStay.classList.remove('opacity-40', 'pointer-events-none');
+            deckCardEl.classList.remove('opacity-50', 'pointer-events-none');
+          } else {
+            btnHit.classList.add('opacity-40', 'pointer-events-none');
+            btnStay.classList.add('opacity-40', 'pointer-events-none');
+            deckCardEl.classList.add('opacity-50', 'pointer-events-none');
+          }
+        }
+
+        myCardsContainer.innerHTML = '';
+        if(!myP || myP.hand.length === 0) {
+          myCardsContainer.innerHTML = '<div class="w-full text-center py-10 text-slate-500 font-bold text-xs">まだ手札はありません（現在 0 スタート）</div>';
+        } else {
+          myP.hand.forEach(c => {
+            const bColorName = c.borderColor || c.title || '緑';
+            const borderCls = JACK_BORDER_STYLES[bColorName] || 'border-teal-500';
+            myCardsContainer.innerHTML += `
+              <div onclick="app.openCardDetail(${c.id})" class="flex-shrink-0 w-36 h-48 rounded-2xl border-4 ${borderCls} bg-slate-900 p-3 flex flex-col justify-between cursor-pointer hover:-translate-y-1 transition shadow-xl select-none">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-1">
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-200">${utils.escapeHtml(bColorName)}</span>
+                  <span class="text-base font-mono font-black text-teal-300">+${c.num}</span>
+                </div>
+                <div class="my-auto py-1 text-center overflow-y-auto custom-scrollbar">
+                  <div class="text-[11px] font-bold text-slate-100 leading-snug">${utils.escapeHtml(c.desc)}</div>
+                </div>
+                <div class="text-[10px] font-mono text-right text-slate-400 pt-1 border-t border-slate-800/80">値: ${c.num}</div>
+              </div>
+            `;
+          });
+        }
+
+        if (window.lucide) lucide.createIcons();
+      },
+
+      processJackTurn: () => {
+        if(state.phase !== 'jack_playing') return;
+        if(app.checkJackGameEnd()) return;
+
+        const currentP = state.players[state.turnIdx];
+        if(!currentP || currentP.isStayed || currentP.isBusted) {
+          app.advanceJackTurn();
+          return;
+        }
+
+        app.renderJackTable();
+        const banner = document.getElementById('jack-announcement-banner');
+
+        if(currentP.id === state.me.id && !currentP.isAI) {
+          if(banner) banner.innerHTML = `あなたの手番です。「<strong class="text-teal-300">ドロー（問題に挑戦）</strong>」か「<strong class="text-amber-300">ステイアンドプレイ宣言</strong>」を選択してください`;
+        } else {
+          if(banner) banner.innerHTML = `<strong class="text-teal-300">${utils.escapeHtml(currentP.name)}</strong> が思考中です...`;
+          if(currentP.isAI && (state.room.isHost || state.room.isSolo) && !state.jackState.isProcessing) {
+            state.jackState.isProcessing = true;
+            if(state.timers.aiDelay) clearTimeout(state.timers.aiDelay);
+            state.timers.aiDelay = setTimeout(() => {
+              app.executeAiJackTurn(currentP);
+            }, 1400);
+          }
+        }
+      },
+
+      jackDrawCard: () => {
+        if(state.phase !== 'jack_playing' || state.jackState.isProcessing) return;
+        const currentP = state.players[state.turnIdx];
+        if(!currentP || currentP.id !== state.me.id || currentP.isStayed || currentP.isBusted) return;
+
+        if(state.jackState.deck.length === 0) {
+          utils.showToast('山札がなくなりました！ゲームを終了します');
+          app.finishJackGame();
+          return;
+        }
+
+        state.jackState.isProcessing = true;
+        const drawn = state.jackState.deck.pop();
+        state.jackState.currentCard = drawn;
+        state.jackState.selectedOption = null;
+        state.jackState.quizAnswered = false;
+
+        app.openJackQuizModal(drawn);
+      },
+
+      openJackQuizModal: (card) => {
+        const modal = document.getElementById('modal-jack-quiz');
+        const badge = document.getElementById('jack-quiz-color-badge');
+        const timerEl = document.getElementById('jack-quiz-timer');
+        const qEl = document.getElementById('jack-quiz-question');
+        const optsEl = document.getElementById('jack-quiz-options');
+        const submitBtn = document.getElementById('btn-jack-submit-answer');
+        const resultArea = document.getElementById('jack-quiz-result-area');
+        const quizBox = document.getElementById('jack-quiz-box');
+
+        const bColorName = card.borderColor || card.title || '緑';
+        if(badge) badge.textContent = `カードふち色: ${bColorName}`;
+        if(quizBox) {
+          quizBox.className = `w-full max-w-lg bg-slate-900 border-4 ${JACK_BORDER_STYLES[bColorName] || 'border-teal-500'} rounded-3xl p-6 flex flex-col`;
+        }
+        if(qEl) qEl.textContent = card.desc;
+
+        // 3つの選択肢を毎回ランダムにシャッフル配置
+        const options = [card.num, card.opt1, card.opt2];
+        for(let i = options.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [options[i], options[j]] = [options[j], options[i]];
+        }
+
+        if(optsEl) {
+          optsEl.innerHTML = '';
+          options.forEach((optVal, idx) => {
+            optsEl.innerHTML += `
+              <button id="jack-opt-btn-${idx}" onclick="app.selectJackQuizOption(${idx}, '${optVal}')" class="jack-opt-btn py-4 px-2 rounded-2xl border-2 border-slate-700 bg-slate-800 hover:border-teal-400 text-white font-mono font-black text-base sm:text-lg transition shadow-md">
+                ${utils.escapeHtml(optVal)}
+              </button>
+            `;
+          });
+        }
+
+        if(submitBtn) {
+          submitBtn.classList.remove('hidden');
+          submitBtn.classList.add('opacity-50', 'pointer-events-none');
+        }
+        resultArea?.classList.add('hidden');
+        resultArea?.classList.remove('flex');
+        modal?.classList.remove('hidden');
+
+        state.jackState.timeLeft = 60;
+        if(timerEl) timerEl.textContent = `残り ${state.jackState.timeLeft} 秒`;
+        if(state.timers.jackQuiz) clearInterval(state.timers.jackQuiz);
+
+        state.timers.jackQuiz = setInterval(() => {
+          state.jackState.timeLeft--;
+          if(timerEl) timerEl.textContent = `残り ${state.jackState.timeLeft} 秒`;
+          if(state.jackState.timeLeft <= 0) {
+            clearInterval(state.timers.jackQuiz);
+            if(!state.jackState.quizAnswered) {
+              app.evaluateJackQuiz(false, true);
+            }
+          }
+        }, 1000);
+      },
+
+      selectJackQuizOption: (idx, val) => {
+        if(state.jackState.quizAnswered) return;
+        state.jackState.selectedOption = val;
+        document.querySelectorAll('.jack-opt-btn').forEach((btn, i) => {
+          if(i === idx) {
+            btn.className = 'jack-opt-btn py-4 px-2 rounded-2xl border-2 border-teal-400 bg-teal-900/70 text-teal-200 font-mono font-black text-base sm:text-lg transition shadow-[0_0_15px_rgba(20,184,166,0.5)] scale-105';
+          } else {
+            btn.className = 'jack-opt-btn py-4 px-2 rounded-2xl border-2 border-slate-700 bg-slate-800 hover:border-teal-400 text-white font-mono font-black text-base sm:text-lg transition opacity-75';
+          }
+        });
+        const submitBtn = document.getElementById('btn-jack-submit-answer');
+        submitBtn?.classList.remove('opacity-50', 'pointer-events-none');
+      },
+
+      submitJackQuizAnswer: () => {
+        if(state.jackState.quizAnswered || state.jackState.selectedOption === null) return;
+        const card = state.jackState.currentCard;
+        const isCorrect = Number(state.jackState.selectedOption) === Number(card.num);
+        app.evaluateJackQuiz(isCorrect, false);
+      },
+
+      evaluateJackQuiz: (isCorrect, isTimeout) => {
+        state.jackState.quizAnswered = true;
+        if(state.timers.jackQuiz) clearInterval(state.timers.jackQuiz);
+
+        const card = state.jackState.currentCard;
+        const submitBtn = document.getElementById('btn-jack-submit-answer');
+        const resultArea = document.getElementById('jack-quiz-result-area');
+        const verdictBanner = document.getElementById('jack-quiz-verdict-banner');
+        const actionBtns = document.getElementById('jack-quiz-action-buttons');
+
+        submitBtn?.classList.add('hidden');
+        document.querySelectorAll('.jack-opt-btn').forEach(btn => btn.classList.add('pointer-events-none'));
+
+        if(resultArea) {
+          resultArea.classList.remove('hidden');
+          resultArea.classList.add('flex');
+        }
+
+        if(verdictBanner) {
+          if(isCorrect) {
+            verdictBanner.className = 'p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-950/70 text-center shadow-[0_0_25px_rgba(16,185,129,0.3)]';
+            verdictBanner.innerHTML = `
+              <div class="text-lg font-black text-emerald-300 mb-1">⭕ 正解！</div>
+              <div class="text-xs text-slate-200 mb-2">【問題】${utils.escapeHtml(card.desc)}</div>
+              <div class="inline-block bg-slate-950 border border-emerald-500/50 px-4 py-1.5 rounded-xl text-sm font-mono font-black text-emerald-400">正答（カードの数値）: ${card.num}</div>
+              <div class="text-[11px] text-emerald-200 mt-2 font-bold">正解特典：このカードを手札に加算するか、加算せず破棄するか選べます！</div>
+            `;
+          } else {
+            verdictBanner.className = 'p-4 rounded-2xl border-2 border-rose-500 bg-rose-950/70 text-center shadow-[0_0_25px_rgba(244,63,94,0.3)]';
+            verdictBanner.innerHTML = `
+              <div class="text-lg font-black text-rose-300 mb-1">${isTimeout ? '⏱ 時間切れ（不正解）！' : '❌ 不正解！'}</div>
+              <div class="text-xs text-slate-200 mb-2">【問題】${utils.escapeHtml(card.desc)}</div>
+              <div class="inline-block bg-slate-950 border border-rose-500/50 px-4 py-1.5 rounded-xl text-sm font-mono font-black text-rose-400">正答（カードの数値）: ${card.num}</div>
+              <div class="text-[11px] text-rose-200 mt-2 font-bold">ペナルティ：このカード（+${card.num}）は手札へ強制加算されます！</div>
+            `;
+          }
+        }
+
+        if(actionBtns) {
+          if(isCorrect) {
+            actionBtns.innerHTML = `
+              <button onclick="app.resolveJackCardChoice(true)" class="flex-1 bg-teal-600 hover:bg-teal-500 text-white font-extrabold py-3.5 px-3 rounded-xl text-xs sm:text-sm transition shadow-lg">手札に加算する (+${card.num})</button>
+              <button onclick="app.resolveJackCardChoice(false)" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 font-extrabold py-3.5 px-3 rounded-xl text-xs sm:text-sm transition border border-slate-500">加算せず破棄（スルー）</button>
+            `;
+          } else {
+            actionBtns.innerHTML = `
+              <button onclick="app.resolveJackCardChoice(true)" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-extrabold py-3.5 px-4 rounded-xl text-xs sm:text-sm transition shadow-lg">手札へ強制加算する (+${card.num})</button>
+            `;
+          }
+        }
+      },
+
+      resolveJackCardChoice: (addToHand) => {
+        document.getElementById('modal-jack-quiz')?.classList.add('hidden');
+        const currentP = state.players[state.turnIdx];
+        const card = state.jackState.currentCard;
+        if(!currentP || !card) return;
+
+        let bustedPlayerId = null;
+
+        if(addToHand) {
+          currentP.hand.push(card);
+          const addInternal = card.internalVal !== undefined ? Number(card.internalVal) : Math.round(Number(card.num) * 100);
+          currentP.totalInternal = (currentP.totalInternal || 0) + addInternal;
+
+          if(currentP.totalInternal >= 9900) {
+            currentP.isBusted = true;
+            bustedPlayerId = currentP.id;
+            app.addLogMessage(`💀 ${currentP.name} が 99.00 を超過し急変（バースト）しました！`);
+            app.showJackBustModal(currentP);
+          } else {
+            app.addLogMessage(`${currentP.name} がカードを手札に加算しました。`);
+          }
+        } else {
+          state.discardPile.push(card);
+          app.addLogMessage(`${currentP.name} が正解し、カードを加算せず破棄しました。`);
+        }
+
+        state.jackState.currentCard = null;
+        state.jackState.isProcessing = false;
+        app.advanceJackTurn(bustedPlayerId);
+      },
+
+      jackDeclareStay: () => {
+        if(state.phase !== 'jack_playing' || state.jackState.isProcessing) return;
+        const currentP = state.players[state.turnIdx];
+        if(!currentP || currentP.id !== state.me.id || currentP.isStayed || currentP.isBusted) return;
+
+        currentP.isStayed = true;
+        utils.showToast('🛡 ステイアンドプレイを宣言しました！');
+        app.addLogMessage(`${currentP.name} がステイアンドプレイを宣言しました。`);
+        app.advanceJackTurn(null);
+      },
+
+      executeAiJackTurn: (aiPlayer) => {
+        if(state.phase !== 'jack_playing' || !aiPlayer) return;
+
+        // AIの判断ロジック：現在値が82.00（8200）以上ならステイ確率を高め、88.00（8800）以上なら確実にステイ
+        if(aiPlayer.totalInternal >= 8800 || (aiPlayer.totalInternal >= 7800 && Math.random() < 0.6) || state.jackState.deck.length === 0) {
+          aiPlayer.isStayed = true;
+          app.addLogMessage(`🛡 ${aiPlayer.name} がステイアンドプレイを宣言しました。`);
+          state.jackState.isProcessing = false;
+          app.advanceJackTurn(null);
+          return;
+        }
+
+        const drawn = state.jackState.deck.pop();
+        const addInternal = drawn.internalVal !== undefined ? Number(drawn.internalVal) : Math.round(Number(drawn.num) * 100);
+        const aiCorrect = Math.random() < 0.72; // AIの3択正答率72%
+
+        let bustedPlayerId = null;
+        if(aiCorrect) {
+          // 正解時：足して9899以下なら加算、9900以上になるなら破棄して回避
+          if(aiPlayer.totalInternal + addInternal <= 9899) {
+            aiPlayer.hand.push(drawn);
+            aiPlayer.totalInternal += addInternal;
+            app.addLogMessage(`${aiPlayer.name} がクイズに正解し、カードを加算しました。`);
+          } else {
+            state.discardPile.push(drawn);
+            app.addLogMessage(`${aiPlayer.name} がクイズに正解し、危険カードを破棄しました。`);
+          }
+        } else {
+          // 不正解時：強制加算
+          aiPlayer.hand.push(drawn);
+          aiPlayer.totalInternal += addInternal;
+          if(aiPlayer.totalInternal >= 9900) {
+            aiPlayer.isBusted = true;
+            bustedPlayerId = aiPlayer.id;
+            app.addLogMessage(`💀 ${aiPlayer.name} が不正解で強制加算され、99.00超過（バースト）しました！`);
+            app.showJackBustModal(aiPlayer);
+          } else {
+            app.addLogMessage(`${aiPlayer.name} がクイズに不正解となり、カードが強制加算されました。`);
+          }
+        }
+
+        state.jackState.isProcessing = false;
+        app.advanceJackTurn(bustedPlayerId);
+      },
+
+      showJackBustModal: (player) => {
+        const modal = document.getElementById('modal-jack-bust');
+        const nameEl = document.getElementById('jack-bust-player-name');
+        const showTotal = state.config.jackShowTotal ?? true;
+        const scoreTxt = showTotal ? `（合計: ${utils.formatJackInternal(player.totalInternal)}）` : '';
+        if(nameEl) nameEl.textContent = `${player.name} さん ${scoreTxt}`;
+        modal?.classList.remove('hidden');
+        if(window.lucide) lucide.createIcons();
+      },
+
+      closeJackBustModal: () => {
+        document.getElementById('modal-jack-bust')?.classList.add('hidden');
+      },
+
+      checkJackGameEnd: () => {
+        const active = state.players.filter(p => !p.isStayed && !p.isBusted);
+        if(active.length === 0 || state.jackState.deck.length === 0) {
+          app.finishJackGame();
+          return true;
+        }
+        return false;
+      },
+
+      advanceJackTurn: (bustedPlayerId) => {
+        const active = state.players.filter(p => !p.isStayed && !p.isBusted);
+        const isEnd = (active.length === 0 || state.jackState.deck.length === 0);
+
+        if(isEnd) {
+          app.computeJackRanks();
+        } else {
+          for(let i = 1; i <= state.players.length; i++) {
+            const nxt = (state.turnIdx + i) % state.players.length;
+            if(!state.players[nxt].isStayed && !state.players[nxt].isBusted) {
+              state.turnIdx = nxt;
+              break;
+            }
+          }
+        }
+
+        socket.emit('game_action', {
+          roomCode: state.room.code,
+          type: 'jack_sync',
+          mode: 'jack',
+          config: state.config,
+          players: state.players,
+          turnIdx: state.turnIdx,
+          jackDeck: state.jackState.deck,
+          ranks: state.ranks,
+          bustPlayerId: bustedPlayerId || null,
+          gameEnded: isEnd
+        });
+
+        if(state.room.isSolo) {
+          app.renderJackTable();
+          if(isEnd) {
+            state.phase = 'ended';
+            setTimeout(() => app.showResults(), bustedPlayerId ? 2800 : 800);
+          } else {
+            app.processJackTurn();
+          }
+        }
+      },
+
+      computeJackRanks: () => {
+        // 98.99（内部9899）以下でより99に近いプレイヤーが上位、99.00（9900）以上のバースト組は最下位
+        const safePlayers = state.players.filter(p => !p.isBusted).sort((a, b) => b.totalInternal - a.totalInternal);
+        const bustPlayers = state.players.filter(p => p.isBusted).sort((a, b) => a.totalInternal - b.totalInternal);
+        const ordered = [...safePlayers, ...bustPlayers];
+        state.ranks = ordered.map(p => p.id);
+        state.players.forEach(p => {
+          p.rank = state.ranks.indexOf(p.id) + 1;
+        });
+      },
+
+      finishJackGame: () => {
+        if(state.phase === 'ended') return;
+        state.phase = 'ended';
+        app.computeJackRanks();
+        setTimeout(() => app.showResults(), 1000);
+      },
+
+      // ==========================================
+      // GAME 02: 救急神経衰弱バトル ロジック
+      // ==========================================
       startMemoryGameSession: () => {
         state.phase = 'memory_playing';
         state.turnIdx = 0;
@@ -1741,6 +2720,9 @@
         app.showResults();
       },
 
+      // ==========================================
+      // GAME 01 & 03: ババ抜き・ジジ抜き ロジック
+      // ==========================================
       startStandardCardGameSession: () => {
         state.phase = 'initial_discard';
         state.discardPile = [];
@@ -1757,7 +2739,9 @@
           p.isReady = p.isAI ? true : false;
         });
 
-        let deck = state.mode === 'babanuki' ? currentCardDB.filter(c => c.id !== 54 && c.suit !== 'M') : currentCardDB.filter(c => c.suit !== 'M');
+        let deck = state.mode === 'babanuki'
+          ? currentCardDB.filter(c => c.id !== 54 && c.suit !== 'M' && c.suit !== 'J')
+          : currentCardDB.filter(c => c.suit !== 'M' && c.suit !== 'J');
         deck.sort(() => Math.random() - 0.5);
         if(state.mode === 'jinuki') state.hiddenCard = deck.pop();
         
@@ -2119,6 +3103,7 @@
         if(state.timers.matchTimer) clearTimeout(state.timers.matchTimer);
         if(state.timers.quizTimer) clearInterval(state.timers.quizTimer);
         if(state.timers.quizAutoClose) clearTimeout(state.timers.quizAutoClose);
+        if(state.timers.jackQuiz) clearInterval(state.timers.jackQuiz);
       },
 
       playDefibAnimation: () => {
@@ -2130,7 +3115,6 @@
         });
       },
 
-      // 🆕 下部バーの3ボタン（お知らせ・会話・ゲームログ）から指定タブで直接モーダルを開く
       openCommModal: (tab) => {
         const modal = document.getElementById('modal-chat');
         modal?.classList.remove('hidden');
@@ -2298,7 +3282,7 @@
         if(!content) return;
         content.innerHTML = `
           <div class="text-5xl mb-4 ${SUIT_COLORS[c.suit]||''}">${SUIT_ICONS[c.suit]||'♠'}</div>
-          <h3 class="text-xl font-bold ${isJoker ? 'text-amber-300' : 'text-white'} mb-2">${utils.escapeHtml(c.title)}</h3>
+          <h3 class="text-xl font-bold ${isJoker ? 'text-amber-300' : 'text-white'} mb-2">${utils.escapeHtml(c.title)} ${c.suit==='J' ? `(+${c.num})` : ''}</h3>
           ${isJoker ? '<div class="text-xs font-bold text-rose-400 bg-rose-950/60 border border-rose-800 py-1 px-3 rounded-full mb-4 inline-block">要緊急対応カード</div>' : ''}
           <p class="text-sm text-slate-200 bg-slate-800 p-5 rounded-2xl leading-relaxed text-left shadow-inner">${utils.escapeHtml(c.desc)}</p>
         `;
@@ -2400,18 +3384,25 @@
       showResults: () => {
         app.clearAllTimers();
         document.getElementById('modal-jinuki-quiz')?.classList.add('hidden');
+        document.getElementById('modal-jack-quiz')?.classList.add('hidden');
+        document.getElementById('modal-jack-bust')?.classList.add('hidden');
+
+        if(state.mode === 'jack' && state.ranks.length === 0) {
+          app.computeJackRanks();
+        }
+
         const myP = state.players.find(p=>p.id===state.me.id);
         const iconBox = document.getElementById('result-icon-container'), badge = document.getElementById('result-badge-label'), title = document.getElementById('result-title');
         
-        if (myP?.rank === 1) {
+        if (myP?.rank === 1 && !(state.mode === 'jack' && myP?.isBusted)) {
           if(iconBox) { iconBox.className='w-20 h-20 rounded-3xl flex items-center justify-center mb-4 bg-amber-500/20 text-amber-300 border-2 border-amber-400 mx-auto'; iconBox.innerHTML='<i data-lucide="trophy" class="w-12 h-12"></i>'; }
           if(badge) { badge.className='text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block bg-amber-900/60 text-amber-300 border border-amber-600'; badge.textContent='1ST PLACE'; }
-          if(title) title.textContent='最速クリア達成！'; 
+          if(title) title.textContent = state.mode === 'jack' ? '99ジャック 制覇！' : '最速クリア達成！'; 
           if(window.confetti) confetti();
-        } else if (myP?.rank === state.players.length) {
+        } else if ((state.mode === 'jack' && myP?.isBusted) || myP?.rank === state.players.length) {
           if(iconBox) { iconBox.className='w-20 h-20 rounded-3xl flex items-center justify-center mb-4 bg-rose-500/20 text-rose-400 border-2 border-rose-500 mx-auto'; iconBox.innerHTML='<i data-lucide="zap-off" class="w-12 h-12"></i>'; }
-          if(badge) { badge.className='text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block bg-rose-900/60 text-rose-300 border border-rose-600'; badge.textContent=state.mode==='babanuki'?'VF保持':'孤立カード保持'; }
-          if(title) title.textContent=state.mode==='babanuki'?'VFを回避できず！':'作戦完了';
+          if(badge) { badge.className='text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block bg-rose-900/60 text-rose-300 border border-rose-600'; badge.textContent=state.mode==='babanuki'?'VF保持':state.mode==='jack'?'OVER 99.00 (CPA)':'孤立カード保持'; }
+          if(title) title.textContent=state.mode==='babanuki'?'VFを回避できず！':state.mode==='jack'?'99超過…急変（バースト）':'作戦完了';
         } else {
           if(iconBox) { iconBox.className='w-20 h-20 rounded-3xl flex items-center justify-center mb-4 bg-cyan-500/20 text-cyan-300 border-2 border-cyan-400 mx-auto'; iconBox.innerHTML='<i data-lucide="award" class="w-12 h-12"></i>'; }
           if(badge) { badge.className='text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block bg-cyan-900/60 text-cyan-300 border border-cyan-600'; badge.textContent='CLEAR'; }
@@ -2421,10 +3412,24 @@
         const list = document.getElementById('result-ranking-list'); 
         if(list) {
           list.innerHTML = '';
-          list.innerHTML += `<div class="text-xs font-bold text-slate-400 mb-1 border-b border-slate-800 pb-1">🏆 あがり順位表彰</div>`;
+          list.innerHTML += `<div class="text-xs font-bold text-slate-400 mb-1 border-b border-slate-800 pb-1">🏆 ${state.mode === 'jack' ? '99ジャック 最終順位（98.99に近い順 / 99超は最下位）' : 'あがり順位表彰'}</div>`;
           state.ranks.forEach((pId, idx) => {
             const p = state.players.find(x=>x.id===pId); if(!p) return;
-            list.innerHTML += `<div class="flex items-center justify-between p-2.5 rounded-xl border ${p.id===state.me.id?'bg-cyan-950/40 border-cyan-500/60':'bg-slate-900 border-slate-800'}"><div class="flex items-center gap-2"><span class="text-lg w-6 text-center">${['🥇','🥈','🥉','🏅','🏅','⚡'][idx]||`${idx+1}`}</span><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${p.color || '#38bdf8'}"></span><span class="text-xs font-bold text-white">${utils.escapeHtml(p.name)}</span></div><span class="text-[11px] font-mono font-bold ${idx===0?'text-amber-400':'text-slate-400'}">${idx===0?'WINNER':'CLEAR'}</span></div>`;
+            let rightLabel = idx===0 ? 'WINNER' : 'CLEAR';
+            let rightColor = idx===0 ? 'text-amber-400' : 'text-slate-400';
+
+            if(state.mode === 'jack') {
+              const scoreStr = utils.formatJackInternal(p.totalInternal);
+              if(p.isBusted) {
+                rightLabel = `💀 ${scoreStr} (99超過・最下位)`;
+                rightColor = 'text-rose-400';
+              } else {
+                rightLabel = `合計: ${scoreStr} / 98.99`;
+                rightColor = idx===0 ? 'text-amber-400' : 'text-teal-300';
+              }
+            }
+
+            list.innerHTML += `<div class="flex items-center justify-between p-2.5 rounded-xl border ${p.id===state.me.id?'bg-cyan-950/40 border-cyan-500/60':'bg-slate-900 border-slate-800'}"><div class="flex items-center gap-2"><span class="text-lg w-6 text-center">${['🥇','🥈','🥉','🏅','🏅','🏅','🏅','⚡'][idx]||`${idx+1}`}</span><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${p.color || '#38bdf8'}"></span><span class="text-xs font-bold text-white">${utils.escapeHtml(p.name)}</span></div><span class="text-[11px] font-mono font-bold ${rightColor}">${rightLabel}</span></div>`;
           });
 
           if (state.mode === 'jinuki') {
@@ -2445,6 +3450,9 @@
       },
       rematch: () => state.room.isSolo ? app.startSoloAI() : app.returnToPortal(),
 
+      // ==========================================
+      // 管理室（CMS）ロジック（GAME 04 編集対応）
+      // ==========================================
       adminClicks: 0, adminTimer: null,
       openAdmin: () => { 
         socket.emit('request_admin_state');
@@ -2475,7 +3483,7 @@
         currentGameAccess.game1 = document.getElementById('toggle-game1')?.checked ?? true;
         currentGameAccess.game2 = document.getElementById('toggle-game2')?.checked ?? true;
         currentGameAccess.game3 = document.getElementById('toggle-game3')?.checked ?? true;
-        currentGameAccess.game4 = document.getElementById('toggle-game4')?.checked ?? false;
+        currentGameAccess.game4 = document.getElementById('toggle-game4')?.checked ?? true;
         saveAccess(currentGameAccess);
         socket.emit('admin_update_access', currentGameAccess);
         app.renderPortal(); 
@@ -2489,14 +3497,27 @@
         const selector = document.getElementById('admin-deck-selector');
         const f = selector ? selector.value : 'all';
         let d = currentCardDB;
-        if(f==='babanuki') d = currentCardDB.filter(c=>c.id!==54 && c.suit!=='M');
+        if(f==='babanuki') d = currentCardDB.filter(c=>c.id!==54 && c.suit!=='M' && c.suit!=='J');
         else if(f==='memory') d = currentCardDB.filter(c=>c.suit==='M');
-        else if(f==='jinuki') d = currentCardDB.filter(c=>c.suit!=='M'); 
+        else if(f==='jinuki') d = currentCardDB.filter(c=>c.suit!=='M' && c.suit!=='J');
+        else if(f==='jack') d = currentCardDB.filter(c=>c.suit==='J');
         
         d.forEach(c => {
+          const isJack = (c.suit === 'J');
+          const subInfoHtml = isJack
+            ? `<div id="tv-${c.id}" class="text-[11px]"><span class="px-1.5 py-0.5 rounded bg-slate-800 text-teal-300 font-bold mr-1">${utils.escapeHtml(c.borderColor || c.title || '緑')}</span><span class="text-slate-400 font-mono">他択: ${c.opt1} / ${c.opt2}</span></div>
+               <div id="te-${c.id}" class="hidden space-y-1">
+                 <input id="te-color-${c.id}" class="w-full bg-slate-950 border border-slate-700 p-1 rounded text-[11px] text-white" placeholder="ふち色(赤,青など)" value="${utils.escapeHtml(c.borderColor || c.title || '緑')}">
+                 <div class="flex gap-1">
+                   <input id="te-o1-${c.id}" type="number" step="any" class="w-1/2 bg-slate-950 border border-slate-700 p-1 rounded text-[11px] text-white" placeholder="選択肢1" value="${c.opt1 ?? 1}">
+                   <input id="te-o2-${c.id}" type="number" step="any" class="w-1/2 bg-slate-950 border border-slate-700 p-1 rounded text-[11px] text-white" placeholder="選択肢2" value="${c.opt2 ?? 2}">
+                 </div>
+               </div>`
+            : `<span id="tv-${c.id}">${utils.escapeHtml(c.title)}</span><input id="te-${c.id}" class="hidden w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-white focus:border-cyan-500 focus:outline-none" value="${utils.escapeHtml(c.title)}">`;
+
           tb.innerHTML += `<tr class="hover:bg-slate-800/50 transition border-b border-slate-800/50">
             <td class="p-2 font-mono font-bold text-center text-slate-400">${c.id}</td>
-            <td class="p-2 font-mono text-center"><span id="nv-${c.id}">${c.num===0?'⚡':c.num}</span><input id="ne-${c.id}" type="number" min="0" max="99" class="hidden w-12 bg-slate-950 border border-slate-700 p-1 rounded text-xs text-center text-white focus:border-cyan-500 focus:outline-none" value="${c.num}"></td>
+            <td class="p-2 font-mono text-center"><span id="nv-${c.id}">${c.num===0 && c.suit==='JOKER'?'⚡':c.num}</span><input id="ne-${c.id}" type="number" step="any" class="hidden w-16 bg-slate-950 border border-slate-700 p-1 rounded text-xs text-center text-white focus:border-cyan-500 focus:outline-none" value="${c.num}"></td>
             <td class="p-2 font-bold text-center ${SUIT_COLORS[c.suit]||''}"><span id="sv-${c.id}">${SUIT_ICONS[c.suit]||c.suit}</span>
               <select id="se-${c.id}" class="hidden bg-slate-950 border border-slate-700 p-1 rounded text-xs text-white focus:border-cyan-500 focus:outline-none">
                 <option value="C" ${c.suit==='C'?'selected':''}>♣(C)</option>
@@ -2504,10 +3525,11 @@
                 <option value="H" ${c.suit==='H'?'selected':''}>♥(H)</option>
                 <option value="D" ${c.suit==='D'?'selected':''}>♦(D)</option>
                 <option value="M" ${c.suit==='M'?'selected':''}>🧠(M)</option>
+                <option value="J" ${c.suit==='J'?'selected':''}>🎯(99J)</option>
                 <option value="JOKER" ${c.suit==='JOKER'?'selected':''}>⚡(JOKER)</option>
               </select>
             </td>
-            <td class="p-2"><span id="tv-${c.id}">${utils.escapeHtml(c.title)}</span><input id="te-${c.id}" class="hidden w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-white focus:border-cyan-500 focus:outline-none" value="${utils.escapeHtml(c.title)}"></td>
+            <td class="p-2">${subInfoHtml}</td>
             <td class="p-2"><span id="dv-${c.id}">${utils.escapeHtml(c.desc)}</span><textarea id="de-${c.id}" class="hidden w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-white h-12 focus:border-cyan-500 focus:outline-none">${utils.escapeHtml(c.desc)}</textarea></td>
             <td class="p-2 text-center flex items-center justify-center gap-1">
               <button id="be-${c.id}" onclick="app.editCard(${c.id})" class="text-[10px] bg-slate-800 border border-slate-600 hover:bg-slate-700 text-cyan-400 px-2 py-1.5 rounded transition">編集</button>
@@ -2530,16 +3552,27 @@
         document.getElementById(`bs-${id}`)?.classList.remove('hidden'); 
       },
       saveCard: (id) => {
-        const nVal = parseInt(document.getElementById(`ne-${id}`)?.value ?? 1, 10);
+        const nVal = parseFloat(document.getElementById(`ne-${id}`)?.value ?? 1);
         const sVal = document.getElementById(`se-${id}`)?.value || 'C';
-        const t = document.getElementById(`te-${id}`)?.value || '';
         const d = document.getElementById(`de-${id}`)?.value || '';
         const c = currentCardDB.find(x=>x.id===id);
         if(c){
           c.num = isNaN(nVal) ? c.num : nVal;
           c.suit = sVal;
-          c.title = t;
           c.desc = d;
+          if(sVal === 'J') {
+            const colStr = document.getElementById(`te-color-${id}`)?.value.trim() || '緑';
+            const o1 = parseFloat(document.getElementById(`te-o1-${id}`)?.value ?? 1);
+            const o2 = parseFloat(document.getElementById(`te-o2-${id}`)?.value ?? 2);
+            c.borderColor = colStr;
+            c.title = colStr;
+            c.opt1 = isNaN(o1) ? 1 : o1;
+            c.opt2 = isNaN(o2) ? 2 : o2;
+            c.internalVal = Math.round(Number(c.num) * 100);
+          } else {
+            const t = document.getElementById(`te-${id}`)?.value || '';
+            c.title = t;
+          }
         } 
         saveDB(currentCardDB); 
         socket.emit('admin_update_cards', currentCardDB);
@@ -2549,9 +3582,11 @@
       addNewCardPrompt: () => {
         const selector = document.getElementById('admin-deck-selector');
         const f = selector ? selector.value : 'all';
-        const defaultSuit = (f === 'babanuki' || f === 'jinuki') ? 'C' : 'M';
+        const defaultSuit = (f === 'babanuki' || f === 'jinuki') ? 'C' : (f === 'jack' ? 'J' : 'M');
         const newId = currentCardDB.length > 0 ? Math.max(...currentCardDB.map(c => c.id)) + 1 : 1;
-        const newCard = { id: newId, suit: defaultSuit, num: 1, title: "新規項目", desc: "ここに問題文を入力してください" };
+        const newCard = defaultSuit === 'J'
+          ? { id: newId, suit: "J", num: 1, internalVal: 100, title: "緑", borderColor: "緑", opt1: 2, opt2: 3, desc: "ここに99ジャックの問題文を入力してください" }
+          : { id: newId, suit: defaultSuit, num: 1, title: "新規項目", desc: "ここに問題文を入力してください" };
         currentCardDB.push(newCard);
         saveDB(currentCardDB);
         socket.emit('admin_update_cards', currentCardDB);

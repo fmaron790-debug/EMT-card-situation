@@ -15,8 +15,7 @@ app.get('/', (req, res) => {
 
 const rooms = {};
 
-// 管理室（CMS）の最新設定・お知らせ履歴をサーバー側で一元保持
-let globalAccessState = { game1: true, game2: true, game3: true, game4: false };
+let globalAccessState = { game1: true, game2: true, game3: true, game4: true };
 let globalCardDB = null;
 let globalAnnouncements = [];
 
@@ -25,7 +24,6 @@ const PLAYER_COLORS = [
   '#ec4899', '#84cc16', '#f97316', '#06b6d4', '#6366f1'
 ];
 
-// 現在のリアルタイム接続人数を全端末へ配信
 function broadcastActiveUsers() {
   io.emit('update_active_users', io.engine.clientsCount);
 }
@@ -34,7 +32,6 @@ io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
   broadcastActiveUsers();
 
-  // 接続した端末へ最新の設定・カードDB・お知らせ履歴・接続人数を即座に同期
   socket.emit('update_access', globalAccessState);
   if (globalCardDB) socket.emit('update_cards', globalCardDB);
   socket.emit('init_announcements', globalAnnouncements);
@@ -76,7 +73,9 @@ io.on('connection', (socket) => {
         isReady: false,
         rank: 0,
         team: (rooms[roomCode].players.length % 3) + 1,
-        color: randomColor
+        color: randomColor,
+        jackScore: 0,
+        jackStatus: 'active'
       };
       rooms[roomCode].players.push(player);
     } else if (playerName) {
@@ -126,7 +125,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 管理室からの全体お知らせ配信
   socket.on('admin_send_announcement', (data) => {
     const msg = (data && data.message ? String(data.message).trim() : '');
     if (!msg) return;
