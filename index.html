@@ -2117,10 +2117,10 @@ openManualModal: () => {
         app.advanceJackTurn(null);
       },
 
-     executeAiJackTurn: (aiPlayer) => {
+    executeAiJackTurn: (aiPlayer) => {
       if(state.phase !== 'jack_playing' || !aiPlayer) return;
 
-      // AIの判断ロジック：現在値が82.00以上ならステイ確率を高め、手札10枚または88.00以上なら確実にステイ
+      // AIの判断ロジック：手札10枚、または現在値が一定以上ならステイ
       if(aiPlayer.hand.length >= 10 || aiPlayer.totalInternal >= 8800 || (aiPlayer.totalInternal >= 7800 && Math.random() < 0.6) || state.jackState.deck.length === 0) {
         aiPlayer.isStayed = true;
         app.addLogMessage(`🛡 ${aiPlayer.name} がステイアンドプレイを宣言しました。`);
@@ -2129,39 +2129,40 @@ openManualModal: () => {
         return;
       }
 
-        const drawn = state.jackState.deck.pop();
-        const addInternal = drawn.internalVal !== undefined ? Number(drawn.internalVal) : Math.round(Number(drawn.num) * 100);
-        const aiCorrect = Math.random() < 0.72; // AIの3択正答率72%
+      const drawn = state.jackState.deck.pop();
+      const addInternal = drawn.internalVal !== undefined ? Number(drawn.internalVal) : Math.round(Number(drawn.num) * 100);
+      const aiCorrect = Math.random() < 0.72; // AIの3択正答率72%
 
-        let bustedPlayerId = null;
-        if(aiCorrect) {
-          // 正解時：足して9899以下なら加算、9900以上になるなら破棄して回避
-          if(aiPlayer.totalInternal + addInternal <= 9899) {
-            aiPlayer.hand.push(drawn);
-            aiPlayer.totalInternal += addInternal;
-            app.addLogMessage(`${aiPlayer.name} がクイズに正解し、カードを加算しました。`);
-          } else {
-            state.discardPile.push(drawn);
-            app.addLogMessage(`${aiPlayer.name} がクイズに正解し、危険カードを破棄しました。`);
-          }
-        } else {
-          // 不正解時：強制加算
+      let bustedPlayerId = null;
+      if(aiCorrect) {
+        // 正解時：足して9899以下なら加算、9900以上になるなら破棄して回避
+        if(aiPlayer.totalInternal + addInternal <= 9899) {
           aiPlayer.hand.push(drawn);
           aiPlayer.totalInternal += addInternal;
-          if(aiPlayer.totalInternal >= 9900) {
-            aiPlayer.isBusted = true;
-            bustedPlayerId = aiPlayer.id;
-            app.addLogMessage(`💀 ${aiPlayer.name} が不正解で強制加算され、99.00超過（バースト）しました！`);
-            app.showJackBustModal(aiPlayer);
-          } else {
-            app.addLogMessage(`${aiPlayer.name} がクイズに不正解となり、カードが強制加算されました。`);
-          }
+          if(!aiPlayer.isBusted && aiPlayer.hand.length >= 10) aiPlayer.isStayed = true;
+          app.addLogMessage(`${aiPlayer.name} がクイズに正解し、カードを加算しました。`);
+        } else {
+          state.discardPile.push(drawn);
+          app.addLogMessage(`${aiPlayer.name} がクイズに正解し、危険カードを破棄しました。`);
         }
+      } else {
+        // 不正解時：強制加算
+        aiPlayer.hand.push(drawn);
+        aiPlayer.totalInternal += addInternal;
+        if(!aiPlayer.isBusted && aiPlayer.hand.length >= 10) aiPlayer.isStayed = true;
+        if(aiPlayer.totalInternal >= 9900) {
+          aiPlayer.isBusted = true;
+          bustedPlayerId = aiPlayer.id;
+          app.addLogMessage(`💀 ${aiPlayer.name} が不正解で強制加算され、99.00超過（バースト）しました！`);
+          app.showJackBustModal(aiPlayer);
+        } else {
+          app.addLogMessage(`${aiPlayer.name} がクイズに不正解となり、カードが強制加算されました。`);
+        }
+      }
 
-        state.jackState.isProcessing = false;
-        app.advanceJackTurn(bustedPlayerId);
-      },
-
+      state.jackState.isProcessing = false;
+      app.advanceJackTurn(bustedPlayerId);
+    },
       showJackBustModal: (player) => {
         const modal = document.getElementById('modal-jack-bust');
         const nameEl = document.getElementById('jack-bust-player-name');
