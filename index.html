@@ -2130,7 +2130,7 @@ openManualModal: () => {
       }
 
       const drawn = state.jackState.deck.pop();
-      const addInternal = drawn.internalVal !== undefined ? Number(drawn.internalVal) : Math.round(Number(drawn.num) * 100);
+      const addInternal = (drawn.internalVal !== undefined) ? Number(drawn.internalVal) : Math.round(Number(drawn.num) * 100);
       const aiCorrect = Math.random() < 0.72; // AIの3択正答率72%
 
       let bustedPlayerId = null;
