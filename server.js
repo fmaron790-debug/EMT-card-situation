@@ -14,6 +14,7 @@ app.get('/', (req, res) => {
 });
 
 const rooms = {};
+const socketRoomMap = {}; // 🆕 どのソケットがどのルームにいるかを記録するマップ
 
 let globalAccessState = { game1: true, game2: true, game3: true, game4: true };
 let globalCardDB = null;
@@ -46,6 +47,7 @@ io.on('connection', (socket) => {
   socket.on('join_room', (data) => {
     const { roomCode, playerName, config } = data;
     socket.join(roomCode);
+    socketRoomMap[socket.id] = roomCode; // 🆕 参加したルームを記録
 
     if (!rooms[roomCode]) {
       rooms[roomCode] = {
@@ -144,49 +146,44 @@ io.on('connection', (socket) => {
     io.emit('receive_chat', { name, message });
   });
 
-  // ─── ここを追加・確認 ───
+  // 🆕 退出処理を確実に行う
   socket.on('leave_room', (data) => {
-    const { roomCode } = data;
-    const room = rooms[roomCode];
-    if (room && room.players) {
-      // 退出したプレイヤーをリストから除外
-      room.players = room.players.filter(p => p.id !== socket.id);
+    const roomCode = data?.roomCode || socketRoomMap[socket.id];
+    if (roomCode && rooms[roomCode]) {
+      rooms[roomCode].players = rooms[roomCode].players.filter(p => p.id !== socket.id);
       socket.leave(roomCode);
+      delete socketRoomMap[socket.id];
 
-      if (room.players.length === 0) {
+      if (rooms[roomCode].players.length === 0) {
         delete rooms[roomCode];
       } else {
-        // 残ったメンバーへ最新のプレイヤー一覧を即時同期
         io.to(roomCode).emit('update_room', {
-          players: room.players,
-          discardPile: room.discardPile,
-          config: room.config
+          players: rooms[roomCode].players,
+          discardPile: rooms[roomCode].discardPile,
+          config: rooms[roomCode].config
         });
       }
     }
   });
 
+  // 🆕 切断時も同様に紐づいたルームから即座に削除
   socket.on('disconnect', () => {
     console.log(`ユーザーが切断しました: ${socket.id}`);
     broadcastActiveUsers();
-    
-    for (const roomCode in rooms) {
-      const room = rooms[roomCode];
-      if (room && room.players) {
-        const initialLength = room.players.length;
-        room.players = room.players.filter(p => p.id !== socket.id);
-        
-        if (room.players.length !== initialLength) {
-          if (room.players.length === 0) {
-            delete rooms[roomCode];
-          } else {
-            io.to(roomCode).emit('update_room', {
-              players: room.players,
-              discardPile: room.discardPile,
-              config: room.config
-            });
-          }
-        }
+
+    const roomCode = socketRoomMap[socket.id];
+    if (roomCode && rooms[roomCode]) {
+      rooms[roomCode].players = rooms[roomCode].players.filter(p => p.id !== socket.id);
+      delete socketRoomMap[socket.id];
+
+      if (rooms[roomCode].players.length === 0) {
+        delete rooms[roomCode];
+      } else {
+        io.to(roomCode).emit('update_room', {
+          players: rooms[roomCode].players,
+          discardPile: rooms[roomCode].discardPile,
+          config: rooms[roomCode].config
+        });
       }
     }
   });
