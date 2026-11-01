@@ -1618,7 +1618,7 @@ socket.on('receive_chat', (data) => {
         if(maxP < 4 && teamMode) teamMode.value = 'solo';
       },
 
-      r// 🆕 オープンルーム信号の送受信・一覧描画・ワンタップ参加
+      // 🆕 オープンルーム信号の送受信・一覧描画・ワンタップ参加
       handleOpenRoomSignal: (payload) => {
         if(!payload || !payload.code) return;
         if(payload.action === 'close' || !payload.isOpen) {
