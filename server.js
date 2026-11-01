@@ -15,7 +15,6 @@ app.get('/', (req, res) => {
 
 const rooms = {};
 
-// ▼ 17行目付近：game4 を true に変更
 let globalAccessState = { game1: true, game2: true, game3: true, game4: true };
 let globalCardDB = null;
 let globalAnnouncements = [];
@@ -65,7 +64,6 @@ io.on('connection', (socket) => {
       const pool = availableColors.length > 0 ? availableColors : PLAYER_COLORS;
       const randomColor = pool[Math.floor(Math.random() * pool.length)];
 
-      // ▼ 58行目付近：join_room 内の player 作成部分に下3行を追加
       player = {
         id: socket.id,
         name: playerName || '救急隊員',
@@ -76,9 +74,9 @@ io.on('connection', (socket) => {
         rank: 0,
         team: (rooms[roomCode].players.length % 3) + 1,
         color: randomColor,
-        totalInternal: 0, // 🆕 追加
-        isStayed: false,  // 🆕 追加
-        isBusted: false   // 🆕 追加
+        totalInternal: 0,
+        isStayed: false,
+        isBusted: false
       };
       rooms[roomCode].players.push(player);
     } else if (playerName) {
@@ -146,45 +144,49 @@ io.on('connection', (socket) => {
     io.emit('receive_chat', { name, message });
   });
 
-socket.on('leave_room', (data) => {
-  const room = rooms[data.roomCode];
-  if (room && room.players) {
-    room.players = room.players.filter(p => p.id !== socket.id);
-    io.to(data.roomCode).emit('update_room', {
-      players: room.players,
-      discardPile: room.discardPile,
-      config: room.config
-    });
-  }
-});
-
-  // server.js などのサーバー側コード内
-socket.on('disconnect', () => {
-  console.log(`ユーザーが切断しました: ${socket.id}`);
-  
-  // 参加しているすべてのルームを走査し、切断したプレイヤーを削除する
-  for (const roomCode in rooms) {
+  socket.on('leave_room', (data) => {
+    const { roomCode } = data;
     const room = rooms[roomCode];
     if (room && room.players) {
-      const initialLength = room.players.length;
       room.players = room.players.filter(p => p.id !== socket.id);
-      
-      // メンバーに変動があった場合、残りのプレイヤーへ最新情報をブロードキャスト
-      if (room.players.length !== initialLength) {
-        if (room.players.length === 0) {
-          // 誰もいなくなったらルームを削除
-          delete rooms[roomCode];
-        } else {
-          // ホストが抜けた場合の処理（必要に応じて最初のメンバーを新しいホストにするなど）
-          io.to(roomCode).emit('update_room', {
-            players: room.players,
-            discardPile: room.discardPile,
-            config: room.config
-          });
+      socket.leave(roomCode);
+
+      if (room.players.length === 0) {
+        delete rooms[roomCode];
+      } else {
+        io.to(roomCode).emit('update_room', {
+          players: room.players,
+          discardPile: room.discardPile,
+          config: room.config
+        });
+      }
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`ユーザーが切断しました: ${socket.id}`);
+    broadcastActiveUsers();
+    
+    for (const roomCode in rooms) {
+      const room = rooms[roomCode];
+      if (room && room.players) {
+        const initialLength = room.players.length;
+        room.players = room.players.filter(p => p.id !== socket.id);
+        
+        if (room.players.length !== initialLength) {
+          if (room.players.length === 0) {
+            delete rooms[roomCode];
+          } else {
+            io.to(roomCode).emit('update_room', {
+              players: room.players,
+              discardPile: room.discardPile,
+              config: room.config
+            });
+          }
         }
       }
     }
-  }
+  });
 });
 
 const PORT = process.env.PORT || 3000;
