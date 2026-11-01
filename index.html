@@ -1793,7 +1793,7 @@
         app.readConfig();
         if (state.mode === 'jack') state.config.autoFillAI = false;
 
-        // 🆕 既存のオープンルームと絶対に重複しない6桁コードを生成
+        // 既存のオープンルームと絶対に重複しない6桁コードを生成
         let newCode = '';
         do {
           newCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -1813,7 +1813,7 @@
         }
         app.updateRoomUI(); app.showScreen('view-room');
 
-        // 🆕 待機中は4秒おきにオープンルーム情報をロビーへ配信
+        // 待機中は4秒おきにオープンルーム情報をロビーへ配信
         app.broadcastRoomSignal('update');
         if(state.timers.openRoomBeacon) clearInterval(state.timers.openRoomBeacon);
         state.timers.openRoomBeacon = setInterval(() => {
@@ -1823,6 +1823,20 @@
             clearInterval(state.timers.openRoomBeacon);
           }
         }, 4000);
+      }, // 👈 このカンマ付きの閉じ括弧が抜けていたのがエラーの原因です！
+
+      startSoloAI: () => {
+        app.readConfig(); state.room = { code: 'SOLO-AI', isHost: true, isSolo: true };
+        if (state.mode === 'jack') {
+          state.config.maxPlayers = 2;
+          state.config.autoFillAI = true;
+        } else {
+          state.config.autoFillAI = true;
+        }
+        const myColor = pickUnusedColor([]);
+        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: myColor, totalInternal: 0, isStayed: false, isBusted: false }];
+        app.startGame(); 
+      },
 
       startSoloAI: () => {
         app.readConfig(); state.room = { code: 'SOLO-AI', isHost: true, isSolo: true };
