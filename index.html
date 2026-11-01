@@ -19,9 +19,11 @@
       touch-action: manipulation;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: none;
     }
     .font-mono-num { font-family: 'JetBrains Mono', monospace; }
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar { -webkit-overflow-scrolling: touch; }
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); border-radius: 9999px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 0.8); border-radius: 9999px; }
     
@@ -69,7 +71,7 @@
     }
   </style>
 </head>
-<body class="min-h-screen bg-slate-950 flex flex-col items-center justify-start text-slate-100 overflow-x-hidden pb-20">
+<body class="min-h-screen bg-slate-950 flex flex-col items-center justify-start text-slate-100 overflow-x-hidden pb-28">
 
   <script>
     const DEFAULT_EMS_CARDS = [
@@ -127,9 +129,7 @@
       { id: 52, suit: "D", num: 13, title: "外傷", desc: "成人男性、片側上肢全体III度熱傷と前胸部のみのII度熱傷、この人の熱傷指数（端数切捨て）" },
       { id: 53, suit: "JOKER", num: 0, title: "心室細動（VF）", desc: "即座に除細動が必要な致死性不整脈。持ち続けるとあがれません" },
       { id: 54, suit: "JOKER", num: 0, title: "DC（電気ショック）", desc: "VFと組み合わせて使える。このカードとVFのカードを組み合わせて使える" },
-      // ※GAME02（神経衰弱用40グループ）および GAME04（99ジャック用228問＋3択データ）を含みます
-      // （この後すぐに「後半コード」を出力しますのでお待ちください）
-// GAME 02（救急神経衰弱用：全40グループ正式エクセルデータ）
+      // GAME 02（救急神経衰弱用：全40グループ正式エクセルデータ）
       { id: 101, suit: "M", num: 1, title: "急性心筋梗塞", desc: "心電図、標準誘導等でII、IIIでST上昇" },
       { id: 102, suit: "M", num: 1, title: "急性心筋梗塞", desc: "突然20分以上の胸痛・呼吸困難、ショック" },
       { id: 103, suit: "M", num: 2, title: "急性大動脈解離", desc: "突然発症する強い胸痛・背部痛、移動する痛み" },
@@ -500,67 +500,65 @@
     let currentCardDB = loadDB();
     let currentGameAccess = loadAccess();
   </script>
-
-  <div id="main-content-wrapper" class="w-full flex-1 flex flex-col items-center">
-    <header class="w-full max-w-5xl px-4 py-3 border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
+<div id="main-content-wrapper" class="w-full flex-1 flex flex-col items-center">
+    <header class="w-full max-w-5xl px-3 sm:px-4 py-2.5 sm:py-3 border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40 flex items-center justify-between">
+      <div class="flex items-center space-x-2 sm:space-x-3">
         <button id="secret-admin-trigger" class="relative group p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 transition active:scale-95" title="管理者ツール">
-          <i data-lucide="activity" class="w-6 h-6 text-rose-500 transition-transform group-hover:scale-110"></i>
+          <i data-lucide="activity" class="w-5 h-5 sm:w-6 sm:h-6 text-rose-500 transition-transform group-hover:scale-110"></i>
         </button>
         <div class="flex items-center gap-2">
-          <h1 class="text-lg md:text-xl font-bold tracking-tight text-white flex items-center gap-2">
+          <h1 class="text-base sm:text-xl font-bold tracking-tight text-white flex flex-wrap items-center gap-1.5 sm:gap-2">
             <span>EMS CARD STATION</span>
-            <span id="current-mode-badge" class="text-xs px-2 py-0.5 rounded-full bg-cyan-900/60 text-cyan-300 border border-cyan-700">総合ポータル</span>
+            <span id="current-mode-badge" class="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-cyan-900/60 text-cyan-300 border border-cyan-700">総合ポータル</span>
           </h1>
         </div>
       </div>
       <div class="flex items-center space-x-2">
-        <button id="btn-return-portal" onclick="app.returnToPortal()" class="hidden text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+        <button id="btn-return-portal" onclick="app.returnToPortal()" class="hidden text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-2 rounded-xl border border-slate-700 transition flex items-center gap-1.5 active:scale-95">
           <i data-lucide="grid" class="w-3.5 h-3.5"></i><span>タイトルへ</span>
         </button>
       </div>
     </header>
 
-    <main class="w-full max-w-5xl p-4 flex-1 flex flex-col items-center justify-start relative">
+    <main class="w-full max-w-5xl p-3 sm:p-4 flex-1 flex flex-col items-center justify-start relative">
       
       <!-- VIEW 1: PORTAL -->
-      <section id="view-portal" class="w-full flex flex-col items-center py-6 animate-fade-in">
-        <div class="text-center mb-8 max-w-2xl">
+      <section id="view-portal" class="w-full flex flex-col items-center py-4 sm:py-6 animate-fade-in">
+        <div class="text-center mb-6 sm:mb-8 max-w-2xl px-2">
           <h2 class="text-2xl md:text-4xl font-extrabold text-white tracking-tight mb-2">訓練ミッションを選択</h2>
-          <p class="text-sm md:text-base text-slate-400">救急救命士国家試験・現場活動に必要な知識をトランプゲームで体得せよ！</p>
+          <p class="text-xs sm:text-base text-slate-400">救急救命士国家試験・現場活動に必要な知識をトランプゲームで体得せよ！</p>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 w-full max-w-4xl" id="portal-games-container"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 w-full max-w-4xl" id="portal-games-container"></div>
       </section>
 
       <!-- VIEW 2: LOBBY -->
-      <section id="view-lobby" class="w-full max-w-xl flex flex-col items-center py-6 hidden animate-fade-in">
-        <div class="w-full bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl backdrop-blur">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-5">
+      <section id="view-lobby" class="w-full max-w-xl flex flex-col items-center py-3 sm:py-6 hidden animate-fade-in">
+        <div class="w-full bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl backdrop-blur">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3 sm:pb-4 mb-4 sm:mb-5">
             <div>
               <span id="lobby-mode-tag" class="text-xs font-mono px-2.5 py-1 rounded-md font-bold">GAME XX</span>
-              <h2 id="lobby-mode-title" class="text-xl font-bold text-white mt-1">TITLE</h2>
+              <h2 id="lobby-mode-title" class="text-lg sm:text-xl font-bold text-white mt-1">TITLE</h2>
             </div>
-            <!-- 🆕 ここに説明書を開くアイコンボタンを追加 -->
-            <button onclick="app.openManualModal()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 transition flex items-center gap-1.5 text-xs font-bold" title="遊び方・説明書">
+            <button onclick="app.openManualModal()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 transition flex items-center gap-1.5 text-xs font-bold active:scale-95" title="遊び方・説明書">
               <i data-lucide="book-open" class="w-4 h-4"></i>
-              <span class="hidden sm:inline">説明書</span>
+              <span>説明書</span>
             </button>
           </div>
-          <div class="mb-5">
-            <label class="block text-xs font-semibold text-slate-300 mb-2">あなたの名前（隊員コールサイン）</label>
-            <input id="input-player-name" type="text" maxlength="10" value="救急隊員" placeholder="名前を入力..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 font-semibold">
+          <div class="mb-4 sm:mb-5">
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">あなたの名前（隊員コールサイン）</label>
+            <input id="input-player-name" type="text" maxlength="10" value="救急隊員" placeholder="名前を入力..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-base sm:text-sm text-white focus:outline-none focus:border-cyan-500 font-semibold">
           </div>
-          <div class="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-4 mb-5 space-y-3">
+          <div class="bg-slate-950/70 border border-slate-800/80 rounded-2xl p-3.5 sm:p-4 mb-4 sm:mb-5 space-y-3">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label class="block text-[11px] font-semibold text-slate-400 mb-1">最大参加人数</label>
-                <select id="config-max-players" onchange="app.updateLobbyConfigUI()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white">
+                <select id="config-max-players" onchange="app.updateLobbyConfigUI()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs font-semibold text-white">
                   <option value="2">2 名</option><option value="3">3 名</option><option value="4" selected>4 名 (標準)</option><option value="5">5 名</option><option value="6">6 名 (特別編成)</option><option value="7" class="jack-player-opt hidden">7 名</option><option value="8" class="jack-player-opt hidden">8 名 (最大)</option>
                 </select>
               </div>
               <div>
                 <label class="block text-[11px] font-semibold text-slate-400 mb-1">思考制限時間 (手番ごと)</label>
-                <select id="config-turn-time" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white">
+                <select id="config-turn-time" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs font-semibold text-white">
                   <option value="10">10 秒</option><option value="15">15 秒</option><option value="20" selected>20 秒</option><option value="30">30 秒</option><option value="60">60 秒</option><option value="999">無制限</option>
                 </select>
               </div>
@@ -570,7 +568,8 @@
             <div id="memory-only-config" class="hidden pt-3 border-t border-slate-800/80 space-y-3">
               <div>
                 <label class="block text-[11px] font-semibold text-cyan-300 mb-1">改訂長谷川式簡易測定知能スケールに引っかかるな！ 全体ペア数（最大40グループ）</label>
-                <select id="config-memory-pairs" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white">
+                <select id="config-memory-pairs" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs font-semibold text-white">
+                  <option value="6">6 ペア (12枚 / スマホ推奨・短時間)</option>
                   <option value="12">12 ペア (24枚)</option>
                   <option value="18">18 ペア (36枚)</option>
                   <option value="24">24 ペア (48枚)</option>
@@ -580,7 +579,7 @@
               </div>
               <div>
                 <label class="block text-[11px] font-semibold text-amber-300 mb-1">対戦形式・チーム編成</label>
-                <select id="config-team-mode" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white">
+                <select id="config-team-mode" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs font-semibold text-white">
                   <option value="solo">個人戦 (全員対抗)</option>
                   <option value="team2">2チーム対抗 (各チーム半数)</option>
                   <option value="team3">3チーム対抗 (3人×2 or 2人×3)</option>
@@ -624,13 +623,13 @@
               </label>
             </div>
 
-            <!-- 🆕 オープンルーム / クローズドルーム 切替スイッチ -->
+            <!-- オープンルーム / クローズドルーム 切替スイッチ（デフォルトOFF＝クローズド） -->
             <div class="flex items-center justify-between pt-2 border-t border-slate-800/60">
-              <div>
+              <div class="pr-2">
                 <span class="text-xs font-bold text-emerald-300 block">オープンルームとして公開募集する</span>
                 <span class="text-[10px] text-slate-400">※OFF時は6桁コードを知っている人のみ参加できるクローズドルームになります</span>
               </div>
-              <label class="relative inline-flex items-center cursor-pointer">
+              <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
                 <input id="config-is-open-room" type="checkbox" class="sr-only peer">
                 <div class="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
               </label>
@@ -638,12 +637,17 @@
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-            <button onclick="app.createRoom()" class="w-full bg-rose-700 hover:bg-rose-600 text-white font-bold py-3.5 px-4 rounded-xl transition shadow-[0_0_15px_rgba(225,29,72,0.4)]">ルーム作成</button>
-            <button onclick="app.showJoinModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3.5 px-4 rounded-xl border border-slate-700 transition">6桁コードで参加</button>
+            <button onclick="app.createRoom()" class="w-full bg-rose-700 hover:bg-rose-600 active:scale-98 text-white font-bold py-3.5 px-4 rounded-xl transition shadow-[0_0_15px_rgba(225,29,72,0.4)]">ルーム作成</button>
+            <button onclick="app.showJoinModal()" class="w-full bg-slate-800 hover:bg-slate-700 active:scale-98 text-white font-bold py-3.5 px-4 rounded-xl border border-slate-700 transition">6桁コードで参加</button>
           </div>
 
-          <!-- 🆕 現在募集中のオープンルーム一覧 -->
-          <div class="mb-4 bg-slate-950/90 border border-slate-800 rounded-2xl p-3.5">
+          <!-- すぐ遊ぶ（AI演習）ボタンもスマホで押しやすく配置 -->
+          <div class="mb-4">
+            <button id="btn-solo-ai" onclick="app.startSoloAI()" class="w-full bg-cyan-950/70 hover:bg-cyan-900/80 text-cyan-300 font-bold py-3 px-4 rounded-xl border border-cyan-700/60 transition text-xs sm:text-sm">すぐ遊ぶ（AI演習）</button>
+          </div>
+
+          <!-- 現在募集中のオープンルーム一覧 -->
+          <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-3.5">
             <div class="flex items-center justify-between mb-2">
               <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
@@ -651,15 +655,16 @@
               </span>
               <span class="text-[10px] text-slate-500 font-mono">ワンタップで合流</span>
             </div>
-            <div id="open-rooms-list" class="space-y-2 max-h-36 overflow-y-auto custom-scrollbar pr-1">
+            <div id="open-rooms-list" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1">
               <div class="text-[11px] text-slate-500 text-center py-2">現在募集中のオープンルームはありません</div>
             </div>
           </div>
+        </div>
       </section>
 
       <!-- VIEW 3: WAITING ROOM -->
-      <section id="view-room" class="w-full max-w-xl flex flex-col items-center py-6 hidden animate-fade-in">
-        <div class="w-full bg-slate-900/90 border border-slate-800 rounded-3xl p-6 shadow-2xl">
+      <section id="view-room" class="w-full max-w-xl flex flex-col items-center py-4 sm:py-6 hidden animate-fade-in">
+        <div class="w-full bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl">
           <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
             <div>
               <span class="text-xs text-slate-400">出動待機室</span>
@@ -668,13 +673,12 @@
                 <span id="room-code-display" class="font-mono-num text-cyan-400 font-extrabold text-2xl tracking-wider">------</span>
               </h2>
             </div>
-            <!-- 🆕 待機室内でオープン/クローズドをいつでも切り替えられるバッジ＆ボタン -->
-            <div class="flex flex-col items-end gap-1">
-              <span id="room-open-status-badge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700">🌐 オープン公開中</span>
-              <button id="btn-toggle-room-open" onclick="app.toggleRoomOpenStatus()" class="hidden text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 transition">クローズドに変更</button>
+            <div class="flex flex-col items-end gap-1.5">
+              <span id="room-open-status-badge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-950 text-amber-300 border border-amber-700">🔒 クローズド (コード限定)</span>
+              <button id="btn-toggle-room-open" onclick="app.toggleRoomOpenStatus()" class="hidden text-[11px] bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 px-3 py-1.5 rounded-xl border border-slate-700 transition font-bold">🌐 オープンに変更</button>
             </div>
           </div>
-          <div class="flex items-center justify-between text-[11px] bg-slate-950 px-3 py-2 rounded-xl border border-slate-800 mb-4 text-slate-300 font-mono">
+          <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] bg-slate-950 px-3 py-2.5 rounded-xl border border-slate-800 mb-4 text-slate-300 font-mono">
             <span id="room-summary-max"></span><span id="room-summary-timer"></span><span id="room-summary-ai"></span>
           </div>
           <div class="mb-4">
@@ -684,114 +688,115 @@
             <div id="room-members-list" class="space-y-2"></div>
           </div>
           <div id="host-ai-controls" class="flex gap-2 mb-4 hidden">
-            <button onclick="app.addBot()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-bold py-2.5 px-3 rounded-xl border border-cyan-800/40 transition">＋AI追加</button>
-            <button onclick="app.removeBot()" class="bg-slate-800 hover:bg-slate-700 text-rose-300 text-xs font-bold py-2.5 px-3 rounded-xl border border-rose-900/40 transition">AI解任</button>
+            <button onclick="app.addBot()" class="flex-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-cyan-300 text-xs font-bold py-3 px-3 rounded-xl border border-cyan-800/40 transition">＋AI追加</button>
+            <button onclick="app.removeBot()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-rose-300 text-xs font-bold py-3 px-4 rounded-xl border border-rose-900/40 transition">AI解任</button>
           </div>
-          <button id="btn-start-game" onclick="app.startGame()" class="w-full hidden bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-3.5 px-4 rounded-xl transition shadow-[0_0_15px_rgba(16,185,129,0.4)]">出動開始</button>
+          <button id="btn-start-game" onclick="app.startGame()" class="w-full hidden bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white font-extrabold py-4 px-4 rounded-xl transition shadow-[0_0_15px_rgba(16,185,129,0.4)] text-base">出動開始</button>
         </div>
       </section>
 
       <!-- VIEW 4: GAME TABLE (BABANUKI / JINUKI) -->
       <section id="view-game" class="w-full flex-1 flex flex-col items-center justify-between hidden">
-        <div class="w-full max-w-4xl bg-slate-900/90 border border-slate-800 rounded-2xl p-3 mb-3 flex flex-wrap items-center justify-between gap-3 shadow-lg">
-          <div class="flex items-center gap-3">
-            <span id="game-turn-text" class="text-xs px-3 py-1.5 rounded-full bg-rose-950 text-rose-300 border border-rose-700 font-bold">不整脈を回避せよ！</span>
-            <span id="game-sub-timer" class="text-xs font-mono text-amber-400 font-bold w-20 text-center">無制限</span>
+        <div class="w-full max-w-4xl bg-slate-900/90 border border-slate-800 rounded-2xl p-2.5 sm:p-3 mb-2.5 flex flex-wrap items-center justify-between gap-2 shadow-lg">
+          <div class="flex items-center gap-2">
+            <span id="game-turn-text" class="text-[11px] sm:text-xs px-2.5 py-1 rounded-full bg-rose-950 text-rose-300 border border-rose-700 font-bold">不整脈を回避せよ！</span>
+            <span id="game-sub-timer" class="text-xs font-mono text-amber-400 font-bold px-2">無制限</span>
           </div>
           <div class="flex items-center gap-2">
-            <button id="btn-initial-ready" onclick="app.humanReady()" class="hidden bg-emerald-600 text-white text-xs font-extrabold px-4 py-2 rounded-xl hover:scale-105 transition shadow-[0_0_15px_rgba(16,185,129,0.4)]">手札確認完了</button>
-            <button id="btn-open-jinuki-tracker" onclick="app.openTracker()" class="hidden text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 px-3 py-1.5 rounded-xl font-bold">推理シート(1〜13+⚡)</button>
+            <button id="btn-initial-ready" onclick="app.humanReady()" class="hidden bg-emerald-600 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl active:scale-95 transition shadow-[0_0_15px_rgba(16,185,129,0.4)]">手札確認完了</button>
+            <button id="btn-open-jinuki-tracker" onclick="app.openTracker()" class="hidden text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 px-3 py-2 rounded-xl font-bold active:scale-95">推理シート(1〜13+⚡)</button>
           </div>
         </div>
         
-        <div id="other-players-container" class="w-full max-w-4xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-2"></div>
+        <div id="other-players-container" class="w-full max-w-4xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 mb-2"></div>
         
-        <div class="w-full max-w-4xl my-2 bg-slate-900/60 border border-slate-800 rounded-2xl p-3 flex flex-col items-center justify-center shadow-inner relative min-h-[110px]">
-          <div class="absolute top-2 left-4 text-xs font-bold text-slate-400 z-10">捨て札の山 <span class="text-[10px] ml-1 px-2 py-0.5 rounded-full bg-slate-800">計 <span id="center-discard-count" class="text-cyan-400 text-sm font-mono">0</span> 枚</span></div>
-          <div id="center-discard-cards" class="flex items-center justify-center pt-5 pb-1 pl-12 w-full"></div>
+        <div class="w-full max-w-4xl my-1.5 bg-slate-900/60 border border-slate-800 rounded-2xl p-3 flex flex-col items-center justify-center shadow-inner relative min-h-[100px]">
+          <div class="absolute top-2 left-3 text-xs font-bold text-slate-400 z-10">捨て札の山 <span class="text-[10px] ml-1 px-2 py-0.5 rounded-full bg-slate-800">計 <span id="center-discard-count" class="text-cyan-400 text-sm font-mono">0</span> 枚</span></div>
+          <div id="center-discard-cards" class="flex items-center justify-center pt-5 pb-1 pl-10 w-full"></div>
         </div>
         
         <div class="w-full max-w-2xl my-1 flex flex-col items-center justify-center relative">
-          <div id="game-announcement-banner" class="w-full text-center py-2 px-4 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-300 font-bold transition-opacity duration-200">
+          <div id="game-announcement-banner" class="w-full text-center py-2.5 px-3 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-200 font-bold transition-opacity duration-200">
             ペアを確認して破棄してください
           </div>
         </div>
         
-        <div class="w-full max-w-4xl bg-slate-900/95 border border-slate-800/90 rounded-3xl p-4 shadow-2xl flex flex-col items-center relative mt-2">
-          <div class="w-full flex items-center justify-between mb-2">
+        <div class="w-full max-w-4xl bg-slate-900/95 border border-slate-800/90 rounded-3xl p-3 sm:p-4 shadow-2xl flex flex-col items-center relative mt-1.5">
+          <div class="w-full flex flex-wrap items-center justify-between gap-2 mb-2">
             <div class="flex items-center gap-2">
               <span class="w-3 h-3 rounded-full" id="my-color-dot" style="background-color: #38bdf8;"></span>
-              <span class="text-sm font-bold text-white">あなたの手札</span>
+              <span class="text-xs sm:text-sm font-bold text-white">あなたの手札</span>
               <span id="my-card-count-badge" class="text-xs font-mono px-2 py-0.5 rounded-full bg-slate-800 text-cyan-400 border border-slate-700">0 枚</span>
             </div>
             
             <div class="flex items-center gap-2">
-              <button id="btn-discard-pair" onclick="app.executePairDiscard()" class="bg-slate-800 text-slate-500 text-xs font-extrabold px-3 py-2 rounded-xl border border-slate-700 transition duration-300 opacity-60 pointer-events-none">ペアを破棄</button>
-              <button id="btn-end-turn" onclick="app.humanEndTurn()" class="hidden bg-amber-600 text-white text-xs font-extrabold px-3 py-2 rounded-xl hover:scale-105 transition shadow-[0_0_15px_rgba(217,119,6,0.4)]">ターン終了</button>
+              <button id="btn-discard-pair" onclick="app.executePairDiscard()" class="bg-slate-800 text-slate-500 text-xs font-extrabold px-3.5 py-2.5 rounded-xl border border-slate-700 transition duration-300 opacity-60 pointer-events-none">ペアを破棄</button>
+              <button id="btn-end-turn" onclick="app.humanEndTurn()" class="hidden bg-amber-600 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl active:scale-95 transition shadow-[0_0_15px_rgba(217,119,6,0.4)]">ターン終了</button>
             </div>
           </div>
           
-          <div id="my-cards-container" class="w-full flex items-center gap-2.5 overflow-x-auto py-3 px-2 custom-scrollbar min-h-[160px]"></div>
+          <div id="my-cards-container" class="w-full flex items-center gap-2.5 overflow-x-auto py-3 px-2 custom-scrollbar min-h-[165px]"></div>
         </div>
       </section>
 
       <!-- VIEW 4-2: MEMORY GAME TABLE -->
       <section id="view-memory-game" class="w-full flex-1 flex flex-col items-center justify-start hidden animate-fade-in">
-        <div class="w-full max-w-5xl bg-slate-900/95 border border-blue-500/50 rounded-2xl p-3 mb-3 flex items-center justify-between shadow-lg">
-          <div class="flex items-center gap-3">
-            <span class="text-xs px-3 py-1.5 rounded-full bg-blue-950 text-blue-300 border border-blue-600 font-bold">改訂長谷川式簡易知能評価スケールに引っかかるな！</span>
+        <div class="w-full max-w-5xl bg-slate-900/95 border border-blue-500/50 rounded-2xl p-2.5 sm:p-3 mb-2.5 flex flex-wrap items-center justify-between gap-2 shadow-lg">
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] sm:text-xs px-2.5 py-1 rounded-full bg-blue-950 text-blue-300 border border-blue-600 font-bold">神経衰弱バトル</span>
             <span id="memory-turn-info" class="text-xs text-white font-bold">手番: プレイヤー</span>
           </div>
-          <div class="flex items-center gap-3">
-            <button onclick="app.toggleMemoryBoardModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-[0_0_15px_rgba(37,99,235,0.4)] flex items-center gap-1.5">
+          <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+            <button onclick="app.toggleMemoryBoardModal()" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-[0_0_15px_rgba(37,99,235,0.4)] flex items-center gap-1.5">
               <i data-lucide="layout-grid" class="w-4 h-4"></i><span>自陣ボードを確認</span>
             </button>
-            <span id="memory-timer-display" class="text-xs font-mono font-bold text-amber-400 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">手番制限 無制限</span>
+            <span id="memory-timer-display" class="text-xs font-mono font-bold text-amber-400 bg-slate-950 px-3 py-2 rounded-xl border border-slate-800">手番制限 無制限</span>
           </div>
         </div>
 
-        <div onclick="app.toggleMemoryBoardModal()" class="w-full max-w-5xl bg-slate-950/80 border border-slate-800 hover:border-blue-500/60 rounded-2xl p-2.5 mb-3 cursor-pointer transition flex items-center justify-between group shadow-inner">
+        <div onclick="app.toggleMemoryBoardModal()" class="w-full max-w-5xl bg-slate-950/80 border border-slate-800 hover:border-blue-500/60 rounded-2xl p-2.5 mb-2.5 cursor-pointer transition flex items-center justify-between group shadow-inner">
           <div class="flex items-center gap-2">
-            <div class="w-3 h-3 rounded-full animate-ping" id="mini-board-color-dot" style="background-color: #38bdf8;"></div>
-            <span class="text-xs font-bold text-slate-300 group-hover:text-white">自陣ボード状況 (クリックで拡大・配置)</span>
+            <div class="w-3 h-3 rounded-full animate-ping flex-shrink-0" id="mini-board-color-dot" style="background-color: #38bdf8;"></div>
+            <span class="text-[11px] sm:text-xs font-bold text-slate-300 group-hover:text-white">自陣ボード状況 (タップで拡大・疾患あてはめ)</span>
           </div>
-          <div id="mini-board-preview-grid" class="grid grid-cols-6 gap-1 opacity-80"></div>
-          <span class="text-[11px] text-cyan-400 font-bold">拡大 ↗</span>
+          <div id="mini-board-preview-grid" class="grid grid-cols-8 sm:grid-cols-10 gap-1 opacity-80 mx-2"></div>
+          <span class="text-[11px] text-cyan-400 font-bold flex-shrink-0">開く ↗</span>
         </div>
 
-        <div id="table-players-ring" class="w-full max-w-5xl flex flex-wrap items-center justify-center gap-2 mb-3 px-2"></div>
+        <div id="table-players-ring" class="w-full max-w-5xl flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-2.5 px-1"></div>
 
-        <div class="w-full max-w-5xl flex-1 bg-gradient-to-br from-[#5c3a21] via-[#432514] to-[#2a160b] border-4 border-[#1a0d06] rounded-3xl p-4 sm:p-6 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] relative min-h-[480px] flex items-center justify-center overflow-y-auto">
+        <div class="w-full max-w-5xl flex-1 bg-gradient-to-br from-[#5c3a21] via-[#432514] to-[#2a160b] border-2 sm:border-4 border-[#1a0d06] rounded-3xl p-2.5 sm:p-5 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] relative min-h-[420px] flex items-start justify-center overflow-y-auto">
           <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
-          <div id="memory-cards-grid" class="w-full max-w-5xl grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 p-1 z-10"></div>
+          <!-- スマホでもカード文字が読めるようにモバイル3〜4列・タブレット6列・PC8列に最適化 -->
+          <div id="memory-cards-grid" class="w-full max-w-5xl grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 gap-2 p-1 z-10"></div>
         </div>
       </section>
 
       <!-- VIEW 4-4: 99 JACK GAME TABLE -->
       <section id="view-jack-game" class="w-full flex-1 flex flex-col items-center justify-between hidden animate-fade-in">
-        <div class="w-full max-w-5xl bg-slate-900/95 border border-teal-500/50 rounded-2xl p-3 mb-3 flex flex-wrap items-center justify-between gap-3 shadow-lg">
-          <div class="flex items-center gap-3">
-            <span class="text-xs px-3 py-1.5 rounded-full bg-teal-950 text-teal-300 border border-teal-600 font-bold">GAME 04: 99ジャック</span>
+        <div class="w-full max-w-5xl bg-slate-900/95 border border-teal-500/50 rounded-2xl p-2.5 sm:p-3 mb-2.5 flex flex-wrap items-center justify-between gap-2 shadow-lg">
+          <div class="flex items-center gap-2">
+            <span class="text-xs px-2.5 py-1 rounded-full bg-teal-950 text-teal-300 border border-teal-600 font-bold">99ジャック</span>
             <span id="jack-turn-info" class="text-xs text-white font-bold">手番: プレイヤー</span>
           </div>
-          <div class="flex items-center gap-3">
-            <span class="text-xs font-mono text-slate-300 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">山札残り: <strong id="jack-deck-count" class="text-teal-400">228</strong> 枚</span>
-            <span class="text-xs font-mono text-rose-300 bg-rose-950/60 px-3 py-1.5 rounded-xl border border-rose-800 font-bold">上限: 98.99 (99.00〜CPA)</span>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] sm:text-xs font-mono text-slate-300 bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-800">山札: <strong id="jack-deck-count" class="text-teal-400">228</strong>枚</span>
+            <span class="text-[11px] sm:text-xs font-mono text-rose-300 bg-rose-950/60 px-2.5 py-1.5 rounded-xl border border-rose-800 font-bold">上限 98.99</span>
           </div>
         </div>
 
-        <!-- 参加プレイヤー状態一覧（最大8名） -->
-        <div id="jack-players-container" class="w-full max-w-5xl grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-3"></div>
+        <!-- 参加プレイヤー状態一覧 -->
+        <div id="jack-players-container" class="w-full max-w-5xl grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2.5"></div>
 
         <!-- 中央：共通山札＆アクションエリア -->
-        <div class="w-full max-w-5xl my-2 bg-gradient-to-br from-slate-900 via-teal-950/30 to-slate-900 border-2 border-teal-800/60 rounded-3xl p-5 flex flex-col items-center justify-center shadow-2xl relative min-h-[210px]">
-          <div id="jack-announcement-banner" class="text-xs sm:text-sm font-bold text-teal-200 mb-4 text-center px-4 py-2 rounded-xl bg-slate-950/80 border border-teal-800/60 w-full max-w-xl">
+        <div class="w-full max-w-5xl my-1.5 bg-gradient-to-br from-slate-900 via-teal-950/30 to-slate-900 border-2 border-teal-800/60 rounded-3xl p-4 sm:p-5 flex flex-col items-center justify-center shadow-2xl relative">
+          <div id="jack-announcement-banner" class="text-xs sm:text-sm font-bold text-teal-200 mb-3.5 text-center px-3 py-2 rounded-xl bg-slate-950/80 border border-teal-800/60 w-full max-w-xl">
             山札からカードを引くか、ステイアンドプレイを宣言してください
           </div>
 
-          <div class="flex flex-wrap items-center justify-center gap-6">
-            <!-- 共通山札（裏面すべて共通） -->
-            <div onclick="app.jackDrawCard()" id="jack-deck-card" class="w-28 h-40 rounded-2xl border-2 border-cyan-400 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 p-2 flex flex-col items-center justify-between cursor-pointer hover:scale-105 active:scale-95 transition shadow-[0_0_25px_rgba(6,182,212,0.4)] select-none">
+          <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 w-full">
+            <!-- 共通山札 -->
+            <div onclick="app.jackDrawCard()" id="jack-deck-card" class="w-24 h-36 sm:w-28 sm:h-40 rounded-2xl border-2 border-cyan-400 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 p-2 flex flex-col items-center justify-between cursor-pointer hover:scale-105 active:scale-95 transition shadow-[0_0_25px_rgba(6,182,212,0.4)] select-none">
               <div class="w-full flex items-center justify-between text-[9px] text-cyan-400 font-mono">
                 <span class="font-bold">⚡ ECG</span>
                 <span>DECK</span>
@@ -801,15 +806,15 @@
                   <path d="M 0 15 L 18 15 L 23 5 L 28 25 L 33 15 L 55 15 L 60 3 L 65 27 L 70 15 L 100 15" fill="none" stroke="#22d3ee" stroke-width="2.5"/>
                 </svg>
               </div>
-              <div class="text-[10px] text-teal-300 font-extrabold tracking-wider">カードを引く</div>
+              <div class="text-[10px] text-teal-300 font-extrabold tracking-wider">タップで引く</div>
             </div>
 
             <!-- 操作ボタン群 -->
-            <div class="flex flex-col gap-3">
-              <button id="btn-jack-hit" onclick="app.jackDrawCard()" class="bg-teal-600 hover:bg-teal-500 text-white font-extrabold text-xs sm:text-sm px-6 py-3.5 rounded-2xl transition shadow-[0_0_20px_rgba(13,148,136,0.5)] flex items-center justify-center gap-2">
+            <div class="flex flex-col gap-2.5 flex-1 max-w-xs">
+              <button id="btn-jack-hit" onclick="app.jackDrawCard()" class="w-full bg-teal-600 hover:bg-teal-500 active:scale-95 text-white font-extrabold text-xs sm:text-sm px-5 py-3.5 rounded-2xl transition shadow-[0_0_20px_rgba(13,148,136,0.5)] flex items-center justify-center gap-2">
                 <i data-lucide="plus-circle" class="w-4 h-4"></i><span>ドロー（問題に挑戦）</span>
               </button>
-              <button id="btn-jack-stay" onclick="app.jackDeclareStay()" class="bg-amber-600 hover:bg-amber-500 text-white font-extrabold text-xs sm:text-sm px-6 py-3.5 rounded-2xl transition shadow-[0_0_20px_rgba(217,119,6,0.5)] flex items-center justify-center gap-2">
+              <button id="btn-jack-stay" onclick="app.jackDeclareStay()" class="w-full bg-amber-600 hover:bg-amber-500 active:scale-95 text-white font-extrabold text-xs sm:text-sm px-5 py-3.5 rounded-2xl transition shadow-[0_0_20px_rgba(217,119,6,0.5)] flex items-center justify-center gap-2">
                 <i data-lucide="shield-check" class="w-4 h-4"></i><span>ステイアンドプレイ宣言</span>
               </button>
             </div>
@@ -817,35 +822,35 @@
         </div>
 
         <!-- 自分の手札と合計値エリア -->
-        <div class="w-full max-w-5xl bg-slate-900/95 border border-slate-800 rounded-3xl p-4 shadow-2xl flex flex-col items-center mt-2">
+        <div class="w-full max-w-5xl bg-slate-900/95 border border-slate-800 rounded-3xl p-3.5 sm:p-4 shadow-2xl flex flex-col items-center mt-1.5">
           <div class="w-full flex flex-wrap items-center justify-between gap-2 mb-2">
             <div class="flex items-center gap-2">
               <span class="w-3 h-3 rounded-full" id="jack-my-color-dot" style="background-color: #38bdf8;"></span>
-              <span class="text-sm font-bold text-white">あなたの手札</span>
-              <span id="jack-my-status-badge" class="text-xs px-2.5 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-700 font-bold">プレイ中</span>
+              <span class="text-xs sm:text-sm font-bold text-white">あなたの手札</span>
+              <span id="jack-my-status-badge" class="text-[11px] px-2.5 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-700 font-bold">プレイ中</span>
             </div>
-            <div class="flex items-center gap-3">
-              <div class="bg-slate-950 border border-slate-800 px-4 py-1.5 rounded-xl flex items-center gap-2">
-                <span class="text-xs text-slate-400 font-bold">現在合計値:</span>
-                <span id="jack-my-total-display" class="text-lg font-mono font-black text-teal-400">0</span>
-                <span class="text-[11px] text-slate-500 font-mono">/ 98.99</span>
+            <div class="flex items-center gap-2">
+              <div class="bg-slate-950 border border-slate-800 px-3 py-1 rounded-xl flex items-center gap-1.5">
+                <span class="text-[11px] text-slate-400 font-bold">現在合計:</span>
+                <span id="jack-my-total-display" class="text-base sm:text-lg font-mono font-black text-teal-400">0</span>
+                <span class="text-[10px] text-slate-500 font-mono">/ 98.99</span>
               </div>
             </div>
           </div>
-          <div id="jack-my-cards-container" class="w-full flex items-center gap-3 overflow-x-auto py-3 px-2 custom-scrollbar min-h-[175px]"></div>
+          <div id="jack-my-cards-container" class="w-full flex items-center gap-2.5 overflow-x-auto py-2.5 px-2 custom-scrollbar min-h-[165px]"></div>
         </div>
       </section>
 
       <!-- VIEW 5: RESULTS -->
-      <section id="view-result" class="w-full max-w-xl flex flex-col items-center py-6 hidden animate-fade-in">
-        <div id="result-card-box" class="w-full bg-slate-900/95 border border-slate-800 rounded-3xl p-6 text-center shadow-2xl">
-          <div id="result-icon-container" class="w-20 h-20 rounded-3xl flex items-center justify-center mb-4 mx-auto"></div>
+      <section id="view-result" class="w-full max-w-xl flex flex-col items-center py-4 sm:py-6 hidden animate-fade-in">
+        <div id="result-card-box" class="w-full bg-slate-900/95 border border-slate-800 rounded-3xl p-5 sm:p-6 text-center shadow-2xl">
+          <div id="result-icon-container" class="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl flex items-center justify-center mb-3 sm:mb-4 mx-auto"></div>
           <span id="result-badge-label" class="text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block">MISSION CLEAR</span>
-          <h2 id="result-title" class="text-2xl font-extrabold text-white mb-4">作戦完了！</h2>
+          <h2 id="result-title" class="text-xl sm:text-2xl font-extrabold text-white mb-4">作戦完了！</h2>
           <div id="result-ranking-list" class="space-y-2.5 text-left mb-6"></div>
           <div class="flex gap-3">
-            <button onclick="app.returnToPortal()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3.5 rounded-xl transition">タイトルへ</button>
-            <button onclick="app.rematch()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3.5 rounded-xl transition shadow-[0_0_15px_rgba(8,145,178,0.4)]">もう一度プレイ</button>
+            <button onclick="app.returnToPortal()" class="flex-1 bg-slate-700 hover:bg-slate-600 active:scale-95 text-white font-bold py-3.5 rounded-xl transition text-xs sm:text-sm">タイトルへ</button>
+            <button onclick="app.rematch()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 active:scale-95 text-white font-bold py-3.5 rounded-xl transition shadow-[0_0_15px_rgba(8,145,178,0.4)] text-xs sm:text-sm">もう一度プレイ</button>
           </div>
         </div>
       </section>
@@ -853,95 +858,93 @@
     </main>
   </div>
 
-  <!-- 画面下部の3連通信ドック（左：お知らせ、中央：会話ルーム、右：ゲームログ） -->
-  <div class="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 w-full max-w-md px-4 pointer-events-none">
+  <!-- 画面下部の3連通信ドック -->
+  <div class="fixed bottom-2.5 left-1/2 -translate-x-1/2 z-40 w-full max-w-md px-3 pointer-events-none">
     <div class="bg-slate-900/95 border border-slate-700/90 backdrop-blur-md rounded-2xl p-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.8)] grid grid-cols-3 gap-1.5 pointer-events-auto">
-      <button onclick="app.openCommModal('announce')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-amber-400 border border-slate-700/60 transition active:scale-95 relative">
-        <i data-lucide="megaphone" class="w-4 h-4"></i>
-        <span class="text-xs font-bold">お知らせ</span>
+      <button onclick="app.openCommModal('announce')" class="flex items-center justify-center gap-1 py-2.5 px-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-amber-400 border border-slate-700/60 transition active:scale-95 relative">
+        <i data-lucide="megaphone" class="w-4 h-4 flex-shrink-0"></i>
+        <span class="text-[11px] sm:text-xs font-bold truncate">お知らせ</span>
         <span id="badge-dot-announce" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 hidden animate-ping"></span>
       </button>
-      <button onclick="app.openCommModal('chat')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-cyan-400 border border-slate-700/60 transition active:scale-95 relative">
-        <i data-lucide="message-circle" class="w-4 h-4"></i>
-        <span class="text-xs font-bold">会話ルーム</span>
+      <button onclick="app.openCommModal('chat')" class="flex items-center justify-center gap-1 py-2.5 px-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-cyan-400 border border-slate-700/60 transition active:scale-95 relative">
+        <i data-lucide="message-circle" class="w-4 h-4 flex-shrink-0"></i>
+        <span class="text-[11px] sm:text-xs font-bold truncate">会話ルーム</span>
         <span id="badge-dot-chat" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 hidden"></span>
       </button>
-      <button onclick="app.openCommModal('log')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-emerald-400 border border-slate-700/60 transition active:scale-95 relative">
-        <i data-lucide="list-tree" class="w-4 h-4"></i>
-        <span class="text-xs font-bold">ゲームログ</span>
+      <button onclick="app.openCommModal('log')" class="flex items-center justify-center gap-1 py-2.5 px-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-emerald-400 border border-slate-700/60 transition active:scale-95 relative">
+        <i data-lucide="list-tree" class="w-4 h-4 flex-shrink-0"></i>
+        <span class="text-[11px] sm:text-xs font-bold truncate">ゲームログ</span>
         <span id="badge-dot-log" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 hidden"></span>
       </button>
     </div>
   </div>
 
   <!-- MODALS -->
-  <!-- 99ジャック：3択クイズ＆正誤判定モーダル（制限60秒） -->
-  <div id="modal-jack-quiz" class="fixed inset-0 z-50 bg-black/90 hidden flex items-center justify-center p-4 backdrop-blur-md">
-    <div id="jack-quiz-box" class="w-full max-w-lg bg-slate-900 border-4 border-teal-500 rounded-3xl p-6 shadow-[0_0_50px_rgba(20,184,166,0.4)] flex flex-col">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+  <!-- 99ジャック：3択クイズ＆正誤判定モーダル（スマホ対応スクロール付） -->
+  <div id="modal-jack-quiz" class="fixed inset-0 z-50 bg-black/90 hidden flex items-center justify-center p-3 sm:p-4 backdrop-blur-md">
+    <div id="jack-quiz-box" class="w-full max-w-lg bg-slate-900 border-4 border-teal-500 rounded-3xl p-4 sm:p-6 shadow-[0_0_50px_rgba(20,184,166,0.4)] flex flex-col max-h-[92vh] overflow-y-auto custom-scrollbar">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 mb-3">
         <span id="jack-quiz-color-badge" class="text-xs font-extrabold px-3 py-1 rounded-full bg-slate-800 text-teal-300 border border-slate-700">カテゴリ色</span>
-        <span id="jack-quiz-timer" class="text-sm font-mono font-black text-amber-400 bg-slate-950 px-3.5 py-1 rounded-full border border-amber-500/40">残り 60 秒</span>
+        <span id="jack-quiz-timer" class="text-xs sm:text-sm font-mono font-black text-amber-400 bg-slate-950 px-3 py-1 rounded-full border border-amber-500/40">残り 60 秒</span>
       </div>
 
-      <!-- 問題文表示 -->
-      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 mb-4 text-left shadow-inner">
-        <div class="text-[11px] font-bold text-slate-400 mb-1">【問題】正しい数値を選択して回答ボタンを押してください</div>
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 sm:p-4 mb-3.5 text-left shadow-inner">
+        <div class="text-[10px] sm:text-[11px] font-bold text-slate-400 mb-1">【問題】正しい数値を選択して回答ボタンを押してください</div>
         <div id="jack-quiz-question" class="text-sm sm:text-base font-extrabold text-white leading-relaxed">問題文</div>
       </div>
 
-      <!-- 3択ボタン（毎回ランダム配置） -->
-      <div id="jack-quiz-options" class="grid grid-cols-3 gap-3 mb-4"></div>
+      <div id="jack-quiz-options" class="grid grid-cols-3 gap-2.5 sm:gap-3 mb-3.5"></div>
 
-      <!-- 回答確定ボタン -->
-      <button id="btn-jack-submit-answer" onclick="app.submitJackQuizAnswer()" class="w-full bg-teal-600 hover:bg-teal-500 text-white font-extrabold py-3.5 rounded-xl transition shadow-lg opacity-50 pointer-events-none mb-2">
+      <button id="btn-jack-submit-answer" onclick="app.submitJackQuizAnswer()" class="w-full bg-teal-600 hover:bg-teal-500 active:scale-98 text-white font-extrabold py-3.5 rounded-xl transition shadow-lg opacity-50 pointer-events-none mb-1">
         回答する
       </button>
 
-      <!-- 回答後の正誤・正答・問題文まとめ表示＆アクション選択エリア -->
       <div id="jack-quiz-result-area" class="hidden flex-col gap-3 mt-2 pt-3 border-t border-slate-800">
-        <div id="jack-quiz-verdict-banner" class="p-4 rounded-2xl border-2 text-center"></div>
-        <div id="jack-quiz-action-buttons" class="flex gap-3"></div>
+        <div id="jack-quiz-verdict-banner" class="p-3.5 rounded-2xl border-2 text-center"></div>
+        <div id="jack-quiz-action-buttons" class="flex flex-col sm:flex-row gap-2.5"></div>
       </div>
     </div>
   </div>
 
-  <!-- 99ジャック：バースト（99.00超え）時の瞳孔散大・心拍呼吸停止アラートモーダル -->
+  <!-- 99ジャック：バースト時アラートモーダル -->
   <div id="modal-jack-bust" class="fixed inset-0 z-50 bg-rose-950/90 hidden flex items-center justify-center p-4 backdrop-blur-md">
     <div class="w-full max-w-md bg-slate-950 border-4 border-rose-600 rounded-3xl p-6 text-center shadow-[0_0_70px_rgba(225,29,72,0.8)] animate-bounce">
-      <div class="w-20 h-20 rounded-full bg-rose-600/20 border-2 border-rose-500 flex items-center justify-center mx-auto mb-4 text-rose-500">
-        <i data-lucide="heart-off" class="w-12 h-12"></i>
+      <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-rose-600/20 border-2 border-rose-500 flex items-center justify-center mx-auto mb-4 text-rose-500">
+        <i data-lucide="heart-off" class="w-10 h-10 sm:w-12 sm:h-12"></i>
       </div>
       <div class="inline-block px-3 py-1 rounded-full bg-rose-600 text-white text-xs font-black uppercase mb-2">OVER 99.00 - CRITICAL BUST</div>
-      <h3 class="text-2xl font-black text-rose-400 mb-3">【急変】リミット99超過！</h3>
+      <h3 class="text-xl sm:text-2xl font-black text-rose-400 mb-3">【急変】リミット99超過！</h3>
       <p id="jack-bust-player-name" class="text-sm font-bold text-white mb-2"></p>
-      <div class="bg-rose-950/50 border border-rose-700 rounded-2xl p-4 text-rose-200 font-extrabold text-sm leading-relaxed">
+      <div class="bg-rose-950/50 border border-rose-700 rounded-2xl p-4 text-rose-200 font-extrabold text-xs sm:text-sm leading-relaxed">
         瞳孔散大、心拍、呼吸を感じなくなりました…
       </div>
     </div>
   </div>
 
+  <!-- 神経衰弱：カードめくり公開ポップアップ -->
   <div id="modal-memory-popup" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm pointer-events-none">
-    <div id="memory-popup-card-box" class="w-80 sm:w-96 bg-slate-900 border-4 border-cyan-400 rounded-3xl p-6 text-center shadow-[0_0_60px_rgba(6,182,212,0.5)] transform scale-105 transition-all pointer-events-auto">
-      <div id="memory-popup-header" class="text-sm font-bold text-cyan-300 mb-3">カード公開</div>
+    <div id="memory-popup-card-box" class="w-full max-w-sm bg-slate-900 border-4 border-cyan-400 rounded-3xl p-4 sm:p-6 text-center shadow-[0_0_60px_rgba(6,182,212,0.5)] transform transition-all pointer-events-auto">
+      <div id="memory-popup-header" class="text-xs sm:text-sm font-bold text-cyan-300 mb-2.5">カード公開</div>
       <div id="memory-popup-content" class="flex flex-col items-center justify-center gap-3"></div>
     </div>
   </div>
 
-  <div id="modal-memory-board" class="fixed inset-0 z-50 bg-black/90 hidden flex items-center justify-center p-4 backdrop-blur-md">
-    <div class="w-full max-w-4xl bg-slate-900 border-2 border-blue-500 rounded-3xl p-6 shadow-[0_0_50px_rgba(59,130,246,0.3)] flex flex-col max-h-[95vh]">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2"><i data-lucide="layout-grid" class="w-5 h-5 text-blue-400"></i> 救急疾患ボード（自陣）</h3>
+  <!-- 神経衰弱：救急疾患ボードモーダル（スマホで最後の1枠まで確実にタップできるよう余白と高さを改善） -->
+  <div id="modal-memory-board" class="fixed inset-0 z-50 bg-black/90 hidden flex items-center justify-center p-2.5 sm:p-4 backdrop-blur-md">
+    <div class="w-full max-w-4xl bg-slate-900 border-2 border-blue-500 rounded-3xl p-4 sm:p-6 shadow-[0_0_50px_rgba(59,130,246,0.3)] flex flex-col max-h-[90vh]">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 mb-3">
+        <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2"><i data-lucide="layout-grid" class="w-5 h-5 text-blue-400"></i> 救急疾患ボード（自陣）</h3>
         <button onclick="app.toggleMemoryBoardModal()" class="p-2 bg-slate-800 text-slate-400 rounded-xl hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-      <div class="text-xs text-slate-400 mb-4" id="memory-board-guide-text">ペアが揃ったカードを選択し、ボード上の正しい疾患スロットにはめてください。</div>
+      <div class="text-xs text-slate-300 mb-2" id="memory-board-guide-text">ペアが揃ったカードを選択し、ボード上の正しい疾患スロットにはめてください。</div>
       
-      <div class="flex-1 overflow-y-auto custom-scrollbar pr-1">
-        <div id="full-memory-board-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+      <div class="flex-1 overflow-y-auto custom-scrollbar pr-1 pb-12">
+        <div id="full-memory-board-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3"></div>
       </div>
 
-      <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center">
+      <div class="mt-3 pt-3 border-t border-slate-800 flex justify-between items-center">
         <span id="matched-stock-indicator" class="text-xs font-bold text-amber-300">獲得ストック: なし</span>
-        <button onclick="app.toggleMemoryBoardModal()" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition">閉じる</button>
+        <button onclick="app.toggleMemoryBoardModal()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition">閉じる</button>
       </div>
     </div>
   </div>
@@ -951,18 +954,18 @@
     <div class="relative z-10 flex flex-col items-center justify-center text-center p-6 w-full">
       <div class="w-24 h-24 rounded-3xl bg-amber-500/20 border-2 border-amber-400 flex items-center justify-center text-amber-300 shadow-[0_0_50px_rgba(251,191,36,0.6)] animate-bounce mb-4"><i data-lucide="zap" class="w-14 h-14"></i></div>
       <div class="px-4 py-1.5 rounded-full bg-rose-600 text-white font-extrabold text-sm uppercase mb-2">DISCHARGE! 200J ショック実行</div>
-      <h2 class="text-3xl md:text-4xl font-black text-white mb-2 drop-shadow-lg">【VF ＋ DC】除細動成功！</h2>
+      <h2 class="text-2xl md:text-4xl font-black text-white mb-2 drop-shadow-lg">【VF ＋ DC】除細動成功！</h2>
       <div class="w-full max-w-sm h-24 bg-slate-950/80 border border-emerald-500/60 rounded-2xl p-2 relative flex items-center justify-center mt-4 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
         <svg class="w-full h-full" viewBox="0 0 400 80"><path class="ecg-line-anim" d="M 0 40 L 80 40 L 95 30 L 105 45 L 115 40 L 130 40 L 140 10 L 155 70 L 165 40 L 185 40 L 200 32 L 215 40 L 280 40 L 295 30 L 305 45 L 315 40 L 330 40 L 340 10 L 355 70 L 365 40 L 400 40" fill="none" stroke="#10b981" stroke-width="3"/></svg>
       </div>
     </div>
   </div>
 
-  <!-- 3ルーム対応の通信モーダル（左：お知らせ、中：会話ルーム、右：ゲームログ） -->
-  <div id="modal-chat" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl flex flex-col h-[500px]">
+  <!-- 3ルーム対応の通信モーダル -->
+  <div id="modal-chat" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm">
+    <div class="w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col h-[80vh] max-h-[520px]">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
-        <h3 class="text-base font-bold text-white flex items-center gap-2"><i data-lucide="radio" class="w-5 h-5 text-cyan-400"></i>指令・現場通信センター</h3>
+        <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2"><i data-lucide="radio" class="w-5 h-5 text-cyan-400"></i>指令・現場通信センター</h3>
         <button onclick="app.toggleChatModal()" class="p-2 bg-slate-800 text-slate-400 rounded-xl hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <div class="grid grid-cols-3 gap-2 mb-3 border-b border-slate-800 pb-2">
@@ -980,23 +983,23 @@
         <div class="text-slate-500 italic">システム通信記録待機中...</div>
       </div>
       <div id="chat-input-area" class="flex gap-2 pt-2 border-t border-slate-800">
-        <input id="game-chat-input" type="text" placeholder="全員にメッセージ送信..." onkeydown="if(event.key==='Enter')app.sendChatMsg()" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+        <input id="game-chat-input" type="text" placeholder="全員にメッセージ送信..." onkeydown="if(event.key==='Enter')app.sendChatMsg()" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-base sm:text-xs text-white focus:outline-none focus:border-cyan-500">
         <button onclick="app.sendChatMsg()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition">送信</button>
       </div>
     </div>
   </div>
 
-  <div id="modal-jinuki-tracker" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="w-full max-w-2xl bg-slate-900 border border-amber-500/40 rounded-3xl p-6 shadow-2xl">
+  <div id="modal-jinuki-tracker" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm">
+    <div class="w-full max-w-2xl bg-slate-900 border border-amber-500/40 rounded-3xl p-4 sm:p-6 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
       <div class="flex items-center justify-between mb-4"><h3 class="text-base font-bold text-white flex items-center gap-2"><i data-lucide="search" class="w-5 h-5 text-amber-400"></i>現場事後検証 推理シート</h3><button onclick="app.closeTracker()" class="p-2 bg-slate-800 text-slate-400 rounded-xl hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button></div>
       <div id="jinuki-tracker-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs"></div>
     </div>
   </div>
 
   <div id="modal-jinuki-quiz" class="fixed inset-0 z-50 bg-black/95 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="w-full max-w-lg bg-slate-900 border-2 border-amber-500 rounded-3xl p-6 text-center shadow-[0_0_40px_rgba(245,158,11,0.3)]">
+    <div class="w-full max-w-lg bg-slate-900 border-2 border-amber-500 rounded-3xl p-5 sm:p-6 text-center shadow-[0_0_40px_rgba(245,158,11,0.3)]">
       <div class="flex justify-between items-center mb-3">
-        <h3 class="text-xl font-black text-white flex items-center gap-2"><i data-lucide="help-circle" class="w-6 h-6 text-amber-400"></i>【事後検証】隠れカード特定クイズ！</h3>
+        <h3 class="text-base sm:text-xl font-black text-white flex items-center gap-2"><i data-lucide="help-circle" class="w-6 h-6 text-amber-400"></i>【事後検証】隠れカード特定クイズ！</h3>
         <span id="jinuki-quiz-timer" class="text-xs font-mono font-bold text-amber-400 bg-slate-950 px-3 py-1 rounded-full border border-slate-800">制限 60秒</span>
       </div>
       <p class="text-xs text-slate-400 mb-4">最後に残った孤立カードの「本来のペア」は何グループだった？</p>
@@ -1011,15 +1014,15 @@
       <h3 class="text-lg font-bold text-white mb-4">出動ルームに参加</h3>
       <div class="mb-4">
         <label class="block text-xs font-semibold text-slate-300 mb-1.5">あなたの名前（隊員コールサイン）</label>
-        <input id="input-join-player-name" type="text" maxlength="10" value="救急隊員" placeholder="名前を入力..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500 font-semibold">
+        <input id="input-join-player-name" type="text" maxlength="10" value="救急隊員" placeholder="名前を入力..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-base sm:text-sm text-white focus:outline-none focus:border-cyan-500 font-semibold">
       </div>
       <div class="mb-5">
         <label class="block text-xs font-semibold text-slate-300 mb-1.5">ルームコード（6桁）</label>
-        <input id="input-join-code" type="text" maxlength="6" placeholder="123456" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-center text-xl text-white font-mono focus:outline-none focus:border-cyan-500 tracking-widest">
+        <input id="input-join-code" type="text" inputmode="numeric" maxlength="6" placeholder="123456" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-center text-xl text-white font-mono focus:outline-none focus:border-cyan-500 tracking-widest">
       </div>
       <div class="flex gap-2">
-        <button onclick="app.closeJoinModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl transition">キャンセル</button>
-        <button onclick="app.executeJoin()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-3 rounded-xl font-bold transition shadow-[0_0_10px_rgba(8,145,178,0.4)]">合流する</button>
+        <button onclick="app.closeJoinModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl transition text-xs sm:text-sm font-bold">キャンセル</button>
+        <button onclick="app.executeJoin()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-3 rounded-xl font-bold transition shadow-[0_0_10px_rgba(8,145,178,0.4)] text-xs sm:text-sm">合流する</button>
       </div>
     </div>
   </div>
@@ -1031,46 +1034,42 @@
     </div>
   </div>
 
-  <!-- 🆕 ゲーム説明書・マニュアルモーダル -->
+  <!-- ゲーム説明書・マニュアルモーダル -->
   <div id="modal-manual" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="w-full max-w-lg bg-slate-900 border border-cyan-500/50 rounded-3xl p-6 shadow-2xl flex flex-col max-h-[85vh]">
+    <div class="w-full max-w-lg bg-slate-900 border border-cyan-500/50 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col max-h-[85vh]">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
+        <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
           <i data-lucide="book-open" class="w-5 h-5 text-cyan-400"></i>
           <span id="manual-modal-title">訓練ミッション説明書</span>
         </h3>
         <button onclick="app.closeManualModal()" class="p-2 bg-slate-800 text-slate-400 rounded-xl hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-
-      <div id="manual-modal-body" class="flex-1 overflow-y-auto custom-scrollbar space-y-4 text-xs sm:text-sm text-slate-300 pr-1 leading-relaxed">
-        <!-- JSで現在のゲームモードに応じた説明文がここに切り替わります -->
-      </div>
-
+      <div id="manual-modal-body" class="flex-1 overflow-y-auto custom-scrollbar space-y-4 text-xs sm:text-sm text-slate-300 pr-1 leading-relaxed"></div>
       <div class="mt-4 pt-3 border-t border-slate-800 text-right">
         <button onclick="app.closeManualModal()" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold px-6 py-2.5 rounded-xl transition shadow-md">閉じる</button>
       </div>
     </div>
   </div>
 
-  <!-- 管理者用画面（CMSモダル） -->
-  <div id="modal-admin" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
-    <div class="w-full max-w-4xl bg-slate-900 border border-rose-500/50 rounded-3xl p-6 flex flex-col max-h-[95vh] shadow-[0_0_50px_rgba(225,29,72,0.2)]">
+  <!-- 管理者用画面（CMSモーダル） -->
+  <div id="modal-admin" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="w-full max-w-4xl bg-slate-900 border border-rose-500/50 rounded-3xl p-4 sm:p-6 flex flex-col max-h-[92vh] shadow-[0_0_50px_rgba(225,29,72,0.2)]">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2"><i data-lucide="shield-alert" class="w-5 h-5 text-rose-500"></i> システム管理センター (CMS)</h3>
+        <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2"><i data-lucide="shield-alert" class="w-5 h-5 text-rose-500"></i> システム管理センター (CMS)</h3>
         <button onclick="app.closeAdmin()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       
       <div id="admin-auth-box" class="py-12 flex flex-col items-center">
         <p class="text-sm font-bold text-slate-300 mb-3">管理者暗証番号（4桁）を入力</p>
-        <input id="admin-pin-input" type="password" maxlength="4" placeholder="••••" class="bg-slate-950 border border-slate-700 rounded-xl px-6 py-3 text-center text-2xl font-mono text-white mb-4 tracking-[1em] focus:outline-none focus:border-rose-500">
+        <input id="admin-pin-input" type="password" inputmode="numeric" maxlength="4" placeholder="••••" class="bg-slate-950 border border-slate-700 rounded-xl px-6 py-3 text-center text-2xl font-mono text-white mb-4 tracking-[1em] focus:outline-none focus:border-rose-500">
         <button onclick="app.checkAdminPin()" class="bg-rose-700 hover:bg-rose-600 text-white font-bold px-8 py-3 rounded-xl transition shadow-[0_0_15px_rgba(225,29,72,0.4)]">アクセス</button>
       </div>
       
-      <div id="admin-content-box" class="hidden flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-5 pr-2">
+      <div id="admin-content-box" class="hidden flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-5 pr-1">
         <div class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-inner">
           <div class="flex items-center gap-3">
             <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span></span>
-            <span class="text-xs font-bold text-slate-300">現在のリアルタイム接続人数 (アクティブセッション):</span>
+            <span class="text-xs font-bold text-slate-300">現在のリアルタイム接続人数:</span>
           </div>
           <div class="flex items-baseline gap-1">
             <span class="text-2xl font-mono font-black text-cyan-400" id="admin-active-users">1</span>
@@ -1079,7 +1078,7 @@
         </div>
 
         <div class="w-full bg-slate-800/40 border border-amber-500/40 rounded-2xl p-4">
-          <h4 class="text-sm font-bold text-amber-300 mb-2 flex items-center gap-2"><i data-lucide="megaphone" class="w-4 h-4"></i>全体お知らせ配信（全プレイヤーのお知らせルームへ一斉通知）</h4>
+          <h4 class="text-sm font-bold text-amber-300 mb-2 flex items-center gap-2"><i data-lucide="megaphone" class="w-4 h-4"></i>全体お知らせ配信</h4>
           <div class="flex gap-2">
             <input id="admin-announce-input" type="text" placeholder="全プレイヤーへ通知するお知らせ内容を入力..." onkeydown="if(event.key==='Enter')app.sendAdminAnnouncement()" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
             <button onclick="app.sendAdminAnnouncement()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition shadow-md">一斉送信</button>
@@ -1087,8 +1086,8 @@
         </div>
         
         <div class="w-full bg-slate-800/40 border border-slate-700 rounded-2xl p-4">
-          <h4 class="text-sm font-bold text-white mb-3 border-b border-slate-700 pb-2 flex items-center gap-2"><i data-lucide="unlock" class="w-4 h-4"></i>出動権限（アクセス）コントロール（変更時に全端末へ即時同期）</h4>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <h4 class="text-sm font-bold text-white mb-3 border-b border-slate-700 pb-2 flex items-center gap-2"><i data-lucide="unlock" class="w-4 h-4"></i>出動権限（アクセス）コントロール</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div class="flex justify-between items-center p-3 bg-slate-900 rounded-xl border border-slate-800">
               <span class="text-xs font-bold text-rose-300">GAME 01: 致死性不整脈を回避せよ！</span>
               <label class="relative inline-flex items-center cursor-pointer">
@@ -1097,14 +1096,14 @@
               </label>
             </div>
             <div class="flex justify-between items-center p-3 bg-slate-900 rounded-xl border border-slate-800">
-              <span class="text-xs font-bold text-blue-300">GAME 02:改訂長谷川簡易知能評価スケールに引っかかるな！</span>
+              <span class="text-xs font-bold text-blue-300">GAME 02: 神経衰弱バトル</span>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="toggle-game2" onchange="app.saveAdminAccess()" class="sr-only peer">
                 <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
               </label>
             </div>
             <div class="flex justify-between items-center p-3 bg-slate-900 rounded-xl border border-slate-800">
-              <span class="text-xs font-bold text-amber-300">GAME 03: 救急 隠れた疾患を当てろ</span>
+              <span class="text-xs font-bold text-amber-300">GAME 03: 隠れた疾患を当てろ</span>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" id="toggle-game3" onchange="app.saveAdminAccess()" class="sr-only peer">
                 <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
@@ -1118,13 +1117,12 @@
               </label>
             </div>
           </div>
-          <div class="mt-3 text-right"><button onclick="app.saveAdminAccess()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition">設定を保存・即時同期</button></div>
         </div>
         
         <div class="w-full flex-1 flex flex-col min-h-[300px] mt-2">
-          <div class="flex flex-wrap items-center justify-between mb-3 border-b border-slate-700 pb-2">
-            <h4 class="text-sm font-bold text-white flex items-center gap-2"><i data-lucide="database" class="w-4 h-4"></i>問題カード データベース管理 (無制限拡張対応)</h4>
-            <div class="flex items-center gap-3">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3 border-b border-slate-700 pb-2">
+            <h4 class="text-sm font-bold text-white flex items-center gap-2"><i data-lucide="database" class="w-4 h-4"></i>問題カード データベース管理</h4>
+            <div class="flex flex-wrap items-center gap-2">
               <select id="admin-deck-selector" onchange="app.renderAdminCards()" class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
                 <option value="all">マスターデータ (全カード)</option>
                 <option value="babanuki">GAME 01: ババ抜き用</option>
@@ -1150,6 +1148,7 @@
   </div>
 
   <div id="toast-box" class="fixed bottom-20 z-50 transform -translate-y-2 opacity-0 pointer-events-none transition-all duration-300 bg-slate-800 border border-slate-700 text-white text-xs px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2"><span id="toast-text"></span></div>
+
 <script>
     let socket;
     try { socket = io(); } catch(e) { socket = { emit: () => {}, on: () => {} }; }
@@ -1173,11 +1172,10 @@
       phase: 'idle',
       activeCommTab: 'chat',
       room: { code: '', isHost: false, isSolo: false, isOpen: false },
-      openRooms: {}, // 募集中のオープンルーム一覧
+      openRooms: {},
       config: { mode: 'babanuki', maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true, jackShowTotal: true, isOpenRoom: false },
       me: { id: 'p_' + Math.random().toString(36).substring(2, 9), name: '救急隊員' },
       players: [],
-      // ...（以降の既存のstateプロパティ）
       turnIdx: 0,
       discardPile: [],
       hiddenCard: null,
@@ -1187,7 +1185,7 @@
       ranks: [],
       quizResultCorrect: false,
       quizAnswered: false,
-      timers: { turn: null, aiDelay: null, memoryTimer: null, popupTimer: null, matchTimer: null, quizTimer: null, quizAutoClose: null, jackQuiz: null, bustModal: null },
+      timers: { turn: null, aiDelay: null, memoryTimer: null, popupTimer: null, matchTimer: null, quizTimer: null, quizAutoClose: null, jackQuiz: null, bustModal: null, openRoomBeacon: null },
       
       memoryState: {
         cards: [],
@@ -1197,7 +1195,8 @@
         boardSlots: [],
         playerBoards: {},
         timeLeft: 20,
-        isProcessingTurn: false
+        isProcessingTurn: false,
+        waitingForBoardPlacement: false
       },
 
       jackState: {
@@ -1271,7 +1270,6 @@
     });
 
     socket.on('receive_chat', (data) => {
-      // 🆕 オープンルームのブロードキャスト信号を受信した場合は一覧を更新してチャット表示はスキップ
       if(data && typeof data.message === 'string' && data.message.startsWith('__SYS_ROOM__:')) {
         try {
           const payload = JSON.parse(data.message.substring('__SYS_ROOM__:'.length));
@@ -1282,7 +1280,6 @@
 
       const chatContent = document.getElementById('tab-content-chat');
       const badgeDot = document.getElementById('badge-dot-chat');
-      // ...（以降の既存コード）
       if(chatContent) {
         if(chatContent.querySelector('.italic')) chatContent.innerHTML = '';
         chatContent.innerHTML += `<div class="p-2 rounded-xl bg-slate-900 border border-slate-800 mb-1"><span class="text-cyan-400 font-bold mr-2">${utils.escapeHtml(data.name)}:</span><span class="text-slate-200">${utils.escapeHtml(data.message)}</span></div>`;
@@ -1329,6 +1326,7 @@
           state.memoryState.matchedStock = [];
           state.memoryState.selectedStockIdx = 0;
           state.memoryState.isProcessingTurn = false;
+          state.memoryState.waitingForBoardPlacement = false;
           app.showScreen('view-memory-game');
           app.renderMemoryGameTable();
         } else if(state.mode === 'jack') {
@@ -1350,12 +1348,16 @@
           app.renderTable();
         }
       } else if(actionData.type === 'memory_sync') {
-        if(state.phase !== 'memory_playing') {
+        if(state.phase !== 'memory_playing' && state.phase !== 'ended') {
           state.phase = 'memory_playing';
           app.showScreen('view-memory-game');
         }
         state.memoryState.isProcessingTurn = false;
         app.renderMemoryGameTable();
+        if(actionData.gameEnded) {
+          state.phase = 'ended';
+          app.endMemoryGame();
+        }
       } else if(actionData.type === 'jack_sync') {
         if(state.phase !== 'jack_playing' && state.phase !== 'ended') {
           state.phase = 'jack_playing';
@@ -1420,8 +1422,8 @@
             <div class="p-3 bg-blue-950/30 border border-blue-900/50 rounded-2xl mb-3"><strong class="text-blue-300">【ゲームの目的】</strong><br>全40疾患グループの問題文カードからペアをいち早く見つけ出し、自分の救急疾患ボードを完成させるゲームです。</div>
             <ul class="list-disc list-inside space-y-2 text-slate-200">
               <li>自分の番に裏向きのカードを2枚めくり、同じ疾患グループであればペア獲得となります。</li>
-              <li>獲得したペアを自陣ボードの正しい疾患スロットにはめていきます。</li>
-              <li>制限時間内に多くの疾患を埋めたプレイヤーが勝利します。</li>
+              <li>獲得したペアを自陣ボードの正しい疾患スロットにはめていきます（回答権は1回のみ）。</li>
+              <li>すべての疾患が埋まるか場のカードがなくなると終了し、完成させた疾患数が多いプレイヤーが勝利します。</li>
             </ul>
           `;
         } else if (state.mode === 'jinuki') {
@@ -1430,7 +1432,7 @@
             <div class="p-3 bg-amber-950/30 border border-amber-900/50 rounded-2xl mb-3"><strong class="text-amber-300">【ゲームの目的】</strong><br>全54枚から1枚がランダムに事前封印された状態で進行するジジ抜きです。</div>
             <ul class="list-disc list-inside space-y-2 text-slate-200">
               <li>「推理シート」を活用して、どのカードが封印されているかを予測します。</li>
-              <li>ゲーム終了後には、封印されたカードの本来のペアを当てる3択クイズ（制限60秒）が発生します。</li>
+              <li>ゲーム終了後には、封印されたカードの本来のペアを当てるクイズ（制限60秒）が発生します。</li>
             </ul>
           `;
         } else if (state.mode === 'jack') {
@@ -1442,12 +1444,8 @@
               <li>手札上限は最大10枚です。10枚に達すると自動ステイとなります。</li>
               <li><strong class="text-emerald-400">正解</strong>すると「手札に加算するか、破棄するか」を選べます。<br><strong class="text-rose-400">不正解や時間切れ</strong>になると、手札へ強制加算されます。</li>
               <li>手札の合計値が <strong class="text-rose-400">99.00以上</strong> になると急変（バースト：瞳孔散大・心拍呼吸停止）で敗北となります。</li>
-              <li>超える前に「ステイアンドプレイ」を宣言して安全に勝負を確定させましょう！</li>
             </ul>
           `;
-        } else {
-          titleTxt = '総合ガイド';
-          htmlTxt = `<p>各ゲームのロビー画面にある「説明書」アイコンから、いつでも詳しいルールを確認できます。</p>`;
         }
 
         if(titleEl) titleEl.textContent = titleTxt;
@@ -1508,22 +1506,20 @@
         if (returnBtn) returnBtn.classList.toggle('hidden', id === 'view-portal');
         if (window.lucide) lucide.createIcons();
       },
+
       returnToPortal: () => {
-        // 🆕 サーバーへルーム退出を通知
-        if (state.room && state.room.code) {
+        if (state.room && state.room.code && !state.room.isSolo) {
           socket.emit('leave_room', { roomCode: state.room.code });
         }
-        
-        app.clearAllTimers(); 
-        state.phase = 'idle'; 
+        app.clearAllTimers();
+        state.phase = 'idle';
         state.room = { code: '', isHost: false, isSolo: false, isOpen: false };
-        app.renderPortal(); 
+        app.renderPortal();
         app.showScreen('view-portal');
-        
         const badge = document.getElementById('current-mode-badge');
         if(badge) {
           badge.textContent = '総合ポータル';
-          badge.className = 'text-xs px-2 py-0.5 rounded-full bg-cyan-900/60 text-cyan-300 border border-cyan-700';
+          badge.className = 'text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-cyan-900/60 text-cyan-300 border border-cyan-700';
         }
       },
       
@@ -1541,17 +1537,16 @@
           const isReady = currentGameAccess[g.id];
           c.innerHTML += `
             <div onclick="${isReady ? `app.selectGame('${g.code}')` : `utils.showToast('${g.title} は現在管理システムからロックされています')`}" 
-                 class="cursor-pointer group relative overflow-hidden rounded-2xl border p-6 shadow-xl transition-all duration-300 ${isReady ? `bg-gradient-to-br from-slate-900 via-slate-900/90 to-${g.col}-950/40 border-${g.col}-900/40 hover:border-${g.col}-500 hover:-translate-y-1 hover:shadow-${g.col}-950/30` : 'bg-slate-900/50 border-slate-800 opacity-60 hover:opacity-80'}">
-              ${isReady ? `<div class="absolute top-0 right-0 w-32 h-32 bg-${g.col}-500/10 rounded-full blur-2xl"></div>` : ''}
-              <div class="flex items-start justify-between mb-4">
+                 class="cursor-pointer group relative overflow-hidden rounded-2xl border p-5 sm:p-6 shadow-xl transition-all duration-300 ${isReady ? `bg-gradient-to-br from-slate-900 via-slate-900/90 to-${g.col}-950/40 border-${g.col}-900/40 hover:border-${g.col}-500 active:scale-98` : 'bg-slate-900/50 border-slate-800 opacity-60'}">
+              <div class="flex items-start justify-between mb-3">
                 <span class="text-xs font-mono px-2.5 py-1 rounded-md ${isReady ? `bg-${g.col}-500/20 text-${g.col}-300 border-${g.col}-500/30` : 'bg-slate-800 text-slate-400'} font-semibold border">${g.lbl}</span>
                 <span class="text-xs px-2.5 py-0.5 rounded-full ${isReady ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1' : 'bg-slate-700/60 text-slate-300 border border-slate-600'} font-bold">${isReady ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>出動可能' : '<i data-lucide="lock" class="w-3 h-3 mr-1 inline"></i>LOCK'}</span>
               </div>
               <div class="flex items-center gap-3 mb-2 relative z-10">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center transition ${isReady ? `bg-${g.col}-600/20 border border-${g.col}-500/30 text-${g.col}-400 group-hover:scale-110` : 'bg-slate-800 text-slate-500'}"><i data-lucide="${g.icon}" class="w-6 h-6"></i></div>
-                <h3 class="text-lg md:text-xl font-bold ${isReady ? `text-white group-hover:text-${g.col}-300 transition` : 'text-slate-400'}">${g.title}</h3>
+                <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center transition ${isReady ? `bg-${g.col}-600/20 border border-${g.col}-500/30 text-${g.col}-400` : 'bg-slate-800 text-slate-500'}"><i data-lucide="${g.icon}" class="w-6 h-6"></i></div>
+                <h3 class="text-base sm:text-xl font-bold ${isReady ? 'text-white' : 'text-slate-400'}">${g.title}</h3>
               </div>
-              <p class="text-xs ${isReady ? 'text-slate-400' : 'text-slate-500'} mb-4 relative z-10 leading-relaxed">${g.desc}</p>
+              <p class="text-xs ${isReady ? 'text-slate-400' : 'text-slate-500'} relative z-10 leading-relaxed">${g.desc}</p>
             </div>
           `;
         });
@@ -1579,8 +1574,8 @@
 
         if (mode === 'babanuki') {
           if(tag) tag.textContent = 'GAME 01'; if(title) title.textContent = '致死性不整脈を回避せよ！';
-          if(badge) { badge.textContent = '不整脈を回避せよ！'; badge.className = 'text-xs px-2 py-0.5 rounded-full bg-rose-900/60 text-rose-300 border border-rose-700'; }
-          if(turnBadge) { turnBadge.textContent = '不整脈を回避せよ！'; turnBadge.className = 'text-xs px-3 py-1.5 rounded-full bg-rose-950 text-rose-300 border border-rose-700 font-bold'; }
+          if(badge) { badge.textContent = '不整脈を回避せよ！'; badge.className = 'text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-rose-900/60 text-rose-300 border border-rose-700'; }
+          if(turnBadge) { turnBadge.textContent = '不整脈を回避せよ！'; turnBadge.className = 'text-[11px] sm:text-xs px-2.5 py-1 rounded-full bg-rose-950 text-rose-300 border border-rose-700 font-bold'; }
           document.getElementById('btn-open-jinuki-tracker')?.classList.add('hidden');
           memoryConfig?.classList.add('hidden');
           babanukiConfig?.classList.remove('hidden');
@@ -1589,7 +1584,7 @@
           if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（AI演習）';
         } else if (mode === 'memory') {
           if(tag) tag.textContent = 'GAME 02'; if(title) title.textContent = '救急神経衰弱バトル';
-          if(badge) { badge.textContent = '神経衰弱バトル'; badge.className = 'text-xs px-2 py-0.5 rounded-full bg-blue-900/60 text-blue-300 border border-blue-600'; }
+          if(badge) { badge.textContent = '神経衰弱バトル'; badge.className = 'text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-blue-900/60 text-blue-300 border border-blue-600'; }
           document.getElementById('btn-open-jinuki-tracker')?.classList.add('hidden');
           memoryConfig?.classList.remove('hidden');
           babanukiConfig?.classList.add('hidden');
@@ -1598,8 +1593,8 @@
           if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（AI演習）';
         } else if (mode === 'jinuki') {
           if(tag) tag.textContent = 'GAME 03'; if(title) title.textContent = '救急 隠れた疾患を当てろ';
-          if(badge) { badge.textContent = '隠れカード推理'; badge.className = 'text-xs px-2 py-0.5 rounded-full bg-amber-900/60 text-amber-300 border border-amber-700'; }
-          if(turnBadge) { turnBadge.textContent = '隠れカードを当てろ'; turnBadge.className = 'text-xs px-3 py-1.5 rounded-full bg-amber-950 text-amber-300 border border-amber-700 font-bold'; }
+          if(badge) { badge.textContent = '隠れカード推理'; badge.className = 'text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-amber-900/60 text-amber-300 border border-amber-700'; }
+          if(turnBadge) { turnBadge.textContent = '隠れカードを当てろ'; turnBadge.className = 'text-[11px] sm:text-xs px-2.5 py-1 rounded-full bg-amber-950 text-amber-300 border border-amber-700 font-bold'; }
           document.getElementById('btn-open-jinuki-tracker')?.classList.remove('hidden');
           memoryConfig?.classList.add('hidden');
           babanukiConfig?.classList.remove('hidden');
@@ -1608,7 +1603,7 @@
           if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（AI演習）';
         } else if (mode === 'jack') {
           if(tag) tag.textContent = 'GAME 04'; if(title) title.textContent = '99ジャック';
-          if(badge) { badge.textContent = '99ジャック'; badge.className = 'text-xs px-2 py-0.5 rounded-full bg-teal-900/60 text-teal-300 border border-teal-600'; }
+          if(badge) { badge.textContent = '99ジャック'; badge.className = 'text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-teal-900/60 text-teal-300 border border-teal-600'; }
           document.getElementById('btn-open-jinuki-tracker')?.classList.add('hidden');
           memoryConfig?.classList.add('hidden');
           babanukiConfig?.classList.add('hidden');
@@ -1617,6 +1612,7 @@
           aiRow?.classList.add('hidden');
           if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（1 VS 1 救急AI対戦）';
         }
+        app.renderOpenRoomsList();
       },
 
       selectGame: (mode) => {
@@ -1630,7 +1626,6 @@
         if(maxP < 4 && teamMode) teamMode.value = 'solo';
       },
 
-      // 🆕 オープンルーム信号の送受信・一覧描画・ワンタップ参加
       handleOpenRoomSignal: (payload) => {
         if(!payload || !payload.code) return;
         if(payload.action === 'close' || !payload.isOpen) {
@@ -1682,7 +1677,7 @@
                 </div>
                 <div class="text-[10px] text-slate-400 font-mono mt-0.5">${modeNames[r.mode] || r.mode} / CODE: ${utils.escapeHtml(r.code)}</div>
               </div>
-              <button onclick="app.joinOpenRoomDirect('${utils.escapeHtml(r.code)}')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl transition shadow-md">参加する</button>
+              <button onclick="app.joinOpenRoomDirect('${utils.escapeHtml(r.code)}')" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl transition shadow-md">参加する</button>
             </div>
           `;
         });
@@ -1717,12 +1712,11 @@
         state.config.showMemoryDisease = document.getElementById('config-memory-show-disease')?.checked ?? true;
         state.config.showGroupNum = document.getElementById('config-show-group-num')?.checked ?? true;
         state.config.jackShowTotal = document.getElementById('config-jack-show-total')?.checked ?? true;
-        state.config.isOpenRoom = document.getElementById('config-is-open-room')?.checked ?? true;
+        state.config.isOpenRoom = document.getElementById('config-is-open-room')?.checked ?? false;
         state.me.name = document.getElementById('input-player-name')?.value.trim() || '救急隊員';
         try { localStorage.setItem('ems_player_name', state.me.name); } catch(e){}
       },
 
-      // ─── 正しい位置にある updateRoomUI メソッド ───
       updateRoomUI: () => {
         const maxEl = document.getElementById('room-summary-max');
         const timerEl = document.getElementById('room-summary-timer');
@@ -1731,7 +1725,7 @@
         if(timerEl) timerEl.innerHTML = state.mode === 'jack' ? `クイズ制限: <strong class="text-amber-400">60秒</strong>` : `手番制限: <strong class="text-amber-400">${state.config.turnTimeLimit>=900?'無制限':state.config.turnTimeLimit+'秒'}</strong>`;
         if(aiEl) aiEl.innerHTML = state.mode === 'jack' ? `合計表示: <strong class="text-teal-400">${state.config.jackShowTotal?'表示':'非表示(暗算)'}</strong>` : `AI自動: <strong class="text-emerald-400">${state.config.autoFillAI?'オン':'オフ'}</strong>`;
 
-        const isOpen = state.room.isHost ? !!state.room.isOpen : !!(state.config.isOpenRoom ?? true);
+        const isOpen = state.room.isHost ? !!state.room.isOpen : !!(state.config.isOpenRoom ?? false);
         const statusBadge = document.getElementById('room-open-status-badge');
         const toggleBtn = document.getElementById('btn-toggle-room-open');
         if(statusBadge) {
@@ -1755,7 +1749,7 @@
           const pColor = p.color || '#38bdf8';
           list.innerHTML += `<div class="flex items-center p-3 rounded-xl bg-slate-950 border border-slate-800"><span class="w-6 h-6 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs mr-3 font-mono">${i + 1}</span><span class="w-3 h-3 rounded-full mr-2.5 flex-shrink-0" style="background-color: ${pColor}; box-shadow: 0 0 8px ${pColor}"></span><span class="text-sm font-semibold text-white mr-2">${utils.escapeHtml(p.name)}</span>${p.id === state.me.id ? '<span class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800 px-2 py-0.5 rounded-full">あなた</span>' : ''}${p.isAI ? '<span class="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded-full">救急AI</span>' : ''}</div>`;
         });
-      }, // 👈 必ずこの直後にカンマ `,` が必要です！
+      },
 
       createRoom: () => {
         app.clearAllTimers(); state.phase = 'waiting';
@@ -1790,23 +1784,10 @@
             clearInterval(state.timers.openRoomBeacon);
           }
         }, 4000);
-      }, // 👈 ここに必ず「},」が必要です
-
-      startSoloAI: () => {
-        app.readConfig(); state.room = { code: 'SOLO-AI', isHost: true, isSolo: true };
-        if (state.mode === 'jack') {
-          state.config.maxPlayers = 2;
-          state.config.autoFillAI = true;
-        } else {
-          state.config.autoFillAI = true;
-        }
-        const myColor = pickUnusedColor([]);
-        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: myColor, totalInternal: 0, isStayed: false, isBusted: false }];
-        app.startGame(); 
       },
 
       startSoloAI: () => {
-        app.readConfig(); state.room = { code: 'SOLO-AI', isHost: true, isSolo: true };
+        app.readConfig(); state.room = { code: 'SOLO-AI', isHost: true, isSolo: true, isOpen: false };
         if (state.mode === 'jack') {
           state.config.maxPlayers = 2;
           state.config.autoFillAI = true;
@@ -1846,7 +1827,7 @@
           try { localStorage.setItem('ems_player_name', state.me.name); } catch(e){}
         }
 
-        state.room = { code: code, isHost: false, isSolo: false };
+        state.room = { code: code, isHost: false, isSolo: false, isOpen: false };
         const codeDisplay = document.getElementById('room-code-display');
         if(codeDisplay) codeDisplay.textContent = state.room.code;
         
@@ -1968,7 +1949,7 @@
 
         const currentP = state.players[state.turnIdx];
         const isMyTurn = (state.phase === 'jack_playing' && currentP && !currentP.isAI && currentP.id === state.me.id && !state.jackState.isProcessing);
-        if(turnInfoEl) turnInfoEl.textContent = `現在の手番: ${currentP ? currentP.name : ''} ${isMyTurn ? '(あなた)' : ''}`;
+        if(turnInfoEl) turnInfoEl.textContent = `手番: ${currentP ? currentP.name : ''} ${isMyTurn ? '(あなた)' : ''}`;
 
         const showTotal = state.config.jackShowTotal ?? true;
 
@@ -1977,7 +1958,7 @@
           const isCur = (state.phase === 'jack_playing' && idx === state.turnIdx);
           const pColor = p.color || '#38bdf8';
           const statusHtml = p.isBusted
-            ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-700 font-bold">💀 CPA(99超)</span>'
+            ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-700 font-bold">💀 CPA</span>'
             : p.isStayed
               ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-700 font-bold">🛡 ステイ</span>'
               : isCur
@@ -1987,16 +1968,16 @@
           const totalStr = showTotal ? utils.formatJackInternal(p.totalInternal) : '???';
 
           pContainer.innerHTML += `
-            <div class="p-3 rounded-2xl border transition-all ${isCur ? 'bg-teal-950/50 border-teal-400 ring-2 ring-teal-400/50 shadow-lg' : p.isBusted ? 'bg-rose-950/20 border-rose-900/60 opacity-75' : 'bg-slate-900/80 border-slate-800'} flex flex-col justify-between">
-              <div class="flex items-center justify-between gap-1 mb-2">
+            <div class="p-2.5 sm:p-3 rounded-2xl border transition-all ${isCur ? 'bg-teal-950/50 border-teal-400 ring-2 ring-teal-400/50 shadow-lg' : p.isBusted ? 'bg-rose-950/20 border-rose-900/60 opacity-75' : 'bg-slate-900/80 border-slate-800'} flex flex-col justify-between">
+              <div class="flex items-center justify-between gap-1 mb-1.5">
                 <div class="flex items-center gap-1.5 truncate">
                   <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${pColor}"></span>
                   <span class="text-xs font-bold text-white truncate">${utils.escapeHtml(p.name)}</span>
                 </div>
                 ${statusHtml}
               </div>
-              <div class="flex items-center justify-between text-xs bg-slate-950/90 px-2.5 py-1.5 rounded-xl border border-slate-800/80">
-                <span class="text-slate-400 text-[10px]">手札 ${p.hand.length} / 10枚</span>
+              <div class="flex items-center justify-between text-xs bg-slate-950/90 px-2.5 py-1 rounded-xl border border-slate-800/80">
+                <span class="text-slate-400 text-[10px]">手札 ${p.hand.length}/10</span>
                 <span class="font-mono font-black ${p.isBusted && showTotal ? 'text-rose-400' : 'text-teal-300'}">計: ${totalStr}</span>
               </div>
             </div>
@@ -2008,20 +1989,20 @@
         if(myDot && myP?.color) myDot.style.backgroundColor = myP.color;
 
         if(myTotalEl && myP) {
-          myTotalEl.textContent = showTotal ? utils.formatJackInternal(myP.totalInternal) : '??? (暗算モード)';
-          myTotalEl.className = `text-lg font-mono font-black ${myP.isBusted && showTotal ? 'text-rose-500' : 'text-teal-400'}`;
+          myTotalEl.textContent = showTotal ? utils.formatJackInternal(myP.totalInternal) : '??? (暗算)';
+          myTotalEl.className = `text-base sm:text-lg font-mono font-black ${myP.isBusted && showTotal ? 'text-rose-500' : 'text-teal-400'}`;
         }
 
         if(myStatusBadge && myP) {
           if(myP.isBusted) {
-            myStatusBadge.textContent = '💀 99超過 (瞳孔散大・心拍呼吸停止)';
-            myStatusBadge.className = 'text-xs px-2.5 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-600 font-bold';
+            myStatusBadge.textContent = '💀 99超過 (CPA)';
+            myStatusBadge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-600 font-bold';
           } else if(myP.isStayed) {
-            myStatusBadge.textContent = '🛡 ステイアンドプレイ宣言済';
-            myStatusBadge.className = 'text-xs px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-600 font-bold';
+            myStatusBadge.textContent = '🛡 ステイ宣言済';
+            myStatusBadge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-600 font-bold';
           } else {
-            myStatusBadge.textContent = isMyTurn ? '🎯 あなたの手番です' : 'プレイ中';
-            myStatusBadge.className = 'text-xs px-2.5 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-700 font-bold';
+            myStatusBadge.textContent = isMyTurn ? '🎯 あなたの手番' : 'プレイ中';
+            myStatusBadge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-700 font-bold';
           }
         }
 
@@ -2039,16 +2020,16 @@
 
         myCardsContainer.innerHTML = '';
         if(!myP || myP.hand.length === 0) {
-          myCardsContainer.innerHTML = '<div class="w-full text-center py-10 text-slate-500 font-bold text-xs">まだ手札はありません（現在 0 スタート）</div>';
+          myCardsContainer.innerHTML = '<div class="w-full text-center py-8 text-slate-500 font-bold text-xs">まだ手札はありません（現在 0 スタート）</div>';
         } else {
           myP.hand.forEach(c => {
             const bColorName = c.borderColor || c.title || '緑';
             const borderCls = JACK_BORDER_STYLES[bColorName] || 'border-teal-500';
             myCardsContainer.innerHTML += `
-              <div onclick="app.openCardDetail(${c.id})" class="flex-shrink-0 w-36 h-48 rounded-2xl border-4 ${borderCls} bg-slate-900 p-3 flex flex-col justify-between cursor-pointer hover:-translate-y-1 transition shadow-xl select-none">
+              <div onclick="app.openCardDetail(${c.id})" class="flex-shrink-0 w-32 h-44 sm:w-36 sm:h-48 rounded-2xl border-4 ${borderCls} bg-slate-900 p-2.5 sm:p-3 flex flex-col justify-between cursor-pointer active:scale-95 transition shadow-xl select-none">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-1">
                   <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-200">${utils.escapeHtml(bColorName)}</span>
-                  <span class="text-base font-mono font-black text-teal-300">+${c.num}</span>
+                  <span class="text-sm sm:text-base font-mono font-black text-teal-300">+${c.num}</span>
                 </div>
                 <div class="my-auto py-1 text-center overflow-y-auto custom-scrollbar">
                   <div class="text-[11px] font-bold text-slate-100 leading-snug">${utils.escapeHtml(c.desc)}</div>
@@ -2076,7 +2057,7 @@
         const banner = document.getElementById('jack-announcement-banner');
 
         if(currentP.id === state.me.id && !currentP.isAI) {
-          if(banner) banner.innerHTML = `あなたの手番です。「<strong class="text-teal-300">ドロー（問題に挑戦）</strong>」か「<strong class="text-amber-300">ステイアンドプレイ宣言</strong>」を選択してください`;
+          if(banner) banner.innerHTML = `あなたの手番です。「<strong class="text-teal-300">ドロー</strong>」か「<strong class="text-amber-300">ステイ宣言</strong>」を選択してください`;
         } else {
           if(banner) banner.innerHTML = `<strong class="text-teal-300">${utils.escapeHtml(currentP.name)}</strong> が思考中です...`;
           if(currentP.isAI && (state.room.isHost || state.room.isSolo) && !state.jackState.isProcessing) {
@@ -2120,13 +2101,12 @@
         const quizBox = document.getElementById('jack-quiz-box');
 
         const bColorName = card.borderColor || card.title || '緑';
-        if(badge) badge.textContent = `カードふち色: ${bColorName}`;
+        if(badge) badge.textContent = `ふち色: ${bColorName}`;
         if(quizBox) {
-          quizBox.className = `w-full max-w-lg bg-slate-900 border-4 ${JACK_BORDER_STYLES[bColorName] || 'border-teal-500'} rounded-3xl p-6 flex flex-col`;
+          quizBox.className = `w-full max-w-lg bg-slate-900 border-4 ${JACK_BORDER_STYLES[bColorName] || 'border-teal-500'} rounded-3xl p-4 sm:p-6 flex flex-col max-h-[92vh] overflow-y-auto custom-scrollbar`;
         }
         if(qEl) qEl.textContent = card.desc;
 
-        // 3つの選択肢を毎回ランダムにシャッフル配置
         const options = [card.num, card.opt1, card.opt2];
         for(let i = options.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
@@ -2137,7 +2117,7 @@
           optsEl.innerHTML = '';
           options.forEach((optVal, idx) => {
             optsEl.innerHTML += `
-              <button id="jack-opt-btn-${idx}" onclick="app.selectJackQuizOption(${idx}, '${optVal}')" class="jack-opt-btn py-4 px-2 rounded-2xl border-2 border-slate-700 bg-slate-800 hover:border-teal-400 text-white font-mono font-black text-base sm:text-lg transition shadow-md">
+              <button id="jack-opt-btn-${idx}" onclick="app.selectJackQuizOption(${idx}, '${optVal}')" class="jack-opt-btn py-3.5 sm:py-4 px-2 rounded-2xl border-2 border-slate-700 bg-slate-800 hover:border-teal-400 text-white font-mono font-black text-base sm:text-lg transition shadow-md">
                 ${utils.escapeHtml(optVal)}
               </button>
             `;
@@ -2174,9 +2154,9 @@
         state.jackState.selectedOption = val;
         document.querySelectorAll('.jack-opt-btn').forEach((btn, i) => {
           if(i === idx) {
-            btn.className = 'jack-opt-btn py-4 px-2 rounded-2xl border-2 border-teal-400 bg-teal-900/70 text-teal-200 font-mono font-black text-base sm:text-lg transition shadow-[0_0_15px_rgba(20,184,166,0.5)] scale-105';
+            btn.className = 'jack-opt-btn py-3.5 sm:py-4 px-2 rounded-2xl border-2 border-teal-400 bg-teal-900/70 text-teal-200 font-mono font-black text-base sm:text-lg transition shadow-[0_0_15px_rgba(20,184,166,0.5)] scale-105';
           } else {
-            btn.className = 'jack-opt-btn py-4 px-2 rounded-2xl border-2 border-slate-700 bg-slate-800 hover:border-teal-400 text-white font-mono font-black text-base sm:text-lg transition opacity-75';
+            btn.className = 'jack-opt-btn py-3.5 sm:py-4 px-2 rounded-2xl border-2 border-slate-700 bg-slate-800 hover:border-teal-400 text-white font-mono font-black text-base sm:text-lg transition opacity-75';
           }
         });
         const submitBtn = document.getElementById('btn-jack-submit-answer');
@@ -2211,20 +2191,18 @@
 
         if(verdictBanner) {
           if(isCorrect) {
-            verdictBanner.className = 'p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-950/70 text-center shadow-[0_0_25px_rgba(16,185,129,0.3)]';
+            verdictBanner.className = 'p-3.5 rounded-2xl border-2 border-emerald-500 bg-emerald-950/70 text-center shadow-[0_0_25px_rgba(16,185,129,0.3)]';
             verdictBanner.innerHTML = `
-              <div class="text-lg font-black text-emerald-300 mb-1">⭕ 正解！</div>
-              <div class="text-xs text-slate-200 mb-2">【問題】${utils.escapeHtml(card.desc)}</div>
-              <div class="inline-block bg-slate-950 border border-emerald-500/50 px-4 py-1.5 rounded-xl text-sm font-mono font-black text-emerald-400">正答（カードの数値）: ${card.num}</div>
-              <div class="text-[11px] text-emerald-200 mt-2 font-bold">正解特典：このカードを手札に加算するか、加算せず破棄するか選べます！</div>
+              <div class="text-base sm:text-lg font-black text-emerald-300 mb-1">⭕ 正解！</div>
+              <div class="inline-block bg-slate-950 border border-emerald-500/50 px-3.5 py-1 rounded-xl text-xs sm:text-sm font-mono font-black text-emerald-400">正答（カードの数値）: ${card.num}</div>
+              <div class="text-[11px] text-emerald-200 mt-1.5 font-bold">正解特典：手札に加算するか、加算せず破棄するか選べます！</div>
             `;
           } else {
-            verdictBanner.className = 'p-4 rounded-2xl border-2 border-rose-500 bg-rose-950/70 text-center shadow-[0_0_25px_rgba(244,63,94,0.3)]';
+            verdictBanner.className = 'p-3.5 rounded-2xl border-2 border-rose-500 bg-rose-950/70 text-center shadow-[0_0_25px_rgba(244,63,94,0.3)]';
             verdictBanner.innerHTML = `
-              <div class="text-lg font-black text-rose-300 mb-1">${isTimeout ? '⏱ 時間切れ（不正解）！' : '❌ 不正解！'}</div>
-              <div class="text-xs text-slate-200 mb-2">【問題】${utils.escapeHtml(card.desc)}</div>
-              <div class="inline-block bg-slate-950 border border-rose-500/50 px-4 py-1.5 rounded-xl text-sm font-mono font-black text-rose-400">正答（カードの数値）: ${card.num}</div>
-              <div class="text-[11px] text-rose-200 mt-2 font-bold">ペナルティ：このカード（+${card.num}）は手札へ強制加算されます！</div>
+              <div class="text-base sm:text-lg font-black text-rose-300 mb-1">${isTimeout ? '⏱ 時間切れ（不正解）！' : '❌ 不正解！'}</div>
+              <div class="inline-block bg-slate-950 border border-rose-500/50 px-3.5 py-1 rounded-xl text-xs sm:text-sm font-mono font-black text-rose-400">正答（カードの数値）: ${card.num}</div>
+              <div class="text-[11px] text-rose-200 mt-1.5 font-bold">ペナルティ：このカード（+${card.num}）は手札へ強制加算されます！</div>
             `;
           }
         }
@@ -2232,12 +2210,12 @@
         if(actionBtns) {
           if(isCorrect) {
             actionBtns.innerHTML = `
-              <button onclick="app.resolveJackCardChoice(true)" class="flex-1 bg-teal-600 hover:bg-teal-500 text-white font-extrabold py-3.5 px-3 rounded-xl text-xs sm:text-sm transition shadow-lg">手札に加算する (+${card.num})</button>
-              <button onclick="app.resolveJackCardChoice(false)" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 font-extrabold py-3.5 px-3 rounded-xl text-xs sm:text-sm transition border border-slate-500">加算せず破棄（スルー）</button>
+              <button onclick="app.resolveJackCardChoice(true)" class="flex-1 bg-teal-600 hover:bg-teal-500 active:scale-95 text-white font-extrabold py-3.5 px-3 rounded-xl text-xs sm:text-sm transition shadow-lg">手札に加算する (+${card.num})</button>
+              <button onclick="app.resolveJackCardChoice(false)" class="flex-1 bg-slate-700 hover:bg-slate-600 active:scale-95 text-slate-200 font-extrabold py-3.5 px-3 rounded-xl text-xs sm:text-sm transition border border-slate-500">加算せず破棄（スルー）</button>
             `;
           } else {
             actionBtns.innerHTML = `
-              <button onclick="app.resolveJackCardChoice(true)" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-extrabold py-3.5 px-4 rounded-xl text-xs sm:text-sm transition shadow-lg">手札へ強制加算する (+${card.num})</button>
+              <button onclick="app.resolveJackCardChoice(true)" class="w-full bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-extrabold py-3.5 px-4 rounded-xl text-xs sm:text-sm transition shadow-lg">手札へ強制加算する (+${card.num})</button>
             `;
           }
         }
@@ -2332,6 +2310,7 @@
         state.jackState.isProcessing = false;
         app.advanceJackTurn(bustedPlayerId);
       },
+
       showJackBustModal: (player) => {
         const modal = document.getElementById('modal-jack-bust');
         const nameEl = document.getElementById('jack-bust-player-name');
@@ -2400,7 +2379,6 @@
       },
 
       computeJackRanks: () => {
-        // 98.99（内部9899）以下でより99に近いプレイヤーが上位、99.00（9900）以上のバースト組は最下位
         const safePlayers = state.players.filter(p => !p.isBusted).sort((a, b) => b.totalInternal - a.totalInternal);
         const bustPlayers = state.players.filter(p => p.isBusted).sort((a, b) => a.totalInternal - b.totalInternal);
         const ordered = [...safePlayers, ...bustPlayers];
@@ -2416,13 +2394,14 @@
         app.computeJackRanks();
         setTimeout(() => app.showResults(), 1000);
       },
-
-      // ==========================================
-      // GAME 02: 救急神経衰弱バトル ロジック
+// ==========================================
+      // GAME 02: 救急神経衰弱バトル ロジック（スマホ対応・重複排除・最終セット修正済）
       // ==========================================
       startMemoryGameSession: () => {
+        app.clearAllTimers();
         state.phase = 'memory_playing';
         state.turnIdx = 0;
+        state.ranks = [];
 
         const pairCount = state.config.memoryPairs;
         let availablePairs = [];
@@ -2448,6 +2427,7 @@
         state.memoryState.matchedStock = [];
         state.memoryState.selectedStockIdx = 0;
         state.memoryState.isProcessingTurn = false;
+        state.memoryState.waitingForBoardPlacement = false;
 
         state.players.forEach(p => {
           state.memoryState.playerBoards[p.id] = {};
@@ -2486,14 +2466,15 @@
         if(timerEl) timerEl.textContent = `手番残り ${state.memoryState.timeLeft}秒`;
 
         state.timers.memoryTimer = setInterval(() => {
-          if(state.memoryState.isProcessingTurn) return;
+          if(state.memoryState.isProcessingTurn || state.memoryState.waitingForBoardPlacement) return;
           state.memoryState.timeLeft--;
           if(timerEl) timerEl.textContent = `手番残り ${state.memoryState.timeLeft}秒`;
 
           if(state.memoryState.timeLeft <= 0) {
             clearInterval(state.timers.memoryTimer);
             utils.showToast('⏱ 手番の制限時間切れです！');
-            app.addLogMessage(`${state.players[state.turnIdx].name} の手番が制限時間切れになりました。`);
+            const curP = state.players[state.turnIdx];
+            if(curP) app.addLogMessage(`${curP.name} の手番が制限時間切れになりました。`);
             state.memoryState.cards.forEach(c => {
               if(!c.isMatched && c.isFlipped) c.isFlipped = false;
             });
@@ -2512,14 +2493,14 @@
         if(!grid) return;
 
         const currentP = state.players[state.turnIdx];
-        const isMyTurn = (currentP && !currentP.isAI && currentP.id === state.me.id && !state.memoryState.isProcessingTurn);
-        if(turnInfo) turnInfo.textContent = `現在の手番: ${currentP ? currentP.name : ''} ${isMyTurn ? '(あなた)' : ''}`;
+        const isMyTurn = (currentP && !currentP.isAI && currentP.id === state.me.id && !state.memoryState.isProcessingTurn && !state.memoryState.waitingForBoardPlacement);
+        if(turnInfo) turnInfo.textContent = `手番: ${currentP ? currentP.name : ''} ${isMyTurn ? '(あなた)' : ''}`;
 
         const myP = state.players.find(p => p.id === state.me.id);
         const miniDot = document.getElementById('mini-board-color-dot');
         if (miniDot && myP?.color) miniDot.style.backgroundColor = myP.color;
 
-        if (state.phase === 'memory_playing') {
+        if (state.phase === 'memory_playing' && !state.memoryState.waitingForBoardPlacement) {
           app.startMemoryTimer();
         }
 
@@ -2528,11 +2509,11 @@
           state.players.forEach((p, idx) => {
             const isCur = (idx === state.turnIdx);
             ring.innerHTML += `
-              <div class="px-3 py-1.5 rounded-2xl border text-xs font-bold flex items-center gap-1.5 transition-all ${isCur ? 'bg-cyan-950/80 border-cyan-400 text-cyan-200 ring-2 ring-cyan-400/50 scale-105 shadow-lg' : 'bg-slate-900/80 border-slate-700 text-slate-400'}">
+              <div class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-2xl border text-[11px] sm:text-xs font-bold flex items-center gap-1.5 transition-all ${isCur ? 'bg-cyan-950/80 border-cyan-400 text-cyan-200 ring-2 ring-cyan-400/50 scale-105 shadow-lg' : 'bg-slate-900/80 border-slate-700 text-slate-400'}">
                 <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${p.color || '#38bdf8'}"></span>
                 <span>${utils.escapeHtml(p.name)}</span>
                 ${p.isAI ? '<span class="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-300">AI</span>' : ''}
-                ${isCur ? '<span class="text-[10px] text-amber-400 ml-1">▶手番</span>' : ''}
+                ${isCur ? '<span class="text-[10px] text-amber-400 ml-0.5">▶手番</span>' : ''}
               </div>
             `;
           });
@@ -2574,8 +2555,12 @@
             </div>
           `;
 
+          const boxCls = isFlipped
+            ? 'bg-amber-50 text-slate-900 border-amber-400 ring-4 ring-amber-400/60 z-20 scale-[1.03] shadow-[0_0_25px_rgba(251,191,36,0.7)]'
+            : 'bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 ' + guideClass + ' active:scale-95 z-10 text-slate-100';
+
           grid.innerHTML += `
-            <div onclick="app.handleMemoryCardClick(${idx})" class="aspect-[3/4] w-full rounded-xl border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between p-1 shadow-[0_10px_20px_rgba(0,0,0,0.6)] select-none relative overflow-hidden ${isFlipped ? 'bg-amber-50 text-slate-900 border-amber-400 ring-4 ring-amber-400/60 z-20 scale-[1.03] shadow-[0_0_25px_rgba(251,191,36,0.7)]' : `bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 ${guideClass} hover:scale-105 z-10 text-slate-100`}">
+            <div onclick="app.handleMemoryCardClick(${idx})" class="aspect-[3/4] w-full rounded-xl border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between p-1 shadow-[0_10px_20px_rgba(0,0,0,0.6)] select-none relative overflow-hidden ${boxCls}">
               ${isFlipped ? cardFrontHtml : ecgCardBackHtml}
             </div>
           `;
@@ -2600,16 +2585,16 @@
         state.memoryState.boardSlots.forEach((slot, sIdx) => {
           const isFilled = myBoard[sIdx]?.filled;
           const color = myBoard[sIdx]?.color || myColor;
-          mini.innerHTML += `<div class="w-3.5 h-3.5 rounded-sm border border-slate-700" style="background-color: ${isFilled ? color : '#1e293b'}"></div>`;
+          mini.innerHTML += `<div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-sm border border-slate-700" style="background-color: ${isFilled ? color : '#1e293b'}"></div>`;
         });
       },
 
       handleMemoryCardClick: (idx) => {
         const currentP = state.players[state.turnIdx];
-        if(!currentP || currentP.isAI || currentP.id !== state.me.id || state.memoryState.isProcessingTurn) return;
+        if(!currentP || currentP.isAI || currentP.id !== state.me.id || state.memoryState.isProcessingTurn || state.memoryState.waitingForBoardPlacement) return;
 
         const card = state.memoryState.cards[idx];
-        if(card.isFlipped || card.isMatched || state.memoryState.selectedCardIndices.length >= 2) return;
+        if(!card || card.isFlipped || card.isMatched || state.memoryState.selectedCardIndices.length >= 2) return;
 
         app.selectMemoryCard(idx, currentP);
       },
@@ -2649,7 +2634,7 @@
           if(state.timers.popupTimer) clearTimeout(state.timers.popupTimer);
           state.timers.popupTimer = setTimeout(() => {
             if(callback) callback();
-          }, 1500);
+          }, 1400);
           return;
         }
 
@@ -2661,7 +2646,7 @@
         const showDisease = state.config.showMemoryDisease ?? true;
         if(content) {
           content.innerHTML = `
-            <div class="w-48 aspect-[3/4] bg-slate-100 text-slate-900 border-4 border-indigo-400 rounded-2xl p-3 flex flex-col justify-between shadow-2xl text-left">
+            <div class="w-44 sm:w-48 aspect-[3/4] bg-slate-100 text-slate-900 border-4 border-indigo-400 rounded-2xl p-3 flex flex-col justify-between shadow-2xl text-left">
               <div class="flex items-center justify-between text-xs font-bold"><span class="${SUIT_COLORS[card.suit]||''} text-base">${SUIT_ICONS[card.suit]||'🧠'}</span><span class="font-mono bg-cyan-200 text-cyan-900 px-1.5 py-0.5 rounded text-[10px] font-black">Gr.${card.num}</span></div>
               <div class="my-auto py-2 px-2 bg-white rounded-xl border border-slate-300 shadow-inner text-center">
                 ${showDisease ? `<div class="text-xs font-black text-slate-900 mb-1">${utils.escapeHtml(card.title)}</div>` : ''}
@@ -2677,7 +2662,7 @@
         state.timers.popupTimer = setTimeout(() => {
           modal?.classList.add('hidden');
           if(callback) callback();
-        }, 2000);
+        }, 1800);
       },
 
       processMemoryPairResult: (actorP) => {
@@ -2715,19 +2700,17 @@
         }
 
         app.showMemoryMatchResultBanner(c1, c2, isMatch, currentP, () => {
-          // 未成立のカードはすべて確実に裏向きへ戻す
           state.memoryState.cards.forEach(c => {
             if(!c.isMatched) c.isFlipped = false;
           });
           state.memoryState.selectedCardIndices = [];
           state.memoryState.isProcessingTurn = false;
           
-          // 自分がペアを獲得した場合は、ボード配置が終わるまで次のターンへ進めない
           if(isMatch && currentP.id === state.me.id) {
             if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
             state.memoryState.waitingForBoardPlacement = true;
             app.renderMemoryGameTable();
-            app.toggleMemoryBoardModal();
+            app.openMemoryBoardModalForPlacement();
             return;
           }
           
@@ -2744,7 +2727,7 @@
         const isActorMe = (actorP && !actorP.isAI && actorP.id === state.me.id);
         if (!isActorMe) {
           if(state.timers.matchTimer) clearTimeout(state.timers.matchTimer);
-          state.timers.matchTimer = setTimeout(onComplete, 1600);
+          state.timers.matchTimer = setTimeout(onComplete, 1500);
           return;
         }
 
@@ -2758,17 +2741,17 @@
         if(content) {
           content.innerHTML = `
             <div class="flex flex-col items-center w-full">
-              <div class="flex justify-center gap-3 mb-3 w-full">
-                <div class="w-36 aspect-[3/4] bg-slate-100 text-slate-900 border-2 border-indigo-400 rounded-2xl p-2.5 flex flex-col justify-between shadow-xl text-left">
+              <div class="flex justify-center gap-2.5 mb-3 w-full">
+                <div class="w-32 sm:w-36 aspect-[3/4] bg-slate-100 text-slate-900 border-2 border-indigo-400 rounded-2xl p-2 flex flex-col justify-between shadow-xl text-left">
                   <div class="flex items-center justify-between text-[10px] font-bold"><span class="${SUIT_COLORS[c1.suit]||''}">${SUIT_ICONS[c1.suit]||'🧠'}</span><span class="font-mono text-cyan-900 bg-cyan-200 px-1 rounded text-[9px] font-black">Gr.${c1.num}</span></div>
-                  <div class="my-auto py-1.5 px-1 bg-white rounded-lg text-center">${showDisease ? `<div class="text-[10px] font-black text-slate-900 mb-0.5">${utils.escapeHtml(c1.title)}</div>` : ''}<div class="text-[10px] font-bold text-slate-800 leading-tight">${utils.escapeHtml(c1.desc)}</div></div>
+                  <div class="my-auto py-1 px-1 bg-white rounded-lg text-center">${showDisease ? `<div class="text-[10px] font-black text-slate-900 mb-0.5">${utils.escapeHtml(c1.title)}</div>` : ''}<div class="text-[10px] font-bold text-slate-800 leading-tight">${utils.escapeHtml(c1.desc)}</div></div>
                 </div>
-                <div class="w-36 aspect-[3/4] bg-slate-100 text-slate-900 border-2 border-indigo-400 rounded-2xl p-2.5 flex flex-col justify-between shadow-xl text-left">
+                <div class="w-32 sm:w-36 aspect-[3/4] bg-slate-100 text-slate-900 border-2 border-indigo-400 rounded-2xl p-2 flex flex-col justify-between shadow-xl text-left">
                   <div class="flex items-center justify-between text-[10px] font-bold"><span class="${SUIT_COLORS[c2.suit]||''}">${SUIT_ICONS[c2.suit]||'🧠'}</span><span class="font-mono text-cyan-900 bg-cyan-200 px-1 rounded text-[9px] font-black">Gr.${c2.num}</span></div>
-                  <div class="my-auto py-1.5 px-1 bg-white rounded-lg text-center">${showDisease ? `<div class="text-[10px] font-black text-slate-900 mb-0.5">${utils.escapeHtml(c2.title)}</div>` : ''}<div class="text-[10px] font-bold text-slate-800 leading-tight">${utils.escapeHtml(c2.desc)}</div></div>
+                  <div class="my-auto py-1 px-1 bg-white rounded-lg text-center">${showDisease ? `<div class="text-[10px] font-black text-slate-900 mb-0.5">${utils.escapeHtml(c2.title)}</div>` : ''}<div class="text-[10px] font-bold text-slate-800 leading-tight">${utils.escapeHtml(c2.desc)}</div></div>
                 </div>
               </div>
-              <button id="btn-skip-memory-result" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md">確認完了 (次へ進む)</button>
+              <button id="btn-skip-memory-result" class="w-full bg-amber-600 hover:bg-amber-500 active:scale-95 text-white font-bold py-3 rounded-xl text-xs transition shadow-md">${isMatch ? '疾患ボードへ配置する ▶' : '確認完了 (次へ進む)'}</button>
             </div>
           `;
         }
@@ -2787,13 +2770,14 @@
         if(skipBtn) skipBtn.onclick = finish;
 
         if(state.timers.matchTimer) clearTimeout(state.timers.matchTimer);
-        state.timers.matchTimer = setTimeout(finish, 4500);
+        state.timers.matchTimer = setTimeout(finish, 4000);
       },
 
       advanceMemoryTurnCounterclockwise: () => {
         if (state.timers.aiDelay) clearTimeout(state.timers.aiDelay);
         state.memoryState.selectedCardIndices = [];
         state.memoryState.isProcessingTurn = false;
+        state.memoryState.waitingForBoardPlacement = false;
         state.turnIdx = (state.turnIdx - 1 + state.players.length) % state.players.length;
         socket.emit('game_action', {
           roomCode: state.room.code,
@@ -2815,12 +2799,12 @@
           state.memoryState.isProcessingTurn = false;
           return;
         }
-        // すでにめくり処理が進行中なら二重起動しない
         if (state.memoryState.selectedCardIndices.length > 0) return;
 
         const unflipped = state.memoryState.cards.map((c, idx) => (!c.isFlipped && !c.isMatched) ? idx : null).filter(x => x !== null);
         if(unflipped.length < 2) {
           state.memoryState.isProcessingTurn = false;
+          if(unflipped.length === 0) app.endMemoryGame();
           return;
         }
 
@@ -2830,6 +2814,18 @@
         card1.isFlipped = true;
         state.memoryState.selectedCardIndices = [idx1];
         app.renderMemoryGameTable();
+
+        socket.emit('game_action', {
+          roomCode: state.room.code,
+          type: 'memory_sync',
+          mode: 'memory',
+          turnIdx: state.turnIdx,
+          memoryState: {
+            cards: state.memoryState.cards,
+            boardSlots: state.memoryState.boardSlots,
+            playerBoards: state.memoryState.playerBoards
+          }
+        });
 
         app.showMemoryPopupCard(card1, currentP, () => {
           const remainingUnflipped = state.memoryState.cards.map((c, idx) => (!c.isFlipped && !c.isMatched) ? idx : null).filter(x => x !== null);
@@ -2843,21 +2839,49 @@
           state.memoryState.selectedCardIndices = [idx1, idx2];
           app.renderMemoryGameTable();
 
+          socket.emit('game_action', {
+            roomCode: state.room.code,
+            type: 'memory_sync',
+            mode: 'memory',
+            turnIdx: state.turnIdx,
+            memoryState: {
+              cards: state.memoryState.cards,
+              boardSlots: state.memoryState.boardSlots,
+              playerBoards: state.memoryState.playerBoards
+            }
+          });
+
           app.showMemoryPopupCard(card2, currentP, () => {
             app.processMemoryPairResult(currentP);
           });
         });
       },
 
+      openMemoryBoardModalForPlacement: () => {
+        const modal = document.getElementById('modal-memory-board');
+        if(!modal) return;
+        modal.classList.remove('hidden');
+        app.renderFullMemoryBoardModal();
+      },
+
       toggleMemoryBoardModal: () => {
         const modal = document.getElementById('modal-memory-board');
         if(!modal) return;
-        modal.classList.toggle('hidden');
-        if(!modal.classList.contains('hidden')) {
+        const isCurrentlyOpen = !modal.classList.contains('hidden');
+        if (isCurrentlyOpen) {
+          // まだ獲得ストックが残っている状態で誤って閉じようとした場合は警告して閉じない（最後の1セット配置漏れ防止）
+          if (state.memoryState.waitingForBoardPlacement && state.memoryState.matchedStock.length > 0) {
+            utils.showToast('⚠️ 獲得したペアをボードの疾患枠にはめ込んでください！');
+            return;
+          }
+          modal.classList.add('hidden');
+          if (state.memoryState.waitingForBoardPlacement) {
+            state.memoryState.waitingForBoardPlacement = false;
+            app.advanceMemoryTurnCounterclockwise();
+          }
+        } else {
+          modal.classList.remove('hidden');
           app.renderFullMemoryBoardModal();
-        } else if (state.memoryState.waitingForBoardPlacement) {
-          state.memoryState.waitingForBoardPlacement = false;
-          app.advanceMemoryTurnCounterclockwise();
         }
       },
 
@@ -2873,7 +2897,10 @@
         if(!grid) return;
         grid.innerHTML = '';
 
-        const myBoard = state.memoryState.playerBoards[state.me.id] || {};
+        if (!state.memoryState.playerBoards[state.me.id]) {
+          state.memoryState.playerBoards[state.me.id] = {};
+        }
+        const myBoard = state.memoryState.playerBoards[state.me.id];
         const stocks = state.memoryState.matchedStock;
         if(state.memoryState.selectedStockIdx >= stocks.length) {
           state.memoryState.selectedStockIdx = Math.max(0, stocks.length - 1);
@@ -2883,37 +2910,37 @@
         if(stockEl) {
           stockEl.textContent = stocks.length > 0 
             ? `未配置の獲得ペア: ${stocks.length} 組` 
-            : `獲得ストック: なし（場のカードをめくってペアを揃えてください）`;
+            : `獲得ストック: なし`;
         }
 
         if(guideEl) {
           if(activePair) {
             guideEl.innerHTML = `
-              <div class="bg-slate-950 border-2 border-amber-500/80 rounded-2xl p-3 mb-2 shadow-lg">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs font-extrabold text-amber-400">👇 現在選択中のペア（この2枚が示す疾患枠を下から選んでクリック！回答権は1回のみ）</span>
+              <div class="bg-slate-950 border-2 border-amber-500/80 rounded-2xl p-2.5 sm:p-3 mb-1 shadow-lg">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-[11px] sm:text-xs font-extrabold text-amber-400">👇 この2枚が示す疾患枠を下から選んでタップ！（回答権1回）</span>
                   ${stocks.length > 1 ? `<div class="flex gap-1">${stocks.map((st, i) => `<button onclick="app.selectMatchedStock(${i})" class="px-2 py-0.5 rounded text-[10px] font-bold ${i===state.memoryState.selectedStockIdx ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300'}">ペア${i+1}</button>`).join('')}</div>` : ''}
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
-                  <div class="bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-slate-200"><span class="text-cyan-400 font-bold mr-1">[カード1]</span>${utils.escapeHtml(activePair.cards[0].desc)}</div>
-                  <div class="bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-slate-200"><span class="text-cyan-400 font-bold mr-1">[カード2]</span>${utils.escapeHtml(activePair.cards[1].desc)}</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-left">
+                  <div class="bg-slate-900 border border-slate-700 p-2 rounded-xl text-[11px] text-slate-200"><span class="text-cyan-400 font-bold mr-1">[1]</span>${utils.escapeHtml(activePair.cards[0].desc)}</div>
+                  <div class="bg-slate-900 border border-slate-700 p-2 rounded-xl text-[11px] text-slate-200"><span class="text-cyan-400 font-bold mr-1">[2]</span>${utils.escapeHtml(activePair.cards[1].desc)}</div>
                 </div>
               </div>
             `;
           } else {
-            guideEl.innerHTML = `場（テーブル）で問題文カードを2枚揃えると、ここにペアがストックされ、該当する疾患枠に2枚1組ではめ込むことができます。`;
+            guideEl.innerHTML = `場で問題文カードを2枚揃えると、該当する疾患枠に2枚1組ではめ込むことができます。`;
           }
         }
 
         state.memoryState.boardSlots.forEach((slot, sIdx) => {
-          const isFilled = myBoard[sIdx]?.filled;
+          const isFilled = !!myBoard[sIdx]?.filled;
           const matchedCards = myBoard[sIdx]?.cards || [];
           
           grid.innerHTML += `
-            <div class="p-3 rounded-2xl border-2 ${isFilled ? 'border-emerald-500 bg-slate-950' : (activePair ? 'border-slate-700 bg-slate-800/90 hover:border-amber-400 cursor-pointer hover:scale-[1.02]' : 'border-slate-800 bg-slate-900/60 opacity-75')} flex flex-col justify-between transition shadow-md" ${!isFilled && activePair ? `onclick="app.placeCardToBoardSlot(${sIdx})"` : ''}>
+            <div class="p-3 rounded-2xl border-2 ${isFilled ? 'border-emerald-500 bg-slate-950' : (activePair ? 'border-amber-500/70 bg-slate-800/90 hover:border-amber-400 cursor-pointer active:scale-98' : 'border-slate-800 bg-slate-900/60 opacity-75')} flex flex-col justify-between transition shadow-md" ${!isFilled && activePair ? `onclick="app.placeCardToBoardSlot(${sIdx})"` : ''}>
               <div class="flex justify-between items-center mb-2 border-b border-slate-800 pb-1.5">
                 <span class="text-xs font-extrabold ${isFilled ? 'text-emerald-300' : 'text-white'}">${utils.escapeHtml(slot.title)}</span>
-                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${isFilled ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold' : 'bg-slate-900 text-slate-400'}">${isFilled ? '✅ 2枚格納済' : '空き (0/2枚)'}</span>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${isFilled ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold' : 'bg-slate-900 text-slate-400'}">${isFilled ? '✅ 格納済' : '空き'}</span>
               </div>
               ${isFilled ? `
                 <div class="space-y-1 text-[10px] text-slate-300 bg-slate-900/90 p-2 rounded-xl border border-emerald-500/30">
@@ -2921,8 +2948,8 @@
                   <div class="truncate">・${utils.escapeHtml(matchedCards[1]?.desc || '')}</div>
                 </div>
               ` : `
-                <div class="h-12 rounded-xl flex items-center justify-center text-xs font-bold ${activePair ? 'text-amber-300 bg-amber-950/30 border border-dashed border-amber-500/50' : 'text-slate-500 bg-slate-950 border border-slate-800'}">
-                  ${activePair ? '📥 この疾患にペアをはめ込む' : 'ペア未獲得'}
+                <div class="h-11 rounded-xl flex items-center justify-center text-xs font-bold ${activePair ? 'text-amber-300 bg-amber-950/40 border border-dashed border-amber-500/60' : 'text-slate-500 bg-slate-950 border border-slate-800'}">
+                  ${activePair ? '📥 タップしてここにはめ込む' : 'ペア未獲得'}
                 </div>
               `}
             </div>
@@ -2935,6 +2962,9 @@
         if(stocks.length === 0) return utils.showToast('配置できる獲得ペアがありません');
         
         const slot = state.memoryState.boardSlots[sIdx];
+        if (!state.memoryState.playerBoards[state.me.id]) {
+          state.memoryState.playerBoards[state.me.id] = {};
+        }
         const myBoard = state.memoryState.playerBoards[state.me.id];
         if(myBoard[sIdx]?.filled) return utils.showToast('この疾患枠はすでに埋まっています');
 
@@ -2942,32 +2972,42 @@
         const activePair = stocks[activeIdx];
         if(!activePair) return;
 
-        // ❌ 疾患あてはめミス時（回答権1回のみ：ストックから消去し、場の元の位置へ裏向きで戻す）
-        if(slot.num !== activePair.num) {
+        // ❌ 疾患あてはめミス時（ストックから消去し、場の元の位置へ裏向きで戻す）
+        if(Number(slot.num) !== Number(activePair.num)) {
           stocks.splice(activeIdx, 1);
           state.memoryState.selectedStockIdx = 0;
 
           const returnIds = activePair.cards.map(c => c.id);
           state.memoryState.cards.forEach(c => {
-            if(c.num === activePair.num || returnIds.includes(c.id)) {
+            if(Number(c.num) === Number(activePair.num) || returnIds.includes(c.id)) {
               c.isMatched = false;
               c.isFlipped = false;
             }
           });
 
-          utils.showToast(`❌ 不一致！「${slot.title}」ではありません。カードが元の位置に戻りました`);
+          utils.showToast(`❌ 不一致！「${slot.title}」ではありません。カードが場に戻りました`);
           app.addLogMessage(`${state.me.name} が疾患あてはめに失敗し、ペア (Gr.${activePair.num}) が場に戻されました。`);
 
+          socket.emit('game_action', {
+            roomCode: state.room.code,
+            type: 'memory_sync',
+            mode: 'memory',
+            turnIdx: state.turnIdx,
+            memoryState: {
+              cards: state.memoryState.cards,
+              boardSlots: state.memoryState.boardSlots,
+              playerBoards: state.memoryState.playerBoards
+            }
+          });
+
           app.renderFullMemoryBoardModal();
+          app.renderMemoryGameTable();
+
           if(stocks.length === 0) {
             document.getElementById('modal-memory-board')?.classList.add('hidden');
-            if(state.memoryState.waitingForBoardPlacement) {
-              state.memoryState.waitingForBoardPlacement = false;
-              app.advanceMemoryTurnCounterclockwise();
-              return;
-            }
+            state.memoryState.waitingForBoardPlacement = false;
+            app.advanceMemoryTurnCounterclockwise();
           }
-          app.renderMemoryGameTable();
           return;
         }
 
@@ -2980,253 +3020,49 @@
         utils.showToast(`🎉 正解！「${slot.title}」の枠に2枚のカードをはめ込みました！`);
         app.addLogMessage(`${state.me.name} がボードの「${slot.title}」を完成させました！`);
 
-        app.renderFullMemoryBoardModal();
-
         const totalSlots = state.memoryState.boardSlots.length;
-        const filledCount = Object.keys(myBoard).length;
+        const filledCount = Object.keys(myBoard).filter(k => myBoard[k]?.filled).length;
         const remainingCards = state.memoryState.cards.filter(c => !c.isMatched).length;
-        if(filledCount >= totalSlots || (remainingCards === 0 && stocks.length === 0)) {
+        const isGameComplete = (filledCount >= totalSlots || (remainingCards === 0 && stocks.length === 0));
+
+        socket.emit('game_action', {
+          roomCode: state.room.code,
+          type: 'memory_sync',
+          mode: 'memory',
+          turnIdx: state.turnIdx,
+          gameEnded: isGameComplete,
+          memoryState: {
+            cards: state.memoryState.cards,
+            boardSlots: state.memoryState.boardSlots,
+            playerBoards: state.memoryState.playerBoards
+          }
+        });
+
+        app.renderFullMemoryBoardModal();
+        app.renderMemoryGameTable();
+
+        // 最後の1セットが埋まった場合は即座にモーダルを閉じてリザルトへ遷移
+        if(isGameComplete) {
           document.getElementById('modal-memory-board')?.classList.add('hidden');
           state.memoryState.waitingForBoardPlacement = false;
-          setTimeout(() => app.endMemoryGame(), 1000);
+          setTimeout(() => app.endMemoryGame(), 700);
           return;
         }
 
         if(stocks.length === 0) {
           document.getElementById('modal-memory-board')?.classList.add('hidden');
-          if(state.memoryState.waitingForBoardPlacement) {
-            state.memoryState.waitingForBoardPlacement = false;
-            app.advanceMemoryTurnCounterclockwise();
-            return;
-          }
-        }
-        app.renderMemoryGameTable();
-      },
-
-      processAiMemoryTurn: () => {
-        const currentP = state.players[state.turnIdx];
-        if (!currentP || !currentP.isAI) {
-          state.memoryState.isProcessingTurn = false;
-          return;
-        }
-
-        const unflipped = state.memoryState.cards.map((c, idx) => (!c.isFlipped && !c.isMatched) ? idx : null).filter(x => x !== null);
-        if(unflipped.length < 2) {
-          state.memoryState.isProcessingTurn = false;
-          return;
-        }
-
-        const idx1 = unflipped[Math.floor(Math.random() * unflipped.length)];
-        const card1 = state.memoryState.cards[idx1];
-        card1.isFlipped = true;
-        state.memoryState.selectedCardIndices.push(idx1);
-        app.renderMemoryGameTable();
-
-        socket.emit('game_action', {
-          roomCode: state.room.code,
-          type: 'memory_sync',
-          mode: 'memory',
-          turnIdx: state.turnIdx,
-          memoryState: {
-            cards: state.memoryState.cards,
-            boardSlots: state.memoryState.boardSlots,
-            playerBoards: state.memoryState.playerBoards
-          }
-        });
-
-        app.showMemoryPopupCard(card1, currentP, () => {
-          const remainingUnflipped = state.memoryState.cards.map((c, idx) => (!c.isFlipped && !c.isMatched) ? idx : null).filter(x => x !== null);
-          if(remainingUnflipped.length === 0) {
-            state.memoryState.isProcessingTurn = false;
-            return;
-          }
-          const idx2 = remainingUnflipped[Math.floor(Math.random() * remainingUnflipped.length)];
-          const card2 = state.memoryState.cards[idx2];
-          card2.isFlipped = true;
-          state.memoryState.selectedCardIndices.push(idx2);
-          app.renderMemoryGameTable();
-
-          socket.emit('game_action', {
-            roomCode: state.room.code,
-            type: 'memory_sync',
-            mode: 'memory',
-            turnIdx: state.turnIdx,
-            memoryState: {
-              cards: state.memoryState.cards,
-              boardSlots: state.memoryState.boardSlots,
-              playerBoards: state.memoryState.playerBoards
-            }
-          });
-
-          app.showMemoryPopupCard(card2, currentP, () => {
-            app.processMemoryPairResult(currentP);
-          });
-        });
-      },
-
-      toggleMemoryBoardModal: () => {
-        const modal = document.getElementById('modal-memory-board');
-        if(!modal) return;
-        modal.classList.toggle('hidden');
-        if(!modal.classList.contains('hidden')) {
-          app.renderFullMemoryBoardModal();
-        }
-      },
-
-      selectMatchedStock: (idx) => {
-        state.memoryState.selectedStockIdx = idx;
-        app.renderFullMemoryBoardModal();
-      },
-
-      renderFullMemoryBoardModal: () => {
-        const grid = document.getElementById('full-memory-board-grid');
-        const stockEl = document.getElementById('matched-stock-indicator');
-        const guideEl = document.getElementById('memory-board-guide-text');
-        if(!grid) return;
-        grid.innerHTML = '';
-
-        const myBoard = state.memoryState.playerBoards[state.me.id] || {};
-        const stocks = state.memoryState.matchedStock;
-        if(state.memoryState.selectedStockIdx >= stocks.length) {
-          state.memoryState.selectedStockIdx = Math.max(0, stocks.length - 1);
-        }
-        const activePair = stocks[state.memoryState.selectedStockIdx];
-
-        if(stockEl) {
-          stockEl.textContent = stocks.length > 0 
-            ? `未配置の獲得ペア: ${stocks.length} 組` 
-            : `獲得ストック: なし（場のカードをめくってペアを揃えてください）`;
-        }
-
-        if(guideEl) {
-          if(activePair) {
-            guideEl.innerHTML = `
-              <div class="bg-slate-950 border-2 border-amber-500/80 rounded-2xl p-3 mb-2 shadow-lg">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs font-extrabold text-amber-400">👇 現在選択中のペア（この2枚が示す疾患枠を下から選んでクリック！）</span>
-                  ${stocks.length > 1 ? `<div class="flex gap-1">${stocks.map((st, i) => `<button onclick="app.selectMatchedStock(${i})" class="px-2 py-0.5 rounded text-[10px] font-bold ${i===state.memoryState.selectedStockIdx ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300'}">ペア${i+1}</button>`).join('')}</div>` : ''}
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
-                  <div class="bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-slate-200"><span class="text-cyan-400 font-bold mr-1">[カード1]</span>${utils.escapeHtml(activePair.cards[0].desc)}</div>
-                  <div class="bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-slate-200"><span class="text-cyan-400 font-bold mr-1">[カード2]</span>${utils.escapeHtml(activePair.cards[1].desc)}</div>
-                </div>
-              </div>
-            `;
-          } else {
-            guideEl.innerHTML = `場（テーブル）で問題文カードを2枚揃えると、ここにペアがストックされ、該当する疾患枠に2枚1組ではめ込むことができます。`;
-          }
-        }
-
-        state.memoryState.boardSlots.forEach((slot, sIdx) => {
-          const isFilled = myBoard[sIdx]?.filled;
-          const matchedCards = myBoard[sIdx]?.cards || [];
-          
-          grid.innerHTML += `
-            <div class="p-3 rounded-2xl border-2 ${isFilled ? 'border-emerald-500 bg-slate-950' : (activePair ? 'border-slate-700 bg-slate-800/90 hover:border-amber-400 cursor-pointer hover:scale-[1.02]' : 'border-slate-800 bg-slate-900/60 opacity-75')} flex flex-col justify-between transition shadow-md" ${!isFilled && activePair ? `onclick="app.placeCardToBoardSlot(${sIdx})"` : ''}>
-              <div class="flex justify-between items-center mb-2 border-b border-slate-800 pb-1.5">
-                <span class="text-xs font-extrabold ${isFilled ? 'text-emerald-300' : 'text-white'}">${utils.escapeHtml(slot.title)}</span>
-                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${isFilled ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold' : 'bg-slate-900 text-slate-400'}">${isFilled ? '✅ 2枚格納済' : '空き (0/2枚)'}</span>
-              </div>
-              ${isFilled ? `
-                <div class="space-y-1 text-[10px] text-slate-300 bg-slate-900/90 p-2 rounded-xl border border-emerald-500/30">
-                  <div class="truncate">・${utils.escapeHtml(matchedCards[0]?.desc || '')}</div>
-                  <div class="truncate">・${utils.escapeHtml(matchedCards[1]?.desc || '')}</div>
-                </div>
-              ` : `
-                <div class="h-12 rounded-xl flex items-center justify-center text-xs font-bold ${activePair ? 'text-amber-300 bg-amber-950/30 border border-dashed border-amber-500/50' : 'text-slate-500 bg-slate-950 border border-slate-800'}">
-                  ${activePair ? '📥 この疾患にペアをはめ込む' : 'ペア未獲得'}
-                </div>
-              `}
-            </div>
-          `;
-        });
-      },
-
-      placeCardToBoardSlot: (sIdx) => {
-        const stocks = state.memoryState.matchedStock;
-        if(stocks.length === 0) return utils.showToast('配置できる獲得ペアがありません');
-        
-        const slot = state.memoryState.boardSlots[sIdx];
-        const myBoard = state.memoryState.playerBoards[state.me.id];
-        if(myBoard[sIdx]?.filled) return utils.showToast('この疾患枠はすでに埋まっています');
-
-        const activeIdx = state.memoryState.selectedStockIdx || 0;
-        const activePair = stocks[activeIdx];
-        if(!activePair) return;
-
-        // ❌ 疾患あてはめミス時（回答権1回のみ：ストックから消去し、場の元の位置へ裏向きで戻す）
-        if(slot.num !== activePair.num) {
-          stocks.splice(activeIdx, 1);
-          state.memoryState.selectedStockIdx = 0;
-
-          const returnIds = activePair.cards.map(c => c.id);
-          state.memoryState.cards.forEach(c => {
-            if(c.num === activePair.num || returnIds.includes(c.id)) {
-              c.isMatched = false;
-              c.isFlipped = false;
-            }
-          });
-
-          utils.showToast(`❌ 不一致！「${slot.title}」ではありません。カードが元の位置に戻りました`);
-          app.addLogMessage(`${state.me.name} が疾患あてはめに失敗し、ペア (Gr.${activePair.num}) が場に戻されました。`);
-
-          socket.emit('game_action', {
-            roomCode: state.room.code,
-            type: 'memory_sync',
-            mode: 'memory',
-            turnIdx: state.turnIdx,
-            memoryState: {
-              cards: state.memoryState.cards,
-              boardSlots: state.memoryState.boardSlots,
-              playerBoards: state.memoryState.playerBoards
-            }
-          });
-
-          app.renderFullMemoryBoardModal();
-          app.renderMemoryGameTable();
-          if(stocks.length === 0) {
-            document.getElementById('modal-memory-board')?.classList.add('hidden');
-          }
-          return;
-        }
-
-        // ⭕ 正解時
-        stocks.splice(activeIdx, 1);
-        state.memoryState.selectedStockIdx = 0;
-        const myP = state.players.find(p => p.id === state.me.id);
-        myBoard[sIdx] = { filled: true, color: myP?.color || '#38bdf8', cards: activePair.cards };
-
-        utils.showToast(`🎉 正解！「${slot.title}」の枠に2枚のカードをはめ込みました！`);
-        app.addLogMessage(`${state.me.name} がボードの「${slot.title}」を完成させました！`);
-        
-        socket.emit('game_action', {
-          roomCode: state.room.code,
-          type: 'memory_sync',
-          mode: 'memory',
-          turnIdx: state.turnIdx,
-          memoryState: {
-            cards: state.memoryState.cards,
-            boardSlots: state.memoryState.boardSlots,
-            playerBoards: state.memoryState.playerBoards
-          }
-        });
-
-        app.renderFullMemoryBoardModal();
-        app.renderMemoryGameTable();
-
-        const totalSlots = state.memoryState.boardSlots.length;
-        const filledCount = Object.keys(myBoard).length;
-        const remainingCards = state.memoryState.cards.filter(c => !c.isMatched).length;
-        if(filledCount >= totalSlots || (remainingCards === 0 && stocks.length === 0)) {
-          setTimeout(() => app.endMemoryGame(), 1000);
+          state.memoryState.waitingForBoardPlacement = false;
+          app.advanceMemoryTurnCounterclockwise();
         }
       },
 
       endMemoryGame: () => {
         if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
+        state.phase = 'ended';
         const scores = state.players.map(p => {
           const b = state.memoryState.playerBoards[p.id] || {};
-          return { id: p.id, count: Object.keys(b).length };
+          const cnt = Object.keys(b).filter(k => b[k]?.filled).length;
+          return { id: p.id, count: cnt };
         });
         scores.sort((a, b) => b.count - a.count);
         state.ranks = scores.map(s => s.id);
@@ -3358,7 +3194,7 @@
         endTurnBtn?.classList.add('hidden');
 
         if (currentP && currentP.id === state.me.id) {
-          if(banner) banner.innerHTML = `<span class="text-cyan-400 font-bold">${utils.escapeHtml(targetP?.name || '')}</span> からカードを引いてください`;
+          if(banner) banner.innerHTML = `<span class="text-cyan-400 font-bold">${utils.escapeHtml(targetP?.name || '')}</span> の「?」カードをタップして引いてください`;
           let timeLeft = state.config.turnTimeLimit;
           const displayTime = () => { if(subTimer) subTimer.textContent = timeLeft >= 900 ? '無制限' : `残り ${timeLeft} 秒`; };
           displayTime();
@@ -3445,7 +3281,7 @@
           if(app.checkClears()) return;
           app.nextTurn();
         } else if (isMyTurn) {
-          if(banner) banner.innerHTML = `ペアがあれば破棄し、右上の<span class="text-amber-400 font-bold">ターン終了</span>を押してください`;
+          if(banner) banner.innerHTML = `ペアがあれば破棄し、<span class="text-amber-400 font-bold">ターン終了</span>をタップしてください`;
           endTurnBtn?.classList.remove('hidden');
           
           let timeLeft = state.config.turnTimeLimit;
@@ -3574,7 +3410,6 @@
       
       checkClears: () => {
         if (state.phase !== 'playing') return false;
-        let anyoneCleared = false;
         state.players.forEach(p => {
           if(!p.isCleared && p.hand.length === 0) {
             p.isCleared = true;
@@ -3582,7 +3417,6 @@
             p.rank = state.ranks.indexOf(p.id) + 1;
             app.addLogMessage(`🎉 ${p.name} があがりました（${p.rank}位）`);
             utils.showToast(`🎉 ${p.name} あがり（${p.rank}位）`);
-            anyoneCleared = true;
           }
         });
         
@@ -3701,14 +3535,14 @@
           const isTgt = (isMyTurn && targetId === p.id);
           const pColor = p.color || '#38bdf8';
           
-          let h = `<div class="p-3 rounded-2xl border flex flex-col justify-between ${isCur?'bg-cyan-950/40 border-cyan-500 shadow-md':isTgt && !state.hasDrawnThisTurn?'bg-amber-950/40 border-amber-500/80 animate-pulse':'bg-slate-900/80 border-slate-800'}">
+          let h = `<div class="p-2.5 sm:p-3 rounded-2xl border flex flex-col justify-between ${isCur?'bg-cyan-950/40 border-cyan-500 shadow-md':isTgt && !state.hasDrawnThisTurn?'bg-amber-950/40 border-amber-500/80 animate-pulse':'bg-slate-900/80 border-slate-800'}">
                     <div class="flex items-center justify-between"><div class="flex items-center gap-1.5 truncate"><span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${pColor}"></span><span class="text-xs font-bold text-white truncate">${utils.escapeHtml(p.name)}</span></div><span class="text-[10px] bg-slate-800 px-2 rounded-full text-slate-300 font-mono flex-shrink-0">${p.hand.length}枚</span></div>`;
           if (p.isCleared) h += '<span class="text-xs font-bold text-emerald-400 mt-2">🎉 クリア</span>';
           else {
-            h += '<div class="flex flex-wrap gap-1 mt-2">';
+            h += '<div class="flex flex-wrap gap-1.5 mt-2">';
             p.hand.forEach((_, cIdx) => { 
               if(isTgt && !state.hasDrawnThisTurn) {
-                h += `<button onclick="this.disabled=true; app.drawCardFrom('${p.id}', ${cIdx})" class="w-6 h-9 bg-amber-700 border-2 border-amber-300 rounded-lg text-white font-bold text-[10px] shadow hover:scale-110 active:scale-95 transition">?</button>`;
+                h += `<button onclick="this.disabled=true; app.drawCardFrom('${p.id}', ${cIdx})" class="w-7 h-10 bg-amber-700 border-2 border-amber-300 rounded-lg text-white font-bold text-xs shadow active:scale-90 transition">?</button>`;
               } else {
                 h += `<div class="w-5 h-8 bg-slate-800 border border-slate-700 rounded-md"></div>`;
               }
@@ -3786,9 +3620,9 @@
         const btnDiscard = document.getElementById('btn-discard-pair');
         if (btnDiscard) {
             if (state.selectedMyCards.length === 2) {
-                btnDiscard.className = 'bg-cyan-600 text-white text-xs font-extrabold px-3 py-2 rounded-xl hover:scale-105 transition duration-300 shadow-[0_0_15px_rgba(8,145,178,0.6)] cursor-pointer';
+                btnDiscard.className = 'bg-cyan-600 text-white text-xs font-extrabold px-3.5 py-2.5 rounded-xl active:scale-95 transition duration-300 shadow-[0_0_15px_rgba(8,145,178,0.6)] cursor-pointer';
             } else {
-                btnDiscard.className = 'bg-slate-800 text-slate-500 text-xs font-extrabold px-3 py-2 rounded-xl border border-slate-700 transition duration-300 opacity-60 pointer-events-none';
+                btnDiscard.className = 'bg-slate-800 text-slate-500 text-xs font-extrabold px-3.5 py-2.5 rounded-xl border border-slate-700 transition duration-300 opacity-60 pointer-events-none';
             }
         }
         if (window.lucide) lucide.createIcons();
@@ -3834,8 +3668,8 @@
         const o = document.getElementById('jinuki-quiz-options'); 
         if(!o) return;
         o.innerHTML = '';
-        for (let g=1; g<=13; g++) o.innerHTML += `<button onclick="app.submitQuiz(${g})" class="p-2 bg-slate-800 border border-slate-700 hover:bg-amber-600 hover:border-amber-500 text-white font-mono text-xs rounded-xl transition shadow-sm">Gr.${g}</button>`;
-        o.innerHTML += `<button onclick="app.submitQuiz('joker')" class="p-2 bg-slate-800 border border-slate-700 hover:bg-rose-600 hover:border-rose-500 text-rose-300 font-bold text-xs rounded-xl transition shadow-sm">⚡</button>`;
+        for (let g=1; g<=13; g++) o.innerHTML += `<button onclick="app.submitQuiz(${g})" class="p-2.5 bg-slate-800 border border-slate-700 hover:bg-amber-600 hover:border-amber-500 text-white font-mono text-xs rounded-xl transition shadow-sm">Gr.${g}</button>`;
+        o.innerHTML += `<button onclick="app.submitQuiz('joker')" class="p-2.5 bg-slate-800 border border-slate-700 hover:bg-rose-600 hover:border-rose-500 text-rose-300 font-bold text-xs rounded-xl transition shadow-sm">⚡</button>`;
         
         const r = document.getElementById('jinuki-quiz-result');
         if(r) r.classList.add('hidden');
@@ -3892,7 +3726,7 @@
         const btnClose = document.getElementById('btn-close-jinuki-quiz');
         if(btnClose) {
           btnClose.classList.remove('hidden');
-          btnClose.textContent = '10秒後に自動でリザルトへ移動します...';
+          btnClose.textContent = 'リザルトを確認する';
         }
 
         if(state.timers.quizAutoClose) clearTimeout(state.timers.quizAutoClose);
@@ -3914,7 +3748,8 @@
         if(state.mode === 'memory' && state.ranks.length === 0) {
           const scores = state.players.map(p => {
             const b = state.memoryState.playerBoards[p.id] || {};
-            return { id: p.id, count: Object.keys(b).length };
+            const cnt = Object.keys(b).filter(k => b[k]?.filled).length;
+            return { id: p.id, count: cnt };
           });
           scores.sort((a, b) => b.count - a.count);
           state.ranks = scores.map(s => s.id);
@@ -3923,28 +3758,27 @@
           });
         }
 
-        // 神経衰弱のときはボード一覧が見やすいようにリザルト枠の最大幅を広げる
         const resultSec = document.getElementById('view-result');
         if(resultSec) {
           resultSec.className = state.mode === 'memory'
-            ? 'w-full max-w-4xl flex flex-col items-center py-6 hidden animate-fade-in'
-            : 'w-full max-w-xl flex flex-col items-center py-6 hidden animate-fade-in';
+            ? 'w-full max-w-4xl flex flex-col items-center py-4 sm:py-6 hidden animate-fade-in'
+            : 'w-full max-w-xl flex flex-col items-center py-4 sm:py-6 hidden animate-fade-in';
         }
 
         const myP = state.players.find(p=>p.id===state.me.id);
         const iconBox = document.getElementById('result-icon-container'), badge = document.getElementById('result-badge-label'), title = document.getElementById('result-title');
         
         if (myP?.rank === 1 && !(state.mode === 'jack' && myP?.isBusted)) {
-          if(iconBox) { iconBox.className='w-20 h-20 rounded-3xl flex items-center justify-center mb-4 bg-amber-500/20 text-amber-300 border-2 border-amber-400 mx-auto'; iconBox.innerHTML='<i data-lucide="trophy" class="w-12 h-12"></i>'; }
+          if(iconBox) { iconBox.className='w-16 h-16 sm:w-20 sm:h-20 rounded-3xl flex items-center justify-center mb-4 bg-amber-500/20 text-amber-300 border-2 border-amber-400 mx-auto'; iconBox.innerHTML='<i data-lucide="trophy" class="w-10 h-10 sm:w-12 sm:h-12"></i>'; }
           if(badge) { badge.className='text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block bg-amber-900/60 text-amber-300 border border-amber-600'; badge.textContent='1ST PLACE'; }
           if(title) title.textContent = state.mode === 'jack' ? '99ジャック 制覇！' : state.mode === 'memory' ? '神経衰弱バトル 優勝！' : '最速クリア達成！'; 
           if(window.confetti) confetti();
         } else if (state.mode === 'jack' ? myP?.isBusted : myP?.rank === state.players.length) {
-          if(iconBox) { iconBox.className='w-20 h-20 rounded-3xl flex items-center justify-center mb-4 bg-rose-500/20 text-rose-400 border-2 border-rose-500 mx-auto'; iconBox.innerHTML='<i data-lucide="zap-off" class="w-12 h-12"></i>'; }
+          if(iconBox) { iconBox.className='w-16 h-16 sm:w-20 sm:h-20 rounded-3xl flex items-center justify-center mb-4 bg-rose-500/20 text-rose-400 border-2 border-rose-500 mx-auto'; iconBox.innerHTML='<i data-lucide="zap-off" class="w-10 h-10 sm:w-12 sm:h-12"></i>'; }
           if(badge) { badge.className='text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block bg-rose-900/60 text-rose-300 border border-rose-600'; badge.textContent=state.mode==='babanuki'?'VF保持':state.mode==='jack'?'OVER 99.00 (CPA)':state.mode==='memory'?'FINISH':'孤立カード保持'; }
           if(title) title.textContent=state.mode==='babanuki'?'VFを回避できず！':state.mode==='jack'?'99超過…急変（バースト）':'作戦完了';
         } else {
-          if(iconBox) { iconBox.className='w-20 h-20 rounded-3xl flex items-center justify-center mb-4 bg-cyan-500/20 text-cyan-300 border-2 border-cyan-400 mx-auto'; iconBox.innerHTML='<i data-lucide="award" class="w-12 h-12"></i>'; }
+          if(iconBox) { iconBox.className='w-16 h-16 sm:w-20 sm:h-20 rounded-3xl flex items-center justify-center mb-4 bg-cyan-500/20 text-cyan-300 border-2 border-cyan-400 mx-auto'; iconBox.innerHTML='<i data-lucide="award" class="w-10 h-10 sm:w-12 sm:h-12"></i>'; }
           if(badge) { badge.className='text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block bg-cyan-900/60 text-cyan-300 border border-cyan-600'; badge.textContent='CLEAR'; }
           if(title) title.textContent=`無事に完了！(${myP?.rank}位)`;
         }
@@ -3952,7 +3786,7 @@
         const list = document.getElementById('result-ranking-list'); 
         if(list) {
           list.innerHTML = '';
-          list.innerHTML += `<div class="text-xs font-bold text-slate-400 mb-1 border-b border-slate-800 pb-1">🏆 ${state.mode === 'jack' ? '99ジャック 最終順位（98.99に近い順 / 99超は最下位）' : state.mode === 'memory' ? '神経衰弱 最終順位（完成させた疾患数順）' : 'あがり順位表彰'}</div>`;
+          list.innerHTML += `<div class="text-xs font-bold text-slate-400 mb-1 border-b border-slate-800 pb-1">🏆 ${state.mode === 'jack' ? '99ジャック 最終順位' : state.mode === 'memory' ? '神経衰弱 最終順位（完成疾患数順）' : 'あがり順位表彰'}</div>`;
           state.ranks.forEach((pId, idx) => {
             const p = state.players.find(x=>x.id===pId); if(!p) return;
             let rightLabel = idx===0 ? 'WINNER' : 'CLEAR';
@@ -3961,7 +3795,7 @@
             if(state.mode === 'jack') {
               const scoreStr = utils.formatJackInternal(p.totalInternal);
               if(p.isBusted) {
-                rightLabel = `💀 ${scoreStr} (99超過・最下位)`;
+                rightLabel = `💀 ${scoreStr} (99超過)`;
                 rightColor = 'text-rose-400';
               } else {
                 rightLabel = `合計: ${scoreStr} / 98.99`;
@@ -3970,14 +3804,13 @@
             } else if(state.mode === 'memory') {
               const b = state.memoryState.playerBoards[p.id] || {};
               const filledCnt = Object.keys(b).filter(k => b[k]?.filled).length;
-              rightLabel = `完成疾患: ${filledCnt} / ${state.memoryState.boardSlots.length} 枠`;
+              rightLabel = `完成: ${filledCnt} / ${state.memoryState.boardSlots.length} 枠`;
               rightColor = idx===0 ? 'text-amber-400' : 'text-blue-300';
             }
 
             list.innerHTML += `<div class="flex items-center justify-between p-2.5 rounded-xl border ${p.id===state.me.id?'bg-cyan-950/40 border-cyan-500/60':'bg-slate-900 border-slate-800'}"><div class="flex items-center gap-2"><span class="text-lg w-6 text-center">${['🥇','🥈','🥉','🏅','🏅','🏅','🏅','⚡'][idx]||`${idx+1}`}</span><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${p.color || '#38bdf8'}"></span><span class="text-xs font-bold text-white">${utils.escapeHtml(p.name)}${p.id===state.me.id?' (あなた)':''}</span></div><span class="text-[11px] font-mono font-bold ${rightColor}">${rightLabel}</span></div>`;
           });
 
-          // 🆕 GAME 02（神経衰弱）：全プレイヤー（自分＆相手）の完成ボード一覧表示
           if (state.mode === 'memory') {
             list.innerHTML += `
               <div class="text-xs font-bold text-blue-300 mt-5 mb-2 border-b border-slate-800 pb-1.5 flex items-center justify-between">
@@ -3986,7 +3819,7 @@
               </div>
             `;
 
-            let boardsHtml = '<div class="space-y-4 max-h-[55vh] overflow-y-auto custom-scrollbar pr-1">';
+            let boardsHtml = '<div class="space-y-4 max-h-[50vh] overflow-y-auto custom-scrollbar pr-1">';
             state.ranks.forEach((pId, idx) => {
               const p = state.players.find(x => x.id === pId);
               if(!p) return;
@@ -3996,7 +3829,7 @@
                 .map((slot, sIdx) => ({ slot, data: pBoard[sIdx] }))
                 .filter(item => item.data && item.data.filled);
 
-              let slotsGridHtml = '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mt-2">';
+              let slotsGridHtml = '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mt-2">';
               state.memoryState.boardSlots.forEach((slot, sIdx) => {
                 const entry = pBoard[sIdx];
                 const isFilled = entry?.filled;
@@ -4032,7 +3865,7 @@
                       <span class="w-3 h-3 rounded-full" style="background-color: ${pColor}; box-shadow: 0 0 8px ${pColor}"></span>
                       <span class="text-xs sm:text-sm font-extrabold text-white">${idx + 1}位：${utils.escapeHtml(p.name)} ${p.id === state.me.id ? '<span class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-700 px-2 py-0.5 rounded-full ml-1">あなた</span>' : ''}</span>
                     </div>
-                    <span class="text-xs font-mono font-bold text-emerald-400">格納済み: ${filledSlots.length} / ${state.memoryState.boardSlots.length} 疾患</span>
+                    <span class="text-xs font-mono font-bold text-emerald-400">格納済: ${filledSlots.length}/${state.memoryState.boardSlots.length}</span>
                   </div>
                   ${slotsGridHtml}
                 </div>
@@ -4061,7 +3894,7 @@
       rematch: () => state.room.isSolo ? app.startSoloAI() : app.returnToPortal(),
 
       // ==========================================
-      // 管理室（CMS）ロジック（GAME 04 編集対応）
+      // 管理室（CMS）ロジック
       // ==========================================
       adminClicks: 0, adminTimer: null,
       openAdmin: () => { 
@@ -4219,7 +4052,7 @@
         utils.showToast('<i data-lucide="rotate-ccw" class="w-4 h-4 inline mr-1"></i>初期化し全端末に同期しました'); 
         if(window.lucide) lucide.createIcons(); 
       }
-    }; // ← appオブジェクトの閉じ括弧
+    };
 
     document.getElementById('secret-admin-trigger')?.addEventListener('click', () => {
       app.adminClicks++;
