@@ -144,16 +144,19 @@ io.on('connection', (socket) => {
     io.emit('receive_chat', { name, message });
   });
 
+  // ─── ここを追加・確認 ───
   socket.on('leave_room', (data) => {
     const { roomCode } = data;
     const room = rooms[roomCode];
     if (room && room.players) {
+      // 退出したプレイヤーをリストから除外
       room.players = room.players.filter(p => p.id !== socket.id);
       socket.leave(roomCode);
 
       if (room.players.length === 0) {
         delete rooms[roomCode];
       } else {
+        // 残ったメンバーへ最新のプレイヤー一覧を即時同期
         io.to(roomCode).emit('update_room', {
           players: room.players,
           discardPile: room.discardPile,
