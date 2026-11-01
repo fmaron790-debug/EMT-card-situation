@@ -1495,9 +1495,9 @@
             app.advanceMemoryTurnCounterclockwise();
           }
         }, 1000);
-      },   // ← ここで関数をしっかり閉じる
+      },
 
-      // 🔽 ここから下に新機能のプロパティとメソッドを置く
+      // 🔽 ここから下が新機能のプロパティとメソッド（appオブジェクトの中の正しい位置）
       lastOpponentFlippedIdx: null,
       updateMobileOpponentArrow: () => {
         const upEl = document.getElementById('edge-arrow-up');
@@ -1516,7 +1516,6 @@
 
         const currentP = state.players[state.turnIdx];
         const isOpponentTurn = currentP && (currentP.isAI || currentP.id !== state.me.id);
-        // ... (以下続く)
 
         const flippedIndices = state.memoryState.cards
           .map((c, i) => (c.isFlipped && !c.isMatched) ? i : null)
