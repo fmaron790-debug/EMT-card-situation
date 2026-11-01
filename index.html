@@ -623,15 +623,38 @@
                 <div class="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-600"></div>
               </label>
             </div>
+
+            <!-- 🆕 オープンルーム / クローズドルーム 切替スイッチ -->
+            <div class="flex items-center justify-between pt-2 border-t border-slate-800/60">
+              <div>
+                <span class="text-xs font-bold text-emerald-300 block">オープンルームとして公開募集する</span>
+                <span class="text-[10px] text-slate-400">※OFF時は6桁コードを知っている人のみ参加できるクローズドルームになります</span>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input id="config-is-open-room" type="checkbox" checked class="sr-only peer">
+                <div class="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+              </label>
+            </div>
           </div>
+
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             <button onclick="app.createRoom()" class="w-full bg-rose-700 hover:bg-rose-600 text-white font-bold py-3.5 px-4 rounded-xl transition shadow-[0_0_15px_rgba(225,29,72,0.4)]">ルーム作成</button>
             <button onclick="app.showJoinModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3.5 px-4 rounded-xl border border-slate-700 transition">6桁コードで参加</button>
           </div>
-          <div class="border-t border-slate-800/80 pt-4">
-            <button id="btn-solo-ai" onclick="app.startSoloAI()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3.5 px-4 rounded-xl transition shadow-[0_0_15px_rgba(8,145,178,0.4)]">すぐ遊ぶ（AI演習）</button>
+
+          <!-- 🆕 現在募集中のオープンルーム一覧 -->
+          <div class="mb-4 bg-slate-950/90 border border-slate-800 rounded-2xl p-3.5">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                現在募集中のオープンルーム
+              </span>
+              <span class="text-[10px] text-slate-500 font-mono">ワンタップで合流</span>
+            </div>
+            <div id="open-rooms-list" class="space-y-2 max-h-36 overflow-y-auto custom-scrollbar pr-1">
+              <div class="text-[11px] text-slate-500 text-center py-2">現在募集中のオープンルームはありません</div>
+            </div>
           </div>
-        </div>
       </section>
 
       <!-- VIEW 3: WAITING ROOM -->
@@ -640,7 +663,15 @@
           <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
             <div>
               <span class="text-xs text-slate-400">出動待機室</span>
-              <h2 class="text-xl font-bold text-white flex items-center gap-2"><span>CODE:</span><span id="room-code-display" class="font-mono-num text-cyan-400 font-extrabold text-2xl tracking-wider">------</span></h2>
+              <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <span>CODE:</span>
+                <span id="room-code-display" class="font-mono-num text-cyan-400 font-extrabold text-2xl tracking-wider">------</span>
+              </h2>
+            </div>
+            <!-- 🆕 待機室内でオープン/クローズドをいつでも切り替えられるバッジ＆ボタン -->
+            <div class="flex flex-col items-end gap-1">
+              <span id="room-open-status-badge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700">🌐 オープン公開中</span>
+              <button id="btn-toggle-room-open" onclick="app.toggleRoomOpenStatus()" class="hidden text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 transition">クローズドに変更</button>
             </div>
           </div>
           <div class="flex items-center justify-between text-[11px] bg-slate-950 px-3 py-2 rounded-xl border border-slate-800 mb-4 text-slate-300 font-mono">
@@ -1238,6 +1269,16 @@
     });
 
     socket.on('receive_chat', (data) => {
+socket.on('receive_chat', (data) => {
+      // 🆕 オープンルームのブロードキャスト信号を受信した場合は一覧を更新してチャット表示はスキップ
+      if(data && typeof data.message === 'string' && data.message.startsWith('__SYS_ROOM__:')) {
+        try {
+          const payload = JSON.parse(data.message.substring('__SYS_ROOM__:'.length));
+          app.handleOpenRoomSignal(payload);
+        } catch(e){}
+        return;
+      }
+
       const chatContent = document.getElementById('tab-content-chat');
       const badgeDot = document.getElementById('badge-dot-chat');
       if(chatContent) {
@@ -1577,6 +1618,83 @@
         if(maxP < 4 && teamMode) teamMode.value = 'solo';
       },
 
+      r// 🆕 オープンルーム信号の送受信・一覧描画・ワンタップ参加
+      handleOpenRoomSignal: (payload) => {
+        if(!payload || !payload.code) return;
+        if(payload.action === 'close' || !payload.isOpen) {
+          delete state.openRooms[payload.code];
+        } else {
+          state.openRooms[payload.code] = { ...payload, updatedAt: Date.now() };
+        }
+        app.renderOpenRoomsList();
+      },
+
+      broadcastRoomSignal: (action = 'update') => {
+        if(!state.room.isHost || state.room.isSolo || !state.room.code) return;
+        const payload = {
+          action: (action === 'close' || !state.room.isOpen || state.phase !== 'waiting') ? 'close' : 'update',
+          code: state.room.code,
+          hostName: state.me.name,
+          mode: state.mode,
+          curPlayers: state.players.length,
+          maxPlayers: state.config.maxPlayers,
+          isOpen: !!state.room.isOpen
+        };
+        socket.emit('send_chat', {
+          roomCode: 'GLOBAL',
+          name: '__SYS__',
+          message: '__SYS_ROOM__:' + JSON.stringify(payload)
+        });
+      },
+
+      renderOpenRoomsList: () => {
+        const box = document.getElementById('open-rooms-list');
+        if(!box) return;
+        const now = Date.now();
+        const modeNames = { babanuki: 'GAME 01: ババ抜き', memory: 'GAME 02: 神経衰弱', jinuki: 'GAME 03: ジジ抜き', jack: 'GAME 04: 99ジャック' };
+        const activeList = Object.values(state.openRooms).filter(r => (now - r.updatedAt < 15000) && r.isOpen && r.curPlayers < r.maxPlayers && r.mode === state.mode);
+
+        if(activeList.length === 0) {
+          box.innerHTML = '<div class="text-[11px] text-slate-500 text-center py-2">現在このモードで募集中のオープンルームはありません</div>';
+          return;
+        }
+
+        box.innerHTML = '';
+        activeList.forEach(r => {
+          box.innerHTML += `
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-emerald-500/40 hover:border-emerald-400 transition">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-extrabold text-white">${utils.escapeHtml(r.hostName)} の部隊</span>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700">${r.curPlayers}/${r.maxPlayers}名</span>
+                </div>
+                <div class="text-[10px] text-slate-400 font-mono mt-0.5">${modeNames[r.mode] || r.mode} / CODE: ${utils.escapeHtml(r.code)}</div>
+              </div>
+              <button onclick="app.joinOpenRoomDirect('${utils.escapeHtml(r.code)}')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl transition shadow-md">参加する</button>
+            </div>
+          `;
+        });
+      },
+
+      joinOpenRoomDirect: (code) => {
+        const codeInput = document.getElementById('input-join-code');
+        if(codeInput) codeInput.value = code;
+        const joinNameInput = document.getElementById('input-join-player-name');
+        const lobbyName = document.getElementById('input-player-name')?.value.trim();
+        if(joinNameInput && lobbyName) joinNameInput.value = lobbyName;
+        app.executeJoin();
+      },
+
+      toggleRoomOpenStatus: () => {
+        if(!state.room.isHost) return;
+        state.room.isOpen = !state.room.isOpen;
+        state.config.isOpenRoom = state.room.isOpen;
+        app.updateRoomUI();
+        app.broadcastRoomSignal(state.room.isOpen ? 'update' : 'close');
+        socket.emit('update_room', { roomCode: state.room.code, players: state.players, config: state.config });
+        utils.showToast(state.room.isOpen ? '🌐 オープンルーム（公開募集）に変更しました' : '🔒 クローズドルーム（コード限定）に変更しました');
+      },
+
       readConfig: () => {
         state.config.mode = state.mode;
         state.config.maxPlayers = parseInt(document.getElementById('config-max-players')?.value || 4, 10);
@@ -1587,6 +1705,7 @@
         state.config.showMemoryDisease = document.getElementById('config-memory-show-disease')?.checked ?? true;
         state.config.showGroupNum = document.getElementById('config-show-group-num')?.checked ?? true;
         state.config.jackShowTotal = document.getElementById('config-jack-show-total')?.checked ?? true;
+        state.config.isOpenRoom = document.getElementById('config-is-open-room')?.checked ?? true;
         state.me.name = document.getElementById('input-player-name')?.value.trim() || '救急隊員';
         try { localStorage.setItem('ems_player_name', state.me.name); } catch(e){}
       },
@@ -1598,6 +1717,21 @@
         if(maxEl) maxEl.innerHTML = `最大: <strong class="text-cyan-400">${state.config.maxPlayers}名</strong>`;
         if(timerEl) timerEl.innerHTML = state.mode === 'jack' ? `クイズ制限: <strong class="text-amber-400">60秒</strong>` : `手番制限: <strong class="text-amber-400">${state.config.turnTimeLimit>=900?'無制限':state.config.turnTimeLimit+'秒'}</strong>`;
         if(aiEl) aiEl.innerHTML = state.mode === 'jack' ? `合計表示: <strong class="text-teal-400">${state.config.jackShowTotal?'表示':'非表示(暗算)'}</strong>` : `AI自動: <strong class="text-emerald-400">${state.config.autoFillAI?'オン':'オフ'}</strong>`;
+
+        // 🆕 オープン / クローズド状態バッジと切替ボタンの更新
+        const isOpen = state.room.isHost ? !!state.room.isOpen : !!(state.config.isOpenRoom ?? true);
+        const statusBadge = document.getElementById('room-open-status-badge');
+        const toggleBtn = document.getElementById('btn-toggle-room-open');
+        if(statusBadge) {
+          statusBadge.textContent = isOpen ? '🌐 オープン公開中' : '🔒 クローズド (コード限定)';
+          statusBadge.className = isOpen
+            ? 'text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700'
+            : 'text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-950 text-amber-300 border border-amber-700';
+        }
+        if(toggleBtn) {
+          toggleBtn.classList.toggle('hidden', !state.room.isHost);
+          toggleBtn.textContent = isOpen ? '🔒 クローズドに変更' : '🌐 オープンに変更';
+        }
         
         const list = document.getElementById('room-members-list'); 
         if(!list) return;
@@ -1615,7 +1749,14 @@
         app.clearAllTimers(); state.phase = 'waiting';
         app.readConfig();
         if (state.mode === 'jack') state.config.autoFillAI = false;
-        state.room = { code: Math.floor(100000 + Math.random() * 900000).toString(), isHost: true, isSolo: false };
+
+        // 🆕 既存のオープンルームと絶対に重複しない6桁コードを生成
+        let newCode = '';
+        do {
+          newCode = Math.floor(100000 + Math.random() * 900000).toString();
+        } while (state.openRooms && state.openRooms[newCode]);
+
+        state.room = { code: newCode, isHost: true, isSolo: false, isOpen: !!state.config.isOpenRoom };
         const codeDisplay = document.getElementById('room-code-display');
         if(codeDisplay) codeDisplay.textContent = state.room.code;
         const myColor = pickUnusedColor([]);
@@ -1628,6 +1769,17 @@
           document.getElementById('host-ai-controls')?.classList.remove('hidden');
         }
         app.updateRoomUI(); app.showScreen('view-room');
+
+        // 🆕 待機中は4秒おきにオープンルーム情報をロビーへ配信
+        app.broadcastRoomSignal('update');
+        if(state.timers.openRoomBeacon) clearInterval(state.timers.openRoomBeacon);
+        state.timers.openRoomBeacon = setInterval(() => {
+          if(state.phase === 'waiting' && state.room.isHost) {
+            app.broadcastRoomSignal('update');
+          } else {
+            clearInterval(state.timers.openRoomBeacon);
+          }
+        }, 4000);
       },
 
       startSoloAI: () => {
@@ -3447,6 +3599,8 @@
         if(state.timers.quizAutoClose) clearTimeout(state.timers.quizAutoClose);
         if(state.timers.jackQuiz) clearInterval(state.timers.jackQuiz);
         if(state.timers.bustModal) clearTimeout(state.timers.bustModal);
+if(state.timers.openRoomBeacon) { clearInterval(state.timers.openRoomBeacon); state.timers.openRoomBeacon = null; }
+        if(state.room?.isHost && state.room?.code) app.broadcastRoomSignal('close');
       },
 
       playDefibAnimation: () => {
