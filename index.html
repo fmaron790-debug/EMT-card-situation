@@ -1173,10 +1173,11 @@
       phase: 'idle',
       activeCommTab: 'chat',
       room: { code: '', isHost: false, isSolo: false, isOpen: false },
-      openRooms: {}, // 🆕 募集中のオープンルーム一覧
+      openRooms: {}, // 募集中のオープンルーム一覧
       config: { mode: 'babanuki', maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true, jackShowTotal: true, isOpenRoom: false },
       me: { id: 'p_' + Math.random().toString(36).substring(2, 9), name: '救急隊員' },
       players: [],
+      // ...（以降の既存のstateプロパティ）
       turnIdx: 0,
       discardPile: [],
       hiddenCard: null,
@@ -1823,7 +1824,7 @@
             clearInterval(state.timers.openRoomBeacon);
           }
         }, 4000);
-      }, // 👈 このカンマ付きの閉じ括弧が抜けていたのがエラーの原因です！
+      },
 
       startSoloAI: () => {
         app.readConfig(); state.room = { code: 'SOLO-AI', isHost: true, isSolo: true };
@@ -3655,7 +3656,7 @@
         if(state.timers.quizAutoClose) clearTimeout(state.timers.quizAutoClose);
         if(state.timers.jackQuiz) clearInterval(state.timers.jackQuiz);
         if(state.timers.bustModal) clearTimeout(state.timers.bustModal);
-if(state.timers.openRoomBeacon) { clearInterval(state.timers.openRoomBeacon); state.timers.openRoomBeacon = null; }
+        if(state.timers.openRoomBeacon) { clearInterval(state.timers.openRoomBeacon); state.timers.openRoomBeacon = null; }
         if(state.room?.isHost && state.room?.code) app.broadcastRoomSignal('close');
       },
 
