@@ -1445,15 +1445,16 @@
           }
         });
 
-        app.showScreen('view-memory-game');
+       app.showScreen('view-memory-game');
         app.renderMemoryGameTable();
         app.addLogMessage('救急神経衰弱バトルが開始されました。');
-      },
+      },  // ← ここに「},」があることを確認！
 
       startMemoryTimer: () => {
         if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
         const limit = state.config.turnTimeLimit;
         const timerEl = document.getElementById('memory-timer-display');
+        // ... (以下続く)
         
         if (limit >= 900) {
           if(timerEl) timerEl.textContent = `手番制限: 無制限`;
