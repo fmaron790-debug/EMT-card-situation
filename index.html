@@ -2768,10 +2768,43 @@
         const activePair = stocks[activeIdx];
         if(!activePair) return;
 
+        // ❌ 疾患あてはめミス時（回答権1回のみ：ストックから消去し、場の元の位置へ裏向きで戻す）
         if(slot.num !== activePair.num) {
-          return utils.showToast(`❌ 不一致です！このペアは「${slot.title}」ではありません`);
+          stocks.splice(activeIdx, 1);
+          state.memoryState.selectedStockIdx = 0;
+
+          const returnIds = activePair.cards.map(c => c.id);
+          state.memoryState.cards.forEach(c => {
+            if(c.num === activePair.num || returnIds.includes(c.id)) {
+              c.isMatched = false;
+              c.isFlipped = false;
+            }
+          });
+
+          utils.showToast(`❌ 不一致！「${slot.title}」ではありません。カードが元の位置に戻りました`);
+          app.addLogMessage(`${state.me.name} が疾患あてはめに失敗し、ペア (Gr.${activePair.num}) が場に戻されました。`);
+
+          socket.emit('game_action', {
+            roomCode: state.room.code,
+            type: 'memory_sync',
+            mode: 'memory',
+            turnIdx: state.turnIdx,
+            memoryState: {
+              cards: state.memoryState.cards,
+              boardSlots: state.memoryState.boardSlots,
+              playerBoards: state.memoryState.playerBoards
+            }
+          });
+
+          app.renderFullMemoryBoardModal();
+          app.renderMemoryGameTable();
+          if(stocks.length === 0) {
+            document.getElementById('modal-memory-board')?.classList.add('hidden');
+          }
+          return;
         }
 
+        // ⭕ 正解時
         stocks.splice(activeIdx, 1);
         state.memoryState.selectedStockIdx = 0;
         const myP = state.players.find(p => p.id === state.me.id);
