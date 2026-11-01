@@ -1509,7 +1509,17 @@
         if (window.lucide) lucide.createIcons();
       },
       returnToPortal: () => {
-        app.clearAllTimers(); state.phase = 'idle'; app.renderPortal(); app.showScreen('view-portal');
+        // 🆕 サーバーへルーム退出を通知
+        if (state.room && state.room.code) {
+          socket.emit('leave_room', { roomCode: state.room.code });
+        }
+        
+        app.clearAllTimers(); 
+        state.phase = 'idle'; 
+        state.room = { code: '', isHost: false, isSolo: false, isOpen: false };
+        app.renderPortal(); 
+        app.showScreen('view-portal');
+        
         const badge = document.getElementById('current-mode-badge');
         if(badge) {
           badge.textContent = '総合ポータル';
