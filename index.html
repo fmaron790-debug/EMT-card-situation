@@ -3729,9 +3729,29 @@
         document.getElementById('modal-jinuki-quiz')?.classList.add('hidden');
         document.getElementById('modal-jack-quiz')?.classList.add('hidden');
         document.getElementById('modal-jack-bust')?.classList.add('hidden');
+        document.getElementById('modal-memory-board')?.classList.add('hidden');
 
         if(state.mode === 'jack' && state.ranks.length === 0) {
           app.computeJackRanks();
+        }
+        if(state.mode === 'memory' && state.ranks.length === 0) {
+          const scores = state.players.map(p => {
+            const b = state.memoryState.playerBoards[p.id] || {};
+            return { id: p.id, count: Object.keys(b).length };
+          });
+          scores.sort((a, b) => b.count - a.count);
+          state.ranks = scores.map(s => s.id);
+          state.players.forEach(p => {
+            p.rank = state.ranks.indexOf(p.id) + 1;
+          });
+        }
+
+        // 神経衰弱のときはボード一覧が見やすいようにリザルト枠の最大幅を広げる
+        const resultSec = document.getElementById('view-result');
+        if(resultSec) {
+          resultSec.className = state.mode === 'memory'
+            ? 'w-full max-w-4xl flex flex-col items-center py-6 hidden animate-fade-in'
+            : 'w-full max-w-xl flex flex-col items-center py-6 hidden animate-fade-in';
         }
 
         const myP = state.players.find(p=>p.id===state.me.id);
@@ -3740,11 +3760,11 @@
         if (myP?.rank === 1 && !(state.mode === 'jack' && myP?.isBusted)) {
           if(iconBox) { iconBox.className='w-20 h-20 rounded-3xl flex items-center justify-center mb-4 bg-amber-500/20 text-amber-300 border-2 border-amber-400 mx-auto'; iconBox.innerHTML='<i data-lucide="trophy" class="w-12 h-12"></i>'; }
           if(badge) { badge.className='text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block bg-amber-900/60 text-amber-300 border border-amber-600'; badge.textContent='1ST PLACE'; }
-          if(title) title.textContent = state.mode === 'jack' ? '99ジャック 制覇！' : '最速クリア達成！'; 
+          if(title) title.textContent = state.mode === 'jack' ? '99ジャック 制覇！' : state.mode === 'memory' ? '神経衰弱バトル 優勝！' : '最速クリア達成！'; 
           if(window.confetti) confetti();
         } else if (state.mode === 'jack' ? myP?.isBusted : myP?.rank === state.players.length) {
           if(iconBox) { iconBox.className='w-20 h-20 rounded-3xl flex items-center justify-center mb-4 bg-rose-500/20 text-rose-400 border-2 border-rose-500 mx-auto'; iconBox.innerHTML='<i data-lucide="zap-off" class="w-12 h-12"></i>'; }
-          if(badge) { badge.className='text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block bg-rose-900/60 text-rose-300 border border-rose-600'; badge.textContent=state.mode==='babanuki'?'VF保持':state.mode==='jack'?'OVER 99.00 (CPA)':'孤立カード保持'; }
+          if(badge) { badge.className='text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block bg-rose-900/60 text-rose-300 border border-rose-600'; badge.textContent=state.mode==='babanuki'?'VF保持':state.mode==='jack'?'OVER 99.00 (CPA)':state.mode==='memory'?'FINISH':'孤立カード保持'; }
           if(title) title.textContent=state.mode==='babanuki'?'VFを回避できず！':state.mode==='jack'?'99超過…急変（バースト）':'作戦完了';
         } else {
           if(iconBox) { iconBox.className='w-20 h-20 rounded-3xl flex items-center justify-center mb-4 bg-cyan-500/20 text-cyan-300 border-2 border-cyan-400 mx-auto'; iconBox.innerHTML='<i data-lucide="award" class="w-12 h-12"></i>'; }
@@ -3755,7 +3775,7 @@
         const list = document.getElementById('result-ranking-list'); 
         if(list) {
           list.innerHTML = '';
-          list.innerHTML += `<div class="text-xs font-bold text-slate-400 mb-1 border-b border-slate-800 pb-1">🏆 ${state.mode === 'jack' ? '99ジャック 最終順位（98.99に近い順 / 99超は最下位）' : 'あがり順位表彰'}</div>`;
+          list.innerHTML += `<div class="text-xs font-bold text-slate-400 mb-1 border-b border-slate-800 pb-1">🏆 ${state.mode === 'jack' ? '99ジャック 最終順位（98.99に近い順 / 99超は最下位）' : state.mode === 'memory' ? '神経衰弱 最終順位（完成させた疾患数順）' : 'あがり順位表彰'}</div>`;
           state.ranks.forEach((pId, idx) => {
             const p = state.players.find(x=>x.id===pId); if(!p) return;
             let rightLabel = idx===0 ? 'WINNER' : 'CLEAR';
@@ -3770,10 +3790,80 @@
                 rightLabel = `合計: ${scoreStr} / 98.99`;
                 rightColor = idx===0 ? 'text-amber-400' : 'text-teal-300';
               }
+            } else if(state.mode === 'memory') {
+              const b = state.memoryState.playerBoards[p.id] || {};
+              const filledCnt = Object.keys(b).filter(k => b[k]?.filled).length;
+              rightLabel = `完成疾患: ${filledCnt} / ${state.memoryState.boardSlots.length} 枠`;
+              rightColor = idx===0 ? 'text-amber-400' : 'text-blue-300';
             }
 
-            list.innerHTML += `<div class="flex items-center justify-between p-2.5 rounded-xl border ${p.id===state.me.id?'bg-cyan-950/40 border-cyan-500/60':'bg-slate-900 border-slate-800'}"><div class="flex items-center gap-2"><span class="text-lg w-6 text-center">${['🥇','🥈','🥉','🏅','🏅','🏅','🏅','⚡'][idx]||`${idx+1}`}</span><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${p.color || '#38bdf8'}"></span><span class="text-xs font-bold text-white">${utils.escapeHtml(p.name)}</span></div><span class="text-[11px] font-mono font-bold ${rightColor}">${rightLabel}</span></div>`;
+            list.innerHTML += `<div class="flex items-center justify-between p-2.5 rounded-xl border ${p.id===state.me.id?'bg-cyan-950/40 border-cyan-500/60':'bg-slate-900 border-slate-800'}"><div class="flex items-center gap-2"><span class="text-lg w-6 text-center">${['🥇','🥈','🥉','🏅','🏅','🏅','🏅','⚡'][idx]||`${idx+1}`}</span><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${p.color || '#38bdf8'}"></span><span class="text-xs font-bold text-white">${utils.escapeHtml(p.name)}${p.id===state.me.id?' (あなた)':''}</span></div><span class="text-[11px] font-mono font-bold ${rightColor}">${rightLabel}</span></div>`;
           });
+
+          // 🆕 GAME 02（神経衰弱）：全プレイヤー（自分＆相手）の完成ボード一覧表示
+          if (state.mode === 'memory') {
+            list.innerHTML += `
+              <div class="text-xs font-bold text-blue-300 mt-5 mb-2 border-b border-slate-800 pb-1.5 flex items-center justify-between">
+                <span class="flex items-center gap-1.5"><i data-lucide="layout-grid" class="w-4 h-4"></i>全プレイヤーの疾患ボード結果一覧</span>
+                <span class="text-[10px] text-slate-400 font-normal">全 ${state.memoryState.boardSlots.length} 疾患スロット</span>
+              </div>
+            `;
+
+            let boardsHtml = '<div class="space-y-4 max-h-[55vh] overflow-y-auto custom-scrollbar pr-1">';
+            state.ranks.forEach((pId, idx) => {
+              const p = state.players.find(x => x.id === pId);
+              if(!p) return;
+              const pBoard = state.memoryState.playerBoards[p.id] || {};
+              const pColor = p.color || '#38bdf8';
+              const filledSlots = state.memoryState.boardSlots
+                .map((slot, sIdx) => ({ slot, data: pBoard[sIdx] }))
+                .filter(item => item.data && item.data.filled);
+
+              let slotsGridHtml = '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mt-2">';
+              state.memoryState.boardSlots.forEach((slot, sIdx) => {
+                const entry = pBoard[sIdx];
+                const isFilled = entry?.filled;
+                const cards = entry?.cards || [];
+                if(isFilled) {
+                  slotsGridHtml += `
+                    <div class="p-2.5 rounded-xl border-2 bg-slate-950 shadow-md flex flex-col justify-between" style="border-color: ${pColor}">
+                      <div class="flex items-center justify-between gap-1 border-b border-slate-800 pb-1 mb-1">
+                        <span class="text-[11px] font-extrabold text-emerald-300 truncate">${utils.escapeHtml(slot.title)}</span>
+                        <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 flex-shrink-0">Gr.${slot.num}</span>
+                      </div>
+                      <div class="space-y-1 text-[10px] text-slate-300 leading-tight">
+                        <div class="bg-slate-900 p-1 rounded border border-slate-800 line-clamp-2">・${utils.escapeHtml(cards[0]?.desc || '')}</div>
+                        <div class="bg-slate-900 p-1 rounded border border-slate-800 line-clamp-2">・${utils.escapeHtml(cards[1]?.desc || '')}</div>
+                      </div>
+                    </div>
+                  `;
+                } else {
+                  slotsGridHtml += `
+                    <div class="p-2 rounded-xl border border-slate-800/80 bg-slate-900/40 opacity-45 flex items-center justify-between">
+                      <span class="text-[10px] font-bold text-slate-500 truncate">${utils.escapeHtml(slot.title)}</span>
+                      <span class="text-[9px] font-mono text-slate-600 flex-shrink-0">未達成</span>
+                    </div>
+                  `;
+                }
+              });
+              slotsGridHtml += '</div>';
+
+              boardsHtml += `
+                <div class="p-3.5 rounded-2xl bg-slate-950/90 border border-slate-800">
+                  <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <div class="flex items-center gap-2">
+                      <span class="w-3 h-3 rounded-full" style="background-color: ${pColor}; box-shadow: 0 0 8px ${pColor}"></span>
+                      <span class="text-xs sm:text-sm font-extrabold text-white">${idx + 1}位：${utils.escapeHtml(p.name)} ${p.id === state.me.id ? '<span class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-700 px-2 py-0.5 rounded-full ml-1">あなた</span>' : ''}</span>
+                    </div>
+                    <span class="text-xs font-mono font-bold text-emerald-400">格納済み: ${filledSlots.length} / ${state.memoryState.boardSlots.length} 疾患</span>
+                  </div>
+                  ${slotsGridHtml}
+                </div>
+              `;
+            });
+            boardsHtml += '</div>';
+            list.innerHTML += boardsHtml;
+          }
 
           if (state.mode === 'jinuki') {
             list.innerHTML += `<div class="text-xs font-bold text-amber-300 mt-4 mb-1 border-b border-slate-800 pb-1 flex items-center gap-1.5"><i data-lucide="star" class="w-3.5 h-3.5"></i><span>隠しカード推理 特別表彰</span></div>`;
