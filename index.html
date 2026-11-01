@@ -2408,9 +2408,10 @@
 
         app.renderMiniBoardPreview();
 
-        if (currentP && currentP.isAI && (state.room.isHost || state.room.isSolo) && !state.memoryState.isProcessingTurn) {
+        if (currentP && currentP.isAI && (state.room.isHost || state.room.isSolo) && !state.memoryState.isProcessingTurn && state.memoryState.selectedCardIndices.length === 0) {
           state.memoryState.isProcessingTurn = true;
-          setTimeout(app.processAiMemoryTurn, 1400);
+          if (state.timers.aiDelay) clearTimeout(state.timers.aiDelay);
+          state.timers.aiDelay = setTimeout(app.processAiMemoryTurn, 1400);
         }
       },
 
@@ -2511,6 +2512,14 @@
         const c2 = state.memoryState.cards[i2];
         const currentP = actorP || state.players[state.turnIdx];
 
+        if (!c1 || !c2) {
+          state.memoryState.cards.forEach(c => { if (!c.isMatched) c.isFlipped = false; });
+          state.memoryState.selectedCardIndices = [];
+          state.memoryState.isProcessingTurn = false;
+          app.renderMemoryGameTable();
+          return;
+        }
+
         const isMatch = (c1.num === c2.num);
         if(isMatch) {
           c1.isMatched = true; c2.isMatched = true;
@@ -2531,15 +2540,20 @@
         }
 
         app.showMemoryMatchResultBanner(c1, c2, isMatch, currentP, () => {
-          if(!isMatch) {
-            c1.isFlipped = false; c2.isFlipped = false;
-          }
+          // 未成立のカードはすべて確実に裏向きへ戻す
+          state.memoryState.cards.forEach(c => {
+            if(!c.isMatched) c.isFlipped = false;
+          });
           state.memoryState.selectedCardIndices = [];
           state.memoryState.isProcessingTurn = false;
-          app.renderMemoryGameTable();
           
+          // 自分がペアを獲得した場合は、ボード配置が終わるまで次のターンへ進めない
           if(isMatch && currentP.id === state.me.id) {
+            if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
+            state.memoryState.waitingForBoardPlacement = true;
+            app.renderMemoryGameTable();
             app.toggleMemoryBoardModal();
+            return;
           }
           
           const remaining = state.memoryState.cards.filter(c => !c.isMatched).length;
@@ -2602,6 +2616,9 @@
       },
 
       advanceMemoryTurnCounterclockwise: () => {
+        if (state.timers.aiDelay) clearTimeout(state.timers.aiDelay);
+        state.memoryState.selectedCardIndices = [];
+        state.memoryState.isProcessingTurn = false;
         state.turnIdx = (state.turnIdx - 1 + state.players.length) % state.players.length;
         socket.emit('game_action', {
           roomCode: state.room.code,
@@ -2614,6 +2631,200 @@
             playerBoards: state.memoryState.playerBoards
           }
         });
+        app.renderMemoryGameTable();
+      },
+
+      processAiMemoryTurn: () => {
+        const currentP = state.players[state.turnIdx];
+        if (!currentP || !currentP.isAI) {
+          state.memoryState.isProcessingTurn = false;
+          return;
+        }
+        // すでにめくり処理が進行中なら二重起動しない
+        if (state.memoryState.selectedCardIndices.length > 0) return;
+
+        const unflipped = state.memoryState.cards.map((c, idx) => (!c.isFlipped && !c.isMatched) ? idx : null).filter(x => x !== null);
+        if(unflipped.length < 2) {
+          state.memoryState.isProcessingTurn = false;
+          return;
+        }
+
+        state.memoryState.isProcessingTurn = true;
+        const idx1 = unflipped[Math.floor(Math.random() * unflipped.length)];
+        const card1 = state.memoryState.cards[idx1];
+        card1.isFlipped = true;
+        state.memoryState.selectedCardIndices = [idx1];
+        app.renderMemoryGameTable();
+
+        app.showMemoryPopupCard(card1, currentP, () => {
+          const remainingUnflipped = state.memoryState.cards.map((c, idx) => (!c.isFlipped && !c.isMatched) ? idx : null).filter(x => x !== null);
+          if(remainingUnflipped.length === 0) {
+            state.memoryState.isProcessingTurn = false;
+            return;
+          }
+          const idx2 = remainingUnflipped[Math.floor(Math.random() * remainingUnflipped.length)];
+          const card2 = state.memoryState.cards[idx2];
+          card2.isFlipped = true;
+          state.memoryState.selectedCardIndices = [idx1, idx2];
+          app.renderMemoryGameTable();
+
+          app.showMemoryPopupCard(card2, currentP, () => {
+            app.processMemoryPairResult(currentP);
+          });
+        });
+      },
+
+      toggleMemoryBoardModal: () => {
+        const modal = document.getElementById('modal-memory-board');
+        if(!modal) return;
+        modal.classList.toggle('hidden');
+        if(!modal.classList.contains('hidden')) {
+          app.renderFullMemoryBoardModal();
+        } else if (state.memoryState.waitingForBoardPlacement) {
+          state.memoryState.waitingForBoardPlacement = false;
+          app.advanceMemoryTurnCounterclockwise();
+        }
+      },
+
+      selectMatchedStock: (idx) => {
+        state.memoryState.selectedStockIdx = idx;
+        app.renderFullMemoryBoardModal();
+      },
+
+      renderFullMemoryBoardModal: () => {
+        const grid = document.getElementById('full-memory-board-grid');
+        const stockEl = document.getElementById('matched-stock-indicator');
+        const guideEl = document.getElementById('memory-board-guide-text');
+        if(!grid) return;
+        grid.innerHTML = '';
+
+        const myBoard = state.memoryState.playerBoards[state.me.id] || {};
+        const stocks = state.memoryState.matchedStock;
+        if(state.memoryState.selectedStockIdx >= stocks.length) {
+          state.memoryState.selectedStockIdx = Math.max(0, stocks.length - 1);
+        }
+        const activePair = stocks[state.memoryState.selectedStockIdx];
+
+        if(stockEl) {
+          stockEl.textContent = stocks.length > 0 
+            ? `未配置の獲得ペア: ${stocks.length} 組` 
+            : `獲得ストック: なし（場のカードをめくってペアを揃えてください）`;
+        }
+
+        if(guideEl) {
+          if(activePair) {
+            guideEl.innerHTML = `
+              <div class="bg-slate-950 border-2 border-amber-500/80 rounded-2xl p-3 mb-2 shadow-lg">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-extrabold text-amber-400">👇 現在選択中のペア（この2枚が示す疾患枠を下から選んでクリック！回答権は1回のみ）</span>
+                  ${stocks.length > 1 ? `<div class="flex gap-1">${stocks.map((st, i) => `<button onclick="app.selectMatchedStock(${i})" class="px-2 py-0.5 rounded text-[10px] font-bold ${i===state.memoryState.selectedStockIdx ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300'}">ペア${i+1}</button>`).join('')}</div>` : ''}
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left">
+                  <div class="bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-slate-200"><span class="text-cyan-400 font-bold mr-1">[カード1]</span>${utils.escapeHtml(activePair.cards[0].desc)}</div>
+                  <div class="bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-slate-200"><span class="text-cyan-400 font-bold mr-1">[カード2]</span>${utils.escapeHtml(activePair.cards[1].desc)}</div>
+                </div>
+              </div>
+            `;
+          } else {
+            guideEl.innerHTML = `場（テーブル）で問題文カードを2枚揃えると、ここにペアがストックされ、該当する疾患枠に2枚1組ではめ込むことができます。`;
+          }
+        }
+
+        state.memoryState.boardSlots.forEach((slot, sIdx) => {
+          const isFilled = myBoard[sIdx]?.filled;
+          const matchedCards = myBoard[sIdx]?.cards || [];
+          
+          grid.innerHTML += `
+            <div class="p-3 rounded-2xl border-2 ${isFilled ? 'border-emerald-500 bg-slate-950' : (activePair ? 'border-slate-700 bg-slate-800/90 hover:border-amber-400 cursor-pointer hover:scale-[1.02]' : 'border-slate-800 bg-slate-900/60 opacity-75')} flex flex-col justify-between transition shadow-md" ${!isFilled && activePair ? `onclick="app.placeCardToBoardSlot(${sIdx})"` : ''}>
+              <div class="flex justify-between items-center mb-2 border-b border-slate-800 pb-1.5">
+                <span class="text-xs font-extrabold ${isFilled ? 'text-emerald-300' : 'text-white'}">${utils.escapeHtml(slot.title)}</span>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${isFilled ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold' : 'bg-slate-900 text-slate-400'}">${isFilled ? '✅ 2枚格納済' : '空き (0/2枚)'}</span>
+              </div>
+              ${isFilled ? `
+                <div class="space-y-1 text-[10px] text-slate-300 bg-slate-900/90 p-2 rounded-xl border border-emerald-500/30">
+                  <div class="truncate">・${utils.escapeHtml(matchedCards[0]?.desc || '')}</div>
+                  <div class="truncate">・${utils.escapeHtml(matchedCards[1]?.desc || '')}</div>
+                </div>
+              ` : `
+                <div class="h-12 rounded-xl flex items-center justify-center text-xs font-bold ${activePair ? 'text-amber-300 bg-amber-950/30 border border-dashed border-amber-500/50' : 'text-slate-500 bg-slate-950 border border-slate-800'}">
+                  ${activePair ? '📥 この疾患にペアをはめ込む' : 'ペア未獲得'}
+                </div>
+              `}
+            </div>
+          `;
+        });
+      },
+
+      placeCardToBoardSlot: (sIdx) => {
+        const stocks = state.memoryState.matchedStock;
+        if(stocks.length === 0) return utils.showToast('配置できる獲得ペアがありません');
+        
+        const slot = state.memoryState.boardSlots[sIdx];
+        const myBoard = state.memoryState.playerBoards[state.me.id];
+        if(myBoard[sIdx]?.filled) return utils.showToast('この疾患枠はすでに埋まっています');
+
+        const activeIdx = state.memoryState.selectedStockIdx || 0;
+        const activePair = stocks[activeIdx];
+        if(!activePair) return;
+
+        // ❌ 疾患あてはめミス時（回答権1回のみ：ストックから消去し、場の元の位置へ裏向きで戻す）
+        if(slot.num !== activePair.num) {
+          stocks.splice(activeIdx, 1);
+          state.memoryState.selectedStockIdx = 0;
+
+          const returnIds = activePair.cards.map(c => c.id);
+          state.memoryState.cards.forEach(c => {
+            if(c.num === activePair.num || returnIds.includes(c.id)) {
+              c.isMatched = false;
+              c.isFlipped = false;
+            }
+          });
+
+          utils.showToast(`❌ 不一致！「${slot.title}」ではありません。カードが元の位置に戻りました`);
+          app.addLogMessage(`${state.me.name} が疾患あてはめに失敗し、ペア (Gr.${activePair.num}) が場に戻されました。`);
+
+          app.renderFullMemoryBoardModal();
+          if(stocks.length === 0) {
+            document.getElementById('modal-memory-board')?.classList.add('hidden');
+            if(state.memoryState.waitingForBoardPlacement) {
+              state.memoryState.waitingForBoardPlacement = false;
+              app.advanceMemoryTurnCounterclockwise();
+              return;
+            }
+          }
+          app.renderMemoryGameTable();
+          return;
+        }
+
+        // ⭕ 正解時
+        stocks.splice(activeIdx, 1);
+        state.memoryState.selectedStockIdx = 0;
+        const myP = state.players.find(p => p.id === state.me.id);
+        myBoard[sIdx] = { filled: true, color: myP?.color || '#38bdf8', cards: activePair.cards };
+
+        utils.showToast(`🎉 正解！「${slot.title}」の枠に2枚のカードをはめ込みました！`);
+        app.addLogMessage(`${state.me.name} がボードの「${slot.title}」を完成させました！`);
+
+        app.renderFullMemoryBoardModal();
+
+        const totalSlots = state.memoryState.boardSlots.length;
+        const filledCount = Object.keys(myBoard).length;
+        const remainingCards = state.memoryState.cards.filter(c => !c.isMatched).length;
+        if(filledCount >= totalSlots || (remainingCards === 0 && stocks.length === 0)) {
+          document.getElementById('modal-memory-board')?.classList.add('hidden');
+          state.memoryState.waitingForBoardPlacement = false;
+          setTimeout(() => app.endMemoryGame(), 1000);
+          return;
+        }
+
+        if(stocks.length === 0) {
+          document.getElementById('modal-memory-board')?.classList.add('hidden');
+          if(state.memoryState.waitingForBoardPlacement) {
+            state.memoryState.waitingForBoardPlacement = false;
+            app.advanceMemoryTurnCounterclockwise();
+            return;
+          }
+        }
         app.renderMemoryGameTable();
       },
 
