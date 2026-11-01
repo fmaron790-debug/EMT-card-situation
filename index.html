@@ -4193,9 +4193,10 @@ if(state.timers.openRoomBeacon) { clearInterval(state.timers.openRoomBeacon); st
         saveDB(currentCardDB); 
         socket.emit('admin_update_cards', currentCardDB);
         app.renderAdminCards(); 
-        utils.showToast('<i data-lucide="rotate-ccw" class="w-4 h-4 inline mr-1"></i>初期化し全端末に同期しました'); if(window.lucide) lucide.createIcons(); 
-      }
-    };
+        utils.showToast('<i data-lucide="rotate-ccw" class="w-4 h-4 inline mr-1"></i>初期化し全端末に同期しました'); 
+        if(window.lucide) lucide.createIcons();
+      } // ← 1. resetDB の閉じ括弧
+    }; // ← 2. app オブジェクトの閉じ括弧
 
     document.getElementById('secret-admin-trigger')?.addEventListener('click', () => {
       app.adminClicks++;
