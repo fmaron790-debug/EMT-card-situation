@@ -2769,7 +2769,8 @@
         app.renderTable();
       }
     };
-humanReady: () => {
+
+　　　humanReady: () => {
         document.getElementById('btn-initial-ready')?.classList.add('hidden');
         const myP = state.players.find(p => p.id === state.me.id);
         if (myP) myP.isReady = true;
