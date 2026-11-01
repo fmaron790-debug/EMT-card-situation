@@ -874,7 +874,7 @@
     </div>
   </div>
 
-  <!-- 99ジャック：バースト（99.00超え）時のアラートモーダル -->
+  <!-- 99ジャック：バースト（99.00超え）時の瞳孔散大・心拍呼吸停止アラートモーダル -->
   <div id="modal-jack-bust" class="fixed inset-0 z-50 bg-rose-950/90 hidden flex items-center justify-center p-4 backdrop-blur-md">
     <div class="w-full max-w-md bg-slate-950 border-4 border-rose-600 rounded-3xl p-6 text-center shadow-[0_0_70px_rgba(225,29,72,0.8)] animate-bounce">
       <div class="w-20 h-20 rounded-full bg-rose-600/20 border-2 border-rose-500 flex items-center justify-center mx-auto mb-4 text-rose-500">
@@ -1000,7 +1000,7 @@
     </div>
   </div>
 
-  <!-- 🆕 ゲーム説明書モーダル本体 -->
+  <!-- 🆕 ゲーム説明書・マニュアルモーダル -->
   <div id="modal-manual" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm">
     <div class="w-full max-w-lg bg-slate-900 border border-cyan-500/50 rounded-3xl p-6 shadow-2xl flex flex-col max-h-[85vh]">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
@@ -1012,7 +1012,7 @@
       </div>
 
       <div id="manual-modal-body" class="flex-1 overflow-y-auto custom-scrollbar space-y-4 text-xs sm:text-sm text-slate-300 pr-1 leading-relaxed">
-        <!-- ゲームに応じた説明文が挿入されます -->
+        <!-- JSで現在のゲームモードに応じた説明文がここに切り替わります -->
       </div>
 
       <div class="mt-4 pt-3 border-t border-slate-800 text-right">
@@ -1020,9 +1020,6 @@
       </div>
     </div>
   </div>
-
-  <!-- 画面下部の3連通信ドックなどのパーツ -->
-  <div class="fixed bottom-3 left-1/2 ...">...</div>
 
   <!-- 管理者用画面（CMSモダル） -->
   <div id="modal-admin" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
@@ -1157,7 +1154,7 @@
       ranks: [],
       quizResultCorrect: false,
       quizAnswered: false,
-      timers: { turn: null, aiDelay: null, memoryTimer: null, popupTimer: null, matchTimer: null, quizTimer: null, quizAutoClose: null, jackQuiz: null },
+      timers: { turn: null, aiDelay: null, memoryTimer: null, popupTimer: null, matchTimer: null, quizTimer: null, quizAutoClose: null, jackQuiz: null, bustModal: null },
       
       memoryState: {
         cards: [],
@@ -1419,9 +1416,6 @@
       closeManualModal: () => {
         document.getElementById('modal-manual')?.classList.add('hidden');
       },
-
-      init: () => {
-        // ... (以降既存のコード)
 
       init: () => {
         try {
@@ -1986,6 +1980,7 @@
         state.jackState.timeLeft = 60;
         if(timerEl) timerEl.textContent = `残り ${state.jackState.timeLeft} 秒`;
         if(state.timers.jackQuiz) clearInterval(state.timers.jackQuiz);
+        if(state.timers.bustModal) clearTimeout(state.timers.bustModal);
 
         state.timers.jackQuiz = setInterval(() => {
           state.jackState.timeLeft--;
@@ -2023,6 +2018,7 @@
       evaluateJackQuiz: (isCorrect, isTimeout) => {
         state.jackState.quizAnswered = true;
         if(state.timers.jackQuiz) clearInterval(state.timers.jackQuiz);
+        if(state.timers.bustModal) clearTimeout(state.timers.bustModal);
 
         const card = state.jackState.currentCard;
         const submitBtn = document.getElementById('btn-jack-submit-answer');
@@ -2121,7 +2117,6 @@
       executeAiJackTurn: (aiPlayer) => {
         if(state.phase !== 'jack_playing' || !aiPlayer) return;
 
-        // AIの判断ロジック：手札10枚、または88以上なら確実にステイ
         if(aiPlayer.hand.length >= 10 || aiPlayer.totalInternal >= 8800 || (aiPlayer.totalInternal >= 7800 && Math.random() < 0.6) || state.jackState.deck.length === 0) {
           aiPlayer.isStayed = true;
           app.addLogMessage(`🛡 ${aiPlayer.name} がステイアンドプレイを宣言しました。`);
@@ -2162,65 +2157,6 @@
         state.jackState.isProcessing = false;
         app.advanceJackTurn(bustedPlayerId);
       },
-
-      jackDeclareStay: () => {
-        if(state.phase !== 'jack_playing' || state.jackState.isProcessing) return;
-        const currentP = state.players[state.turnIdx];
-        if(!currentP || currentP.id !== state.me.id || currentP.isStayed || currentP.isBusted) return;
-
-        currentP.isStayed = true;
-        utils.showToast('🛡 ステイアンドプレイを宣言しました！');
-        app.addLogMessage(`${currentP.name} がステイアンドプレイを宣言しました。`);
-        app.advanceJackTurn(null);
-      },
-
-    executeAiJackTurn: (aiPlayer) => {
-      if(state.phase !== 'jack_playing' || !aiPlayer) return;
-
-      if(aiPlayer.hand.length >= 10 || aiPlayer.totalInternal >= 8800 || (aiPlayer.totalInternal >= 7800 && Math.random() < 0.6) || state.jackState.deck.length === 0) {
-        aiPlayer.isStayed = true;
-        app.addLogMessage(`🛡 ${aiPlayer.name} がステイアンドプレイを宣言しました。`);
-        state.jackState.isProcessing = false;
-        app.advanceJackTurn(null);
-        return;
-      }
-
-      const drawn = state.jackState.deck.pop();
-      const addInternal = (drawn.internalVal !== undefined) ? Number(drawn.internalVal) : Math.round(Number(drawn.num) * 100);
-      const aiCorrect = Math.random() < 0.72;
-
-      let bustedPlayerId = null;
-      if(aiCorrect) {
-        if(aiPlayer.totalInternal + addInternal <= 9899) {
-          aiPlayer.hand.push(drawn);
-          aiPlayer.totalInternal += addInternal;
-          if(!aiPlayer.isBusted && aiPlayer.hand.length >= 10) aiPlayer.isStayed = true;
-          app.addLogMessage(`${aiPlayer.name} がクイズに正解し、カードを加算しました。`);
-        } else {
-          state.discardPile.push(drawn);
-          app.addLogMessage(`${aiPlayer.name} がクイズに正解し、危険カードを破棄しました。`);
-        }
-      } else {
-        aiPlayer.hand.push(drawn);
-        aiPlayer.totalInternal += addInternal;
-        if(!aiPlayer.isBusted && aiPlayer.hand.length >= 10) aiPlayer.isStayed = true;
-        if(aiPlayer.totalInternal >= 9900) {
-          aiPlayer.isBusted = true;
-          bustedPlayerId = aiPlayer.id;
-          app.addLogMessage(`💀 ${aiPlayer.name} が不正解で強制加算され、99.00超過（バースト）しました！`);
-          app.showJackBustModal(aiPlayer);
-        } else {
-          app.addLogMessage(`${aiPlayer.name} がクイズに不正解となり、カードが強制加算されました。`);
-        }
-      }
-
-      state.jackState.isProcessing = false;
-      app.advanceJackTurn(bustedPlayerId);
-    },
-
-      state.jackState.isProcessing = false;
-      app.advanceJackTurn(bustedPlayerId);
-    },
       showJackBustModal: (player) => {
         const modal = document.getElementById('modal-jack-bust');
         const nameEl = document.getElementById('jack-bust-player-name');
@@ -2238,6 +2174,7 @@
       closeJackBustModal: () => {
         document.getElementById('modal-jack-bust')?.classList.add('hidden');
       },
+
       checkJackGameEnd: () => {
         const active = state.players.filter(p => !p.isStayed && !p.isBusted);
         if(active.length === 0 || state.jackState.deck.length === 0) {
@@ -3265,6 +3202,7 @@
         if(state.timers.quizTimer) clearInterval(state.timers.quizTimer);
         if(state.timers.quizAutoClose) clearTimeout(state.timers.quizAutoClose);
         if(state.timers.jackQuiz) clearInterval(state.timers.jackQuiz);
+        if(state.timers.bustModal) clearTimeout(state.timers.bustModal);
       },
 
       playDefibAnimation: () => {
