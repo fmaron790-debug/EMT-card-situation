@@ -1463,6 +1463,19 @@
         state.memoryState.timeLeft = limit;
         if(timerEl) timerEl.textContent = `手番残り ${state.memoryState.timeLeft}秒`;
 
+        startMemoryTimer: () => {
+        if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
+        const limit = state.config.turnTimeLimit;
+        const timerEl = document.getElementById('memory-timer-display');
+        
+        if (limit >= 900) {
+          if(timerEl) timerEl.textContent = `手番制限: 無制限`;
+          return;
+        }
+
+        state.memoryState.timeLeft = limit;
+        if(timerEl) timerEl.textContent = `手番残り ${state.memoryState.timeLeft}秒`;
+
         state.timers.memoryTimer = setInterval(() => {
           if(state.memoryState.isProcessingTurn || state.memoryState.waitingForBoardPlacement) return;
           state.memoryState.timeLeft--;
@@ -1482,8 +1495,9 @@
             app.advanceMemoryTurnCounterclockwise();
           }
         }, 1000);
-      },
+      },   // ← ここで関数をしっかり閉じる
 
+      // 🔽 ここから下に新機能のプロパティとメソッドを置く
       lastOpponentFlippedIdx: null,
       updateMobileOpponentArrow: () => {
         const upEl = document.getElementById('edge-arrow-up');
@@ -1502,6 +1516,7 @@
 
         const currentP = state.players[state.turnIdx];
         const isOpponentTurn = currentP && (currentP.isAI || currentP.id !== state.me.id);
+        // ... (以下続く)
 
         const flippedIndices = state.memoryState.cards
           .map((c, i) => (c.isFlipped && !c.isMatched) ? i : null)
