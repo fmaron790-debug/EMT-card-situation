@@ -512,13 +512,13 @@
         </div>
       </div>
       <div class="flex items-center space-x-2">
-        <button id="btn-return-portal" onclick="app.returnToPortal()" class="hidden text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-2 rounded-xl border border-slate-700 transition flex items-center gap-1.5 active:scale-95">
-          <i data-lucide="grid" class="w-3.5 h-3.5"></i><span>タイトルへ</span>
+        <button id="btn-return-portal" onclick="app.returnToPortal()" class="hidden text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3.5 py-2.5 rounded-xl border border-slate-700 transition flex items-center gap-1.5 active:scale-95 font-bold">
+          <i data-lucide="grid" class="w-4 h-4"></i><span>タイトルへ</span>
         </button>
       </div>
     </header>
 
-    <main class="w-full max-w-5xl p-3 sm:p-4 flex-1 flex flex-col items-center justify-start relative">
+    <main class="w-full max-w-5xl p-2.5 sm:p-4 flex-1 flex flex-col items-center justify-start relative">
       
       <!-- VIEW 1: PORTAL -->
       <section id="view-portal" class="w-full flex flex-col items-center py-4 sm:py-6 animate-fade-in">
@@ -550,13 +550,13 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label class="block text-[11px] font-semibold text-slate-400 mb-1">最大参加人数</label>
-                <select id="config-max-players" onchange="app.updateLobbyConfigUI()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs font-semibold text-white">
+                <select id="config-max-players" onchange="app.updateLobbyConfigUI()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm sm:text-xs font-semibold text-white">
                   <option value="2">2 名</option><option value="3">3 名</option><option value="4" selected>4 名 (標準)</option><option value="5">5 名</option><option value="6">6 名 (特別編成)</option><option value="7" class="jack-player-opt hidden">7 名</option><option value="8" class="jack-player-opt hidden">8 名 (最大)</option>
                 </select>
               </div>
               <div>
                 <label class="block text-[11px] font-semibold text-slate-400 mb-1">思考制限時間 (手番ごと)</label>
-                <select id="config-turn-time" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs font-semibold text-white">
+                <select id="config-turn-time" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm sm:text-xs font-semibold text-white">
                   <option value="10">10 秒</option><option value="15">15 秒</option><option value="20" selected>20 秒</option><option value="30">30 秒</option><option value="60">60 秒</option><option value="999">無制限</option>
                 </select>
               </div>
@@ -565,8 +565,8 @@
             <!-- 神経衰弱用設定 -->
             <div id="memory-only-config" class="hidden pt-3 border-t border-slate-800/80 space-y-3">
               <div>
-                <label class="block text-[11px] font-semibold text-cyan-300 mb-1">改訂長谷川式簡易測定知能スケールに引っかかるな！ 全体ペア数（最大40グループ）</label>
-                <select id="config-memory-pairs" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs font-semibold text-white">
+                <label class="block text-[11px] font-semibold text-cyan-300 mb-1">改訂長谷川式簡易測定知能スケールに引っかかるな！ 全体ペア数</label>
+                <select id="config-memory-pairs" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm sm:text-xs font-semibold text-white">
                   <option value="6">6 ペア (12枚 / スマホ推奨・短時間)</option>
                   <option value="12">12 ペア (24枚)</option>
                   <option value="18">18 ペア (36枚)</option>
@@ -577,7 +577,7 @@
               </div>
               <div>
                 <label class="block text-[11px] font-semibold text-amber-300 mb-1">対戦形式・チーム編成</label>
-                <select id="config-team-mode" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs font-semibold text-white">
+                <select id="config-team-mode" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-3 text-sm sm:text-xs font-semibold text-white">
                   <option value="solo">個人戦 (全員対抗)</option>
                   <option value="team2">2チーム対抗 (各チーム半数)</option>
                   <option value="team3">3チーム対抗 (3人×2 or 2人×3)</option>
@@ -587,7 +587,7 @@
                 <span class="text-xs font-bold text-slate-200">カード表面に疾患名を記載する</span>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input id="config-memory-show-disease" type="checkbox" checked class="sr-only peer">
-                  <div class="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
             </div>
@@ -597,7 +597,7 @@
               <span class="text-xs font-bold text-slate-200">カード左下にグループの数字を表示する</span>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input id="config-show-group-num" type="checkbox" checked class="sr-only peer">
-                <div class="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
               </label>
             </div>
 
@@ -609,7 +609,7 @@
               </div>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input id="config-jack-show-total" type="checkbox" checked class="sr-only peer">
-                <div class="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
+                <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
               </label>
             </div>
 
@@ -617,7 +617,7 @@
               <span class="text-xs font-bold text-slate-200">不足枠の救急AI自動補充</span>
               <label class="relative inline-flex items-center cursor-pointer">
                 <input id="config-auto-fill-ai" type="checkbox" checked class="sr-only peer">
-                <div class="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-cyan-600"></div>
+                <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
               </label>
             </div>
 
@@ -629,18 +629,18 @@
               </div>
               <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
                 <input id="config-is-open-room" type="checkbox" class="sr-only peer">
-                <div class="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
               </label>
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-            <button onclick="app.createRoom()" class="w-full bg-rose-700 hover:bg-rose-600 active:scale-98 text-white font-bold py-3.5 px-4 rounded-xl transition shadow-[0_0_15px_rgba(225,29,72,0.4)]">ルーム作成</button>
-            <button onclick="app.showJoinModal()" class="w-full bg-slate-800 hover:bg-slate-700 active:scale-98 text-white font-bold py-3.5 px-4 rounded-xl border border-slate-700 transition">6桁コードで参加</button>
+            <button onclick="app.createRoom()" class="w-full bg-rose-700 hover:bg-rose-600 active:scale-95 text-white font-bold py-4 px-4 rounded-xl transition shadow-[0_0_15px_rgba(225,29,72,0.4)] text-sm">ルーム作成</button>
+            <button onclick="app.showJoinModal()" class="w-full bg-slate-800 hover:bg-slate-700 active:scale-95 text-white font-bold py-4 px-4 rounded-xl border border-slate-700 transition text-sm">6桁コードで参加</button>
           </div>
 
           <div class="mb-4">
-            <button id="btn-solo-ai" onclick="app.startSoloAI()" class="w-full bg-cyan-950/70 hover:bg-cyan-900/80 text-cyan-300 font-bold py-3 px-4 rounded-xl border border-cyan-700/60 transition text-xs sm:text-sm">すぐ遊ぶ（AI演習）</button>
+            <button id="btn-solo-ai" onclick="app.startSoloAI()" class="w-full bg-cyan-950/70 hover:bg-cyan-900/80 active:scale-95 text-cyan-300 font-bold py-3.5 px-4 rounded-xl border border-cyan-700/60 transition text-sm">すぐ遊ぶ（AI演習）</button>
           </div>
 
           <div class="bg-slate-950/90 border border-slate-800 rounded-2xl p-3.5">
@@ -684,72 +684,72 @@
             <div id="room-members-list" class="space-y-2"></div>
           </div>
           <div id="host-ai-controls" class="flex gap-2 mb-4 hidden">
-            <button onclick="app.addBot()" class="flex-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-cyan-300 text-xs font-bold py-3 px-3 rounded-xl border border-cyan-800/40 transition">＋AI追加</button>
-            <button onclick="app.removeBot()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-rose-300 text-xs font-bold py-3 px-4 rounded-xl border border-rose-900/40 transition">AI解任</button>
+            <button onclick="app.addBot()" class="flex-1 bg-slate-800 hover:bg-slate-700 active:scale-95 text-cyan-300 text-xs font-bold py-3.5 px-3 rounded-xl border border-cyan-800/40 transition">＋AI追加</button>
+            <button onclick="app.removeBot()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-rose-300 text-xs font-bold py-3.5 px-4 rounded-xl border border-rose-900/40 transition">AI解任</button>
           </div>
           <button id="btn-start-game" onclick="app.startGame()" class="w-full hidden bg-emerald-600 hover:bg-emerald-500 active:scale-98 text-white font-extrabold py-4 px-4 rounded-xl transition shadow-[0_0_15px_rgba(16,185,129,0.4)] text-base">出動開始</button>
         </div>
       </section>
 
-      <!-- VIEW 4: GAME TABLE (BABANUKI / JINUKI) -->
+      <!-- VIEW 4: GAME TABLE (BABANUKI / JINUKI スマホ最適化版) -->
       <section id="view-game" class="w-full flex-1 flex flex-col items-center justify-between hidden">
-        <div class="w-full max-w-4xl bg-slate-900/90 border border-slate-800 rounded-2xl p-2.5 sm:p-3 mb-2.5 flex flex-wrap items-center justify-between gap-2 shadow-lg">
+        <div class="w-full max-w-4xl bg-slate-900/90 border border-slate-800 rounded-2xl p-2.5 sm:p-3 mb-2 flex flex-wrap items-center justify-between gap-2 shadow-lg">
           <div class="flex items-center gap-2">
             <span id="game-turn-text" class="text-[11px] sm:text-xs px-2.5 py-1 rounded-full bg-rose-950 text-rose-300 border border-rose-700 font-bold">不整脈を回避せよ！</span>
-            <span id="game-sub-timer" class="text-xs font-mono text-amber-400 font-bold px-2">無制限</span>
+            <span id="game-sub-timer" class="text-xs font-mono text-amber-400 font-bold px-2 py-0.5 bg-slate-950 rounded-lg border border-slate-800">無制限</span>
           </div>
-          <div class="flex items-center gap-2">
-            <button id="btn-initial-ready" onclick="app.humanReady()" class="hidden bg-emerald-600 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl active:scale-95 transition shadow-[0_0_15px_rgba(16,185,129,0.4)]">手札確認完了</button>
-            <button id="btn-open-jinuki-tracker" onclick="app.openTracker()" class="hidden text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 px-3 py-2 rounded-xl font-bold active:scale-95">推理シート(1〜13+⚡)</button>
+          <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <button id="btn-initial-ready" onclick="app.humanReady()" class="hidden w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-extrabold px-5 py-3 rounded-xl active:scale-95 transition shadow-[0_0_15px_rgba(16,185,129,0.5)]">✅ 手札確認完了（ゲーム開始）</button>
+            <button id="btn-open-jinuki-tracker" onclick="app.openTracker()" class="hidden text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 px-3.5 py-2.5 rounded-xl font-bold active:scale-95">📋 推理シート(1〜13+⚡)</button>
           </div>
         </div>
         
-        <div id="other-players-container" class="w-full max-w-4xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 mb-2"></div>
+        <div id="other-players-container" class="w-full max-w-4xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mb-2"></div>
         
-        <div class="w-full max-w-4xl my-1.5 bg-slate-900/60 border border-slate-800 rounded-2xl p-3 flex flex-col items-center justify-center shadow-inner relative min-h-[100px]">
-          <div class="absolute top-2 left-3 text-xs font-bold text-slate-400 z-10">捨て札の山 <span class="text-[10px] ml-1 px-2 py-0.5 rounded-full bg-slate-800">計 <span id="center-discard-count" class="text-cyan-400 text-sm font-mono">0</span> 枚</span></div>
-          <div id="center-discard-cards" class="flex items-center justify-center pt-5 pb-1 pl-10 w-full"></div>
+        <div class="w-full max-w-4xl my-1 bg-slate-900/60 border border-slate-800 rounded-2xl p-2.5 flex flex-col items-center justify-center shadow-inner relative min-h-[85px]">
+          <div class="absolute top-1.5 left-3 text-[11px] font-bold text-slate-400 z-10">捨て札の山 <span class="text-[10px] ml-1 px-2 py-0.5 rounded-full bg-slate-800">計 <span id="center-discard-count" class="text-cyan-400 text-xs font-mono">0</span> 枚</span></div>
+          <div id="center-discard-cards" class="flex items-center justify-center pt-4 pb-0.5 pl-8 w-full"></div>
         </div>
         
         <div class="w-full max-w-2xl my-1 flex flex-col items-center justify-center relative">
-          <div id="game-announcement-banner" class="w-full text-center py-2.5 px-3 rounded-xl bg-slate-900/90 border border-slate-800 text-xs text-slate-200 font-bold transition-opacity duration-200">
+          <div id="game-announcement-banner" class="w-full text-center py-2.5 px-3 rounded-xl bg-slate-900/95 border border-cyan-500/40 text-xs sm:text-sm text-slate-100 font-bold shadow-md">
             ペアを確認して破棄してください
           </div>
         </div>
         
-        <div class="w-full max-w-4xl bg-slate-900/95 border border-slate-800/90 rounded-3xl p-3 sm:p-4 shadow-2xl flex flex-col items-center relative mt-1.5">
+        <div class="w-full max-w-4xl bg-slate-900/95 border border-slate-800/90 rounded-3xl p-3 sm:p-4 shadow-2xl flex flex-col items-center relative mt-1">
           <div class="w-full flex flex-wrap items-center justify-between gap-2 mb-2">
             <div class="flex items-center gap-2">
               <span class="w-3 h-3 rounded-full" id="my-color-dot" style="background-color: #38bdf8;"></span>
               <span class="text-xs sm:text-sm font-bold text-white">あなたの手札</span>
-              <span id="my-card-count-badge" class="text-xs font-mono px-2 py-0.5 rounded-full bg-slate-800 text-cyan-400 border border-slate-700">0 枚</span>
+              <span id="my-card-count-badge" class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-slate-800 text-cyan-400 border border-slate-700 font-bold">0 枚</span>
             </div>
             
-            <div class="flex items-center gap-2">
-              <button id="btn-discard-pair" onclick="app.executePairDiscard()" class="bg-slate-800 text-slate-500 text-xs font-extrabold px-3.5 py-2.5 rounded-xl border border-slate-700 transition duration-300 opacity-60 pointer-events-none">ペアを破棄</button>
-              <button id="btn-end-turn" onclick="app.humanEndTurn()" class="hidden bg-amber-600 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl active:scale-95 transition shadow-[0_0_15px_rgba(217,119,6,0.4)]">ターン終了</button>
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <button id="btn-discard-pair" onclick="app.executePairDiscard()" class="flex-1 sm:flex-initial bg-slate-800 text-slate-500 text-xs sm:text-sm font-extrabold px-4 py-3 rounded-xl border border-slate-700 transition duration-200 opacity-60 pointer-events-none">ペアを破棄</button>
+              <button id="btn-end-turn" onclick="app.humanEndTurn()" class="hidden flex-1 sm:flex-initial bg-amber-600 hover:bg-amber-500 text-white text-xs sm:text-sm font-extrabold px-5 py-3 rounded-xl active:scale-95 transition shadow-[0_0_15px_rgba(217,119,6,0.5)]">ターン終了 ▶</button>
             </div>
           </div>
           
-          <div id="my-cards-container" class="w-full flex items-center gap-2.5 overflow-x-auto py-3 px-2 custom-scrollbar min-h-[165px]"></div>
+          <div id="my-cards-container" class="w-full flex items-center gap-2.5 overflow-x-auto py-3 px-2 custom-scrollbar min-h-[175px]"></div>
         </div>
       </section>
 <!-- VIEW 4-2: MEMORY GAME TABLE -->
       <section id="view-memory-game" class="w-full flex-1 flex flex-col items-center justify-start hidden animate-fade-in">
-        <div class="w-full max-w-5xl bg-slate-900/95 border border-blue-500/50 rounded-2xl p-2.5 sm:p-3 mb-2.5 flex flex-wrap items-center justify-between gap-2 shadow-lg">
+        <div class="w-full max-w-5xl bg-slate-900/95 border border-blue-500/50 rounded-2xl p-2.5 sm:p-3 mb-2 flex flex-wrap items-center justify-between gap-2 shadow-lg">
           <div class="flex items-center gap-2">
             <span class="text-[11px] sm:text-xs px-2.5 py-1 rounded-full bg-blue-950 text-blue-300 border border-blue-600 font-bold">神経衰弱バトル</span>
             <span id="memory-turn-info" class="text-xs text-white font-bold">手番: プレイヤー</span>
           </div>
           <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-            <button onclick="app.toggleMemoryBoardModal()" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-[0_0_15px_rgba(37,99,235,0.4)] flex items-center gap-1.5">
+            <button onclick="app.toggleMemoryBoardModal()" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl transition shadow-[0_0_15px_rgba(37,99,235,0.4)] flex items-center gap-1.5">
               <i data-lucide="layout-grid" class="w-4 h-4"></i><span>自陣ボードを確認</span>
             </button>
             <span id="memory-timer-display" class="text-xs font-mono font-bold text-amber-400 bg-slate-950 px-3 py-2 rounded-xl border border-slate-800">手番制限 無制限</span>
           </div>
         </div>
 
-        <div onclick="app.toggleMemoryBoardModal()" class="w-full max-w-5xl bg-slate-950/80 border border-slate-800 hover:border-blue-500/60 rounded-2xl p-2.5 mb-2.5 cursor-pointer transition flex items-center justify-between group shadow-inner">
+        <div onclick="app.toggleMemoryBoardModal()" class="w-full max-w-5xl bg-slate-950/80 border border-slate-800 hover:border-blue-500/60 rounded-2xl p-2.5 mb-2 cursor-pointer transition flex items-center justify-between group shadow-inner">
           <div class="flex items-center gap-2">
             <div class="w-3 h-3 rounded-full animate-ping flex-shrink-0" id="mini-board-color-dot" style="background-color: #38bdf8;"></div>
             <span class="text-[11px] sm:text-xs font-bold text-slate-300 group-hover:text-white">自陣ボード状況 (タップで拡大・疾患あてはめ)</span>
@@ -758,25 +758,43 @@
           <span class="text-[11px] text-cyan-400 font-bold flex-shrink-0">開く ↗</span>
         </div>
 
-        <div id="table-players-ring" class="w-full max-w-5xl flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-2.5 px-1"></div>
+        <div id="table-players-ring" class="w-full max-w-5xl flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-2 px-1"></div>
 
-        <!-- 🆕 スマホ版専用：画面の端に常駐する方向インジケーター（上下左右） -->
-        <div id="mobile-edge-dir-indicator" class="fixed inset-x-0 top-16 bottom-20 pointer-events-none z-40 hidden sm:hidden">
-          <div id="edge-arrow-up" onclick="app.scrollToOpponentFlippedCard()" class="absolute top-2 left-1/2 -translate-x-1/2 bg-amber-500/90 text-slate-950 px-3 py-1 rounded-full text-xs font-black shadow-lg pointer-events-auto flex items-center gap-1 animate-bounce hidden">
-            <span>⬆️ 上にカードがあります</span>
+        <!-- 🆕 スマホ版専用：相手がめくったカードの常時方向矢印バナー（タップで移動・×または再タップで消去可能・自分のターンでは自動消去） -->
+        <div id="mobile-memory-dir-indicator" class="fixed top-16 left-1/2 -translate-x-1/2 z-40 hidden sm:hidden pointer-events-auto w-[92%] max-w-xs">
+          <div class="bg-slate-950/95 border-2 border-amber-400 text-amber-300 px-3.5 py-2 rounded-2xl shadow-[0_0_25px_rgba(251,191,36,0.85)] flex items-center justify-between gap-2">
+            <div onclick="app.scrollToOpponentFlippedCard()" class="flex items-center gap-2.5 flex-1 cursor-pointer active:scale-95">
+              <span id="mobile-memory-dir-arrow" class="text-2xl font-black leading-none animate-bounce">⬇️</span>
+              <div class="text-left leading-tight">
+                <div id="mobile-memory-dir-text" class="text-[11px] font-extrabold text-white">相手が下方向をめくりました</div>
+                <div class="text-[9px] text-amber-300 font-mono mt-0.5">タップでカード位置へジャンプ</div>
+              </div>
+            </div>
+            <button onclick="app.dismissMobileOpponentArrow(event)" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-600 text-[10px] font-bold flex-shrink-0 active:scale-90">
+              ✕ 消す
+            </button>
           </div>
-          <div id="edge-arrow-down" onclick="app.scrollToOpponentFlippedCard()" class="absolute bottom-2 left-1/2 -translate-x-1/2 bg-amber-500/90 text-slate-950 px-3 py-1 rounded-full text-xs font-black shadow-lg pointer-events-auto flex items-center gap-1 animate-bounce hidden">
-            <span>⬇️ 下にカードがあります</span>
+        </div>
+
+        <!-- 🆕 スマホ版専用：スクロール先でも画面のフチ（上下左右）に常駐する方向インジケーター（タップでジャンプ＆消去対応） -->
+        <div id="mobile-edge-dir-indicator" class="fixed inset-x-0 top-28 bottom-20 pointer-events-none z-40 hidden sm:hidden">
+          <div id="edge-arrow-up" class="absolute top-1 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 px-3.5 py-1.5 rounded-full text-xs font-black shadow-[0_0_20px_rgba(245,158,11,0.9)] pointer-events-auto flex items-center gap-2 animate-bounce hidden">
+            <span onclick="app.scrollToOpponentFlippedCard()" class="cursor-pointer">⬆️ 上にめくられたカード (移動)</span>
+            <button onclick="app.dismissMobileOpponentArrow(event)" class="bg-slate-950/20 px-1.5 py-0.5 rounded-full text-[10px]">✕</button>
           </div>
-          <div id="edge-arrow-left" onclick="app.scrollToOpponentFlippedCard()" class="absolute left-2 top-1/2 -translate-y-1/2 bg-amber-500/90 text-slate-950 p-2 rounded-full text-xs font-black shadow-lg pointer-events-auto animate-pulse hidden">
+          <div id="edge-arrow-down" class="absolute bottom-1 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 px-3.5 py-1.5 rounded-full text-xs font-black shadow-[0_0_20px_rgba(245,158,11,0.9)] pointer-events-auto flex items-center gap-2 animate-bounce hidden">
+            <span onclick="app.scrollToOpponentFlippedCard()" class="cursor-pointer">⬇️ 下にめくられたカード (移動)</span>
+            <button onclick="app.dismissMobileOpponentArrow(event)" class="bg-slate-950/20 px-1.5 py-0.5 rounded-full text-[10px]">✕</button>
+          </div>
+          <div id="edge-arrow-left" onclick="app.scrollToOpponentFlippedCard()" class="absolute left-1.5 top-1/2 -translate-y-1/2 bg-amber-500 text-slate-950 p-2.5 rounded-full text-sm font-black shadow-[0_0_20px_rgba(245,158,11,0.9)] pointer-events-auto animate-pulse hidden cursor-pointer">
             <span>⬅️</span>
           </div>
-          <div id="edge-arrow-right" onclick="app.scrollToOpponentFlippedCard()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-amber-500/90 text-slate-950 p-2 rounded-full text-xs font-black shadow-lg pointer-events-auto animate-pulse hidden">
+          <div id="edge-arrow-right" onclick="app.scrollToOpponentFlippedCard()" class="absolute right-1.5 top-1/2 -translate-y-1/2 bg-amber-500 text-slate-950 p-2.5 rounded-full text-sm font-black shadow-[0_0_20px_rgba(245,158,11,0.9)] pointer-events-auto animate-pulse hidden cursor-pointer">
             <span>➡️</span>
           </div>
         </div>
 
-        <div class="w-full max-w-5xl flex-1 bg-gradient-to-br from-[#5c3a21] via-[#432514] to-[#2a160b] border-2 sm:border-4 border-[#1a0d06] rounded-3xl p-2.5 sm:p-5 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] relative min-h-[420px] flex items-start justify-center overflow-y-auto">
+        <div id="memory-scroll-area" class="w-full max-w-5xl flex-1 bg-gradient-to-br from-[#5c3a21] via-[#432514] to-[#2a160b] border-2 sm:border-4 border-[#1a0d06] rounded-3xl p-2 sm:p-5 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] relative min-h-[420px] flex items-start justify-center overflow-y-auto">
           <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
           <div id="memory-cards-grid" class="w-full max-w-5xl grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 gap-2 p-1 z-10"></div>
         </div>
@@ -784,7 +802,7 @@
 
       <!-- VIEW 4-4: 99 JACK GAME TABLE -->
       <section id="view-jack-game" class="w-full flex-1 flex flex-col items-center justify-between hidden animate-fade-in">
-        <div class="w-full max-w-5xl bg-slate-900/95 border border-teal-500/50 rounded-2xl p-2.5 sm:p-3 mb-2.5 flex flex-wrap items-center justify-between gap-2 shadow-lg">
+        <div class="w-full max-w-5xl bg-slate-900/95 border border-teal-500/50 rounded-2xl p-2.5 sm:p-3 mb-2 flex flex-wrap items-center justify-between gap-2 shadow-lg">
           <div class="flex items-center gap-2">
             <span class="text-xs px-2.5 py-1 rounded-full bg-teal-950 text-teal-300 border border-teal-600 font-bold">99ジャック</span>
             <span id="jack-turn-info" class="text-xs text-white font-bold">手番: プレイヤー</span>
@@ -795,10 +813,10 @@
           </div>
         </div>
 
-        <div id="jack-players-container" class="w-full max-w-5xl grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2.5"></div>
+        <div id="jack-players-container" class="w-full max-w-5xl grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2"></div>
 
-        <div class="w-full max-w-5xl my-1.5 bg-gradient-to-br from-slate-900 via-teal-950/30 to-slate-900 border-2 border-teal-800/60 rounded-3xl p-4 sm:p-5 flex flex-col items-center justify-center shadow-2xl relative">
-          <div id="jack-announcement-banner" class="text-xs sm:text-sm font-bold text-teal-200 mb-3.5 text-center px-3 py-2 rounded-xl bg-slate-950/80 border border-teal-800/60 w-full max-w-xl">
+        <div class="w-full max-w-5xl my-1 bg-gradient-to-br from-slate-900 via-teal-950/30 to-slate-900 border-2 border-teal-800/60 rounded-3xl p-3.5 sm:p-5 flex flex-col items-center justify-center shadow-2xl relative">
+          <div id="jack-announcement-banner" class="text-xs sm:text-sm font-bold text-teal-200 mb-3 text-center px-3 py-2.5 rounded-xl bg-slate-950/80 border border-teal-800/60 w-full max-w-xl">
             山札からカードを引くか、ステイアンドプレイを宣言してください
           </div>
 
@@ -817,17 +835,17 @@
             </div>
 
             <div class="flex flex-col gap-2.5 flex-1 max-w-xs">
-              <button id="btn-jack-hit" onclick="app.jackDrawCard()" class="w-full bg-teal-600 hover:bg-teal-500 active:scale-95 text-white font-extrabold text-xs sm:text-sm px-5 py-3.5 rounded-2xl transition shadow-[0_0_20px_rgba(13,148,136,0.5)] flex items-center justify-center gap-2">
+              <button id="btn-jack-hit" onclick="app.jackDrawCard()" class="w-full bg-teal-600 hover:bg-teal-500 active:scale-95 text-white font-extrabold text-xs sm:text-sm px-5 py-4 rounded-2xl transition shadow-[0_0_20px_rgba(13,148,136,0.5)] flex items-center justify-center gap-2">
                 <i data-lucide="plus-circle" class="w-4 h-4"></i><span>ドロー（問題に挑戦）</span>
               </button>
-              <button id="btn-jack-stay" onclick="app.jackDeclareStay()" class="w-full bg-amber-600 hover:bg-amber-500 active:scale-95 text-white font-extrabold text-xs sm:text-sm px-5 py-3.5 rounded-2xl transition shadow-[0_0_20px_rgba(217,119,6,0.5)] flex items-center justify-center gap-2">
+              <button id="btn-jack-stay" onclick="app.jackDeclareStay()" class="w-full bg-amber-600 hover:bg-amber-500 active:scale-95 text-white font-extrabold text-xs sm:text-sm px-5 py-4 rounded-2xl transition shadow-[0_0_20px_rgba(217,119,6,0.5)] flex items-center justify-center gap-2">
                 <i data-lucide="shield-check" class="w-4 h-4"></i><span>ステイアンドプレイ宣言</span>
               </button>
             </div>
           </div>
         </div>
 
-        <div class="w-full max-w-5xl bg-slate-900/95 border border-slate-800 rounded-3xl p-3.5 sm:p-4 shadow-2xl flex flex-col items-center mt-1.5">
+        <div class="w-full max-w-5xl bg-slate-900/95 border border-slate-800 rounded-3xl p-3.5 sm:p-4 shadow-2xl flex flex-col items-center mt-1">
           <div class="w-full flex flex-wrap items-center justify-between gap-2 mb-2">
             <div class="flex items-center gap-2">
               <span class="w-3 h-3 rounded-full" id="jack-my-color-dot" style="background-color: #38bdf8;"></span>
@@ -854,8 +872,8 @@
           <h2 id="result-title" class="text-xl sm:text-2xl font-extrabold text-white mb-4">作戦完了！</h2>
           <div id="result-ranking-list" class="space-y-2.5 text-left mb-6"></div>
           <div class="flex gap-3">
-            <button onclick="app.returnToPortal()" class="flex-1 bg-slate-700 hover:bg-slate-600 active:scale-95 text-white font-bold py-3.5 rounded-xl transition text-xs sm:text-sm">タイトルへ</button>
-            <button onclick="app.rematch()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 active:scale-95 text-white font-bold py-3.5 rounded-xl transition shadow-[0_0_15px_rgba(8,145,178,0.4)] text-xs sm:text-sm">もう一度プレイ</button>
+            <button onclick="app.returnToPortal()" class="flex-1 bg-slate-700 hover:bg-slate-600 active:scale-95 text-white font-bold py-4 rounded-xl transition text-xs sm:text-sm">タイトルへ</button>
+            <button onclick="app.rematch()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 active:scale-95 text-white font-bold py-4 rounded-xl transition shadow-[0_0_15px_rgba(8,145,178,0.4)] text-xs sm:text-sm">もう一度プレイ</button>
           </div>
         </div>
       </section>
@@ -899,7 +917,7 @@
 
       <div id="jack-quiz-options" class="grid grid-cols-3 gap-2.5 sm:gap-3 mb-3.5"></div>
 
-      <button id="btn-jack-submit-answer" onclick="app.submitJackQuizAnswer()" class="w-full bg-teal-600 hover:bg-teal-500 active:scale-98 text-white font-extrabold py-3.5 rounded-xl transition shadow-lg opacity-50 pointer-events-none mb-1">
+      <button id="btn-jack-submit-answer" onclick="app.submitJackQuizAnswer()" class="w-full bg-teal-600 hover:bg-teal-500 active:scale-98 text-white font-extrabold py-4 rounded-xl transition shadow-lg opacity-50 pointer-events-none mb-1 text-sm">
         回答する
       </button>
 
@@ -945,7 +963,7 @@
 
       <div class="mt-3 pt-3 border-t border-slate-800 flex justify-between items-center">
         <span id="matched-stock-indicator" class="text-xs font-bold text-amber-300">獲得ストック: なし</span>
-        <button onclick="app.toggleMemoryBoardModal()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition">閉じる</button>
+        <button onclick="app.toggleMemoryBoardModal()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-white text-xs font-bold px-5 py-3 rounded-xl transition">閉じる</button>
       </div>
     </div>
   </div>
@@ -969,9 +987,9 @@
         <button onclick="app.toggleChatModal()" class="p-2 bg-slate-800 text-slate-400 rounded-xl hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <div class="grid grid-cols-3 gap-2 mb-3 border-b border-slate-800 pb-2">
-        <button onclick="app.switchChatTab('announce')" id="btn-tab-announce" class="py-2 px-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center gap-1"><i data-lucide="megaphone" class="w-3.5 h-3.5"></i><span>お知らせ</span></button>
-        <button onclick="app.switchChatTab('chat')" id="btn-tab-chat" class="py-2 px-2 rounded-xl text-xs font-bold bg-cyan-600 text-white transition flex items-center justify-center gap-1"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i><span>会話ルーム</span></button>
-        <button onclick="app.switchChatTab('log')" id="btn-tab-log" class="py-2 px-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center gap-1"><i data-lucide="list-tree" class="w-3.5 h-3.5"></i><span>ゲームログ</span></button>
+        <button onclick="app.switchChatTab('announce')" id="btn-tab-announce" class="py-2.5 px-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center gap-1"><i data-lucide="megaphone" class="w-3.5 h-3.5"></i><span>お知らせ</span></button>
+        <button onclick="app.switchChatTab('chat')" id="btn-tab-chat" class="py-2.5 px-2 rounded-xl text-xs font-bold bg-cyan-600 text-white transition flex items-center justify-center gap-1"><i data-lucide="message-circle" class="w-3.5 h-3.5"></i><span>会話ルーム</span></button>
+        <button onclick="app.switchChatTab('log')" id="btn-tab-log" class="py-2.5 px-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center gap-1"><i data-lucide="list-tree" class="w-3.5 h-3.5"></i><span>ゲームログ</span></button>
       </div>
       <div id="tab-content-announce" class="flex-1 overflow-y-auto custom-scrollbar mb-3 space-y-2 text-xs pr-1 bg-slate-950 p-3 rounded-2xl border border-slate-800 hidden">
         <div class="text-slate-500 italic">管理室からの全体お知らせ待機中...</div>
@@ -983,8 +1001,8 @@
         <div class="text-slate-500 italic">システム通信記録待機中...</div>
       </div>
       <div id="chat-input-area" class="flex gap-2 pt-2 border-t border-slate-800">
-        <input id="game-chat-input" type="text" placeholder="全員にメッセージ送信..." onkeydown="if(event.key==='Enter')app.sendChatMsg()" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-base sm:text-xs text-white focus:outline-none focus:border-cyan-500">
-        <button onclick="app.sendChatMsg()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition">送信</button>
+        <input id="game-chat-input" type="text" placeholder="全員にメッセージ送信..." onkeydown="if(event.key==='Enter')app.sendChatMsg()" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-base sm:text-xs text-white focus:outline-none focus:border-cyan-500">
+        <button onclick="app.sendChatMsg()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-5 py-3 rounded-xl text-xs font-bold transition">送信</button>
       </div>
     </div>
   </div>
@@ -1005,7 +1023,7 @@
       <p class="text-xs text-slate-400 mb-4">最後に残った孤立カードの「本来のペア」は何グループだった？</p>
       <div id="jinuki-quiz-options" class="grid grid-cols-4 sm:grid-cols-7 gap-2 mb-6"></div>
       <div id="jinuki-quiz-result" class="hidden text-sm font-bold p-3 rounded-xl mb-4 transition-all"></div>
-      <button id="btn-close-jinuki-quiz" onclick="app.showResults()" class="w-full hidden bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold py-3.5 rounded-xl transition shadow-[0_0_15px_rgba(8,145,178,0.4)]">リザルトを確認する</button>
+      <button id="btn-close-jinuki-quiz" onclick="app.showResults()" class="w-full hidden bg-cyan-600 hover:bg-cyan-500 text-white font-extrabold py-4 rounded-xl transition shadow-[0_0_15px_rgba(8,145,178,0.4)]">リザルトを確認する</button>
     </div>
   </div>
 
@@ -1014,15 +1032,15 @@
       <h3 class="text-lg font-bold text-white mb-4">出動ルームに参加</h3>
       <div class="mb-4">
         <label class="block text-xs font-semibold text-slate-300 mb-1.5">あなたの名前（隊員コールサイン）</label>
-        <input id="input-join-player-name" type="text" maxlength="10" value="救急隊員" placeholder="名前を入力..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-base sm:text-sm text-white focus:outline-none focus:border-cyan-500 font-semibold">
+        <input id="input-join-player-name" type="text" maxlength="10" value="救急隊員" placeholder="名前を入力..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-base sm:text-sm text-white focus:outline-none focus:border-cyan-500 font-semibold">
       </div>
       <div class="mb-5">
         <label class="block text-xs font-semibold text-slate-300 mb-1.5">ルームコード（6桁）</label>
-        <input id="input-join-code" type="text" inputmode="numeric" maxlength="6" placeholder="123456" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-center text-xl text-white font-mono focus:outline-none focus:border-cyan-500 tracking-widest">
+        <input id="input-join-code" type="text" inputmode="numeric" maxlength="6" placeholder="123456" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-center text-xl text-white font-mono focus:outline-none focus:border-cyan-500 tracking-widest">
       </div>
       <div class="flex gap-2">
-        <button onclick="app.closeJoinModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl transition text-xs sm:text-sm font-bold">キャンセル</button>
-        <button onclick="app.executeJoin()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-3 rounded-xl font-bold transition shadow-[0_0_10px_rgba(8,145,178,0.4)] text-xs sm:text-sm">合流する</button>
+        <button onclick="app.closeJoinModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3.5 rounded-xl transition text-xs sm:text-sm font-bold">キャンセル</button>
+        <button onclick="app.executeJoin()" class="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white py-3.5 rounded-xl font-bold transition shadow-[0_0_10px_rgba(8,145,178,0.4)] text-xs sm:text-sm">合流する</button>
       </div>
     </div>
   </div>
@@ -1045,27 +1063,28 @@
       </div>
       <div id="manual-modal-body" class="flex-1 overflow-y-auto custom-scrollbar space-y-4 text-xs sm:text-sm text-slate-300 pr-1 leading-relaxed"></div>
       <div class="mt-4 pt-3 border-t border-slate-800 text-right">
-        <button onclick="app.closeManualModal()" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold px-6 py-2.5 rounded-xl transition shadow-md">閉じる</button>
+        <button onclick="app.closeManualModal()" class="bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold px-6 py-3 rounded-xl transition shadow-md">閉じる</button>
       </div>
     </div>
   </div>
 
-  <div id="modal-admin" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4">
-    <div class="w-full max-w-4xl bg-slate-900 border border-rose-500/50 rounded-3xl p-4 sm:p-6 flex flex-col max-h-[92vh] shadow-[0_0_50px_rgba(225,29,72,0.2)]">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-        <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2"><i data-lucide="shield-alert" class="w-5 h-5 text-rose-500"></i> システム管理センター (CMS)</h3>
+  <!-- 🆕 管理者用画面（CMSモーダル：スマホでも5行同時表示＆5行編集エリアで操作しやすいレイアウト） -->
+  <div id="modal-admin" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-2 sm:p-4">
+    <div class="w-full max-w-4xl bg-slate-900 border border-rose-500/50 rounded-3xl p-3.5 sm:p-6 flex flex-col max-h-[94vh] shadow-[0_0_50px_rgba(225,29,72,0.2)]">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+        <h3 class="text-sm sm:text-lg font-bold text-white flex items-center gap-2"><i data-lucide="shield-alert" class="w-5 h-5 text-rose-500"></i> システム管理センター (CMS)</h3>
         <button onclick="app.closeAdmin()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       
       <div id="admin-auth-box" class="py-12 flex flex-col items-center">
         <p class="text-sm font-bold text-slate-300 mb-3">管理者暗証番号（4桁）を入力</p>
         <input id="admin-pin-input" type="password" inputmode="numeric" maxlength="4" placeholder="••••" class="bg-slate-950 border border-slate-700 rounded-xl px-6 py-3 text-center text-2xl font-mono text-white mb-4 tracking-[1em] focus:outline-none focus:border-rose-500">
-        <button onclick="app.checkAdminPin()" class="bg-rose-700 hover:bg-rose-600 text-white font-bold px-8 py-3 rounded-xl transition shadow-[0_0_15px_rgba(225,29,72,0.4)]">アクセス</button>
+        <button onclick="app.checkAdminPin()" class="bg-rose-700 hover:bg-rose-600 text-white font-bold px-8 py-3.5 rounded-xl transition shadow-[0_0_15px_rgba(225,29,72,0.4)]">アクセス</button>
       </div>
       
-      <div id="admin-content-box" class="hidden flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-5 pr-1">
-        <div class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-between shadow-inner">
-          <div class="flex items-center gap-3">
+      <div id="admin-content-box" class="hidden flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-4 pr-1">
+        <div class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between shadow-inner">
+          <div class="flex items-center gap-2.5">
             <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span></span>
             <span class="text-xs font-bold text-slate-300">現在のリアルタイム接続人数:</span>
           </div>
@@ -1075,17 +1094,17 @@
           </div>
         </div>
 
-        <div class="w-full bg-slate-800/40 border border-amber-500/40 rounded-2xl p-4">
-          <h4 class="text-sm font-bold text-amber-300 mb-2 flex items-center gap-2"><i data-lucide="megaphone" class="w-4 h-4"></i>全体お知らせ配信</h4>
-          <div class="flex gap-2">
-            <input id="admin-announce-input" type="text" placeholder="全プレイヤーへ通知するお知らせ内容を入力..." onkeydown="if(event.key==='Enter')app.sendAdminAnnouncement()" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
-            <button onclick="app.sendAdminAnnouncement()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition shadow-md">一斉送信</button>
+        <div class="w-full bg-slate-800/40 border border-amber-500/40 rounded-2xl p-3.5">
+          <h4 class="text-xs sm:text-sm font-bold text-amber-300 mb-2 flex items-center gap-2"><i data-lucide="megaphone" class="w-4 h-4"></i>全体お知らせ配信</h4>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input id="admin-announce-input" type="text" placeholder="全プレイヤーへ通知するお知らせ内容を入力..." onkeydown="if(event.key==='Enter')app.sendAdminAnnouncement()" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm sm:text-xs text-white focus:outline-none focus:border-amber-500">
+            <button onclick="app.sendAdminAnnouncement()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-5 py-3 rounded-xl transition shadow-md">一斉送信</button>
           </div>
         </div>
         
-        <div class="w-full bg-slate-800/40 border border-slate-700 rounded-2xl p-4">
-          <h4 class="text-sm font-bold text-white mb-3 border-b border-slate-700 pb-2 flex items-center gap-2"><i data-lucide="unlock" class="w-4 h-4"></i>出動権限（アクセス）コントロール</h4>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="w-full bg-slate-800/40 border border-slate-700 rounded-2xl p-3.5">
+          <h4 class="text-xs sm:text-sm font-bold text-white mb-3 border-b border-slate-700 pb-2 flex items-center gap-2"><i data-lucide="unlock" class="w-4 h-4"></i>出動権限（アクセス）コントロール</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <div class="flex justify-between items-center p-3 bg-slate-900 rounded-xl border border-slate-800">
               <span class="text-xs font-bold text-rose-300">GAME 01: 致死性不整脈を回避せよ！</span>
               <label class="relative inline-flex items-center cursor-pointer">
@@ -1117,29 +1136,29 @@
           </div>
         </div>
         
-        <div class="w-full flex-1 flex flex-col min-h-[300px] mt-2">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-3 border-b border-slate-700 pb-2">
-            <h4 class="text-sm font-bold text-white flex items-center gap-2"><i data-lucide="database" class="w-4 h-4"></i>問題カード データベース管理</h4>
-            <div class="flex flex-wrap items-center gap-2">
-              <select id="admin-deck-selector" onchange="app.renderAdminCards()" class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
-                <option value="all">マスターデータ (全カード)</option>
-                <option value="babanuki">GAME 01: ババ抜き用</option>
-                <option value="memory">GAME 02: 神経衰弱用 (全40グループ)</option>
-                <option value="jinuki">GAME 03: ジジ抜き用</option>
-                <option value="jack">GAME 04: 99ジャック用 (全228問)</option>
+        <div class="w-full flex-1 flex flex-col min-h-[340px] mt-1">
+          <div class="flex flex-col gap-2.5 mb-3 border-b border-slate-700 pb-3">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2"><i data-lucide="database" class="w-4 h-4"></i>問題カード データベース管理</h4>
+              <div class="flex items-center gap-2">
+                <button onclick="app.addNewCardPrompt()" class="text-xs bg-cyan-700 hover:bg-cyan-600 active:scale-95 text-white px-3.5 py-2 rounded-xl transition font-bold shadow">＋カード追加</button>
+                <button onclick="app.resetDB()" class="text-xs bg-rose-900/60 hover:bg-rose-800 active:scale-95 text-rose-300 border border-rose-800 px-3 py-2 rounded-xl transition">初期化</button>
+              </div>
+            </div>
+            <!-- 🆕 スマホでも5行すべてが一覧で見えてワンタップで切り替えられる5行表示セレクトボックス -->
+            <div>
+              <label class="block text-[11px] font-bold text-cyan-300 mb-1">📂 表示・編集するデッキを選択（5行同時表示）：</label>
+              <select id="admin-deck-selector" size="5" onchange="app.renderAdminCards()" class="w-full bg-slate-950 border-2 border-slate-700 rounded-xl p-2 text-xs sm:text-sm text-white focus:outline-none focus:border-cyan-500 custom-scrollbar leading-relaxed">
+                <option value="all" selected class="py-1.5 px-2 rounded hover:bg-slate-800">📋 マスターデータ (全カード一覧)</option>
+                <option value="babanuki" class="py-1.5 px-2 rounded hover:bg-slate-800">🃏 GAME 01: ババ抜き用カード</option>
+                <option value="memory" class="py-1.5 px-2 rounded hover:bg-slate-800">🧠 GAME 02: 神経衰弱用 (全40グループ)</option>
+                <option value="jinuki" class="py-1.5 px-2 rounded hover:bg-slate-800">🔍 GAME 03: ジジ抜き用カード</option>
+                <option value="jack" class="py-1.5 px-2 rounded hover:bg-slate-800">🎯 GAME 04: 99ジャック用 (全228問)</option>
               </select>
-              <button onclick="app.addNewCardPrompt()" class="text-xs bg-cyan-700 hover:bg-cyan-600 text-white px-3 py-1.5 rounded-lg transition font-bold">＋カード追加</button>
-              <button onclick="app.resetDB()" class="text-xs bg-rose-900/60 hover:bg-rose-800 text-rose-300 border border-rose-800 px-3 py-1.5 rounded-lg transition">初期化</button>
             </div>
           </div>
-          <div class="flex-1 bg-slate-900 rounded-xl border border-slate-700 overflow-y-auto custom-scrollbar relative">
-            <table class="w-full text-left text-xs text-slate-300">
-              <thead class="bg-slate-800 text-slate-400 font-mono sticky top-0 z-10 shadow-md">
-                <tr><th class="p-2 w-12 text-center">ID</th><th class="p-2 w-16 text-center">数値/Gr</th><th class="p-2 w-20 text-center">種別</th><th class="p-2 w-36">タイトル / 選択肢・ふち</th><th class="p-2">問題文</th><th class="p-2 w-24 text-center">操作</th></tr>
-              </thead>
-              <tbody id="admin-card-table-body" class="divide-y divide-slate-800/80"></tbody>
-            </table>
-          </div>
+
+          <div class="flex-1 bg-slate-950 rounded-2xl border border-slate-800 overflow-y-auto custom-scrollbar p-2 space-y-2.5" id="admin-card-list-container"></div>
         </div>
       </div>
     </div>
@@ -1279,7 +1298,7 @@
       const badgeDot = document.getElementById('badge-dot-chat');
       if(chatContent) {
         if(chatContent.querySelector('.italic')) chatContent.innerHTML = '';
-        chatContent.innerHTML += `<div class="p-2 rounded-xl bg-slate-900 border border-slate-800 mb-1"><span class="text-cyan-400 font-bold mr-2">${utils.escapeHtml(data.name)}:</span><span class="text-slate-200">${utils.escapeHtml(data.message)}</span></div>`;
+        chatContent.innerHTML += `<div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 mb-1.5"><span class="text-cyan-400 font-bold mr-2">${utils.escapeHtml(data.name)}:</span><span class="text-slate-200">${utils.escapeHtml(data.message)}</span></div>`;
         chatContent.scrollTop = chatContent.scrollHeight;
       }
       const modalHidden = document.getElementById('modal-chat')?.classList.contains('hidden');
@@ -1392,8 +1411,497 @@
         else app.renderTable();
       }
     });
+
+    const app = {
+      openManualModal: () => {
+        const modal = document.getElementById('modal-manual');
+        const titleEl = document.getElementById('manual-modal-title');
+        const bodyEl = document.getElementById('manual-modal-body');
+        if(!modal || !bodyEl) return;
+
+        let titleTxt = '救急トランプ総合演習 ガイド';
+        let htmlTxt = '';
+
+        if (state.mode === 'babanuki') {
+          titleTxt = 'GAME 01: 致死性不整脈を回避せよ！（救急ババ抜き）';
+          htmlTxt = `
+            <div class="p-3 bg-rose-950/30 border border-rose-900/50 rounded-2xl mb-3"><strong class="text-rose-300">【ゲームの目的】</strong><br>除細動が直ちに必要な「心室細動（VF）」のカードを最後まで手元に抱え持たないようにするゲームです。</div>
+            <ul class="list-disc list-inside space-y-2 text-slate-200">
+              <li>自分の番になったら、隣のプレイヤーの手札から1枚カードを引きます。</li>
+              <li>同じグループの数字・疾患ペアが手札に揃ったら、「ペアを破棄」ボタンで場に捨てることができます。</li>
+              <li>最後までVFカードを持っていたプレイヤーが敗北（最下位）となります。</li>
+            </ul>
+          `;
+        } else if (state.mode === 'memory') {
+          titleTxt = 'GAME 02: 救急神経衰弱バトル';
+          htmlTxt = `
+            <div class="p-3 bg-blue-950/30 border border-blue-900/50 rounded-2xl mb-3"><strong class="text-blue-300">【ゲームの目的】</strong><br>全40疾患グループの問題文カードからペアをいち早く見つけ出し、自分の救急疾患ボードを完成させるゲームです。</div>
+            <ul class="list-disc list-inside space-y-2 text-slate-200">
+              <li>自分の番に裏向きのカードを2枚めくり、同じ疾患グループであればペア獲得となります。</li>
+              <li>獲得したペアを自陣ボードの正しい疾患スロットにはめていきます（回答権は1回のみ）。</li>
+              <li>すべての疾患が埋まるか場のカードがなくなると終了し、完成させた疾患数が多いプレイヤーが勝利します。</li>
+            </ul>
+          `;
+        } else if (state.mode === 'jinuki') {
+          titleTxt = 'GAME 03: 救急 隠れた疾患を当てろ（ジジ抜き）';
+          htmlTxt = `
+            <div class="p-3 bg-amber-950/30 border border-amber-900/50 rounded-2xl mb-3"><strong class="text-amber-300">【ゲームの目的】</strong><br>全54枚から1枚がランダムに事前封印された状態で進行するジジ抜きです。</div>
+            <ul class="list-disc list-inside space-y-2 text-slate-200">
+              <li>「推理シート」を活用して、どのカードが封印されているかを予測します。</li>
+              <li>ゲーム終了後には、封印されたカードの本来のペアを当てるクイズ（制限60秒）が発生します。</li>
+            </ul>
+          `;
+        } else if (state.mode === 'jack') {
+          titleTxt = 'GAME 04: 99ジャック';
+          htmlTxt = `
+            <div class="p-3 bg-teal-950/30 border border-teal-900/50 rounded-2xl mb-3"><strong class="text-teal-300">【ゲームの目的】</strong><br>合計点が上限の <strong class="text-teal-300">98.99</strong> を超えない範囲で、より99に近づける救急版ブラックジャックです。</div>
+            <ul class="list-disc list-inside space-y-2 text-slate-200">
+              <li>山札からカードを引くと、小数第2位までの疾患3択クイズ（制限60秒）が出題されます。</li>
+              <li>手札上限は最大10枚です。10枚に達すると自動ステイとなります。</li>
+              <li><strong class="text-emerald-400">正解</strong>すると「手札に加算するか、破棄するか」を選べます。<br><strong class="text-rose-400">不正解や時間切れ</strong>になると、手札へ強制加算されます。</li>
+              <li>手札の合計値が <strong class="text-rose-400">99.00以上</strong> になると急変（バースト：瞳孔散大・心拍呼吸停止）で敗北となります。</li>
+            </ul>
+          `;
+        }
+
+        if(titleEl) titleEl.textContent = titleTxt;
+        if(bodyEl) bodyEl.innerHTML = htmlTxt;
+        modal.classList.remove('hidden');
+        if(window.lucide) lucide.createIcons();
+      },
+
+      closeManualModal: () => {
+        document.getElementById('modal-manual')?.classList.add('hidden');
+      },
+
+      init: () => {
+        try {
+          const savedName = localStorage.getItem('ems_player_name');
+          if (savedName) {
+            state.me.name = savedName;
+            const lobbyInput = document.getElementById('input-player-name');
+            const joinInput = document.getElementById('input-join-player-name');
+            if (lobbyInput) lobbyInput.value = savedName;
+            if (joinInput) joinInput.value = savedName;
+          }
+          app.renderPortal(); 
+          app.showScreen('view-portal');
+          if (window.lucide) lucide.createIcons();
+        } catch (err) { console.error("Init error:", err); }
+      },
+
+      sendChatMsg: () => {
+        const input = document.getElementById('game-chat-input');
+        const msg = input ? input.value.trim() : '';
+        if(!msg) return;
+        const lobbyInput = document.getElementById('input-player-name');
+        const senderName = state.me.name || (lobbyInput ? lobbyInput.value.trim() : '') || '救急隊員';
+        socket.emit('send_chat', {
+          roomCode: 'GLOBAL',
+          name: senderName,
+          message: msg
+        });
+        input.value = '';
+      },
+
+      sendAdminAnnouncement: () => {
+        const input = document.getElementById('admin-announce-input');
+        const msg = input ? input.value.trim() : '';
+        if (!msg) return utils.showToast('お知らせ内容を入力してください');
+        socket.emit('admin_send_announcement', { message: msg });
+        input.value = '';
+        utils.showToast('全体お知らせを配信しました');
+      },
+
+      showScreen: (id) => {
+        ['view-portal', 'view-lobby', 'view-room', 'view-game', 'view-memory-game', 'view-jack-game', 'view-result'].forEach(s => {
+          const el = document.getElementById(s);
+          if (el) el.classList.toggle('hidden', s !== id);
+        });
+        const returnBtn = document.getElementById('btn-return-portal');
+        if (returnBtn) returnBtn.classList.toggle('hidden', id === 'view-portal');
+        if (window.lucide) lucide.createIcons();
+      },
+
+      returnToPortal: () => {
+        if (state.room && state.room.code && !state.room.isSolo) {
+          socket.emit('leave_room', { roomCode: state.room.code });
+        }
+        app.clearAllTimers();
+        state.phase = 'idle';
+        state.room = { code: '', isHost: false, isSolo: false, isOpen: false };
+        app.renderPortal();
+        app.showScreen('view-portal');
+        const badge = document.getElementById('current-mode-badge');
+        if(badge) {
+          badge.textContent = '総合ポータル';
+          badge.className = 'text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-cyan-900/60 text-cyan-300 border border-cyan-700';
+        }
+      },
+      
+      renderPortal: () => {
+        const c = document.getElementById('portal-games-container'); 
+        if(!c) return;
+        c.innerHTML = '';
+        const games = [
+          { id: 'game1', code: 'babanuki', lbl: 'GAME 01', title: '致死性不整脈を回避せよ！', icon: 'activity', desc: '【救急ババ抜き】除細動が不可欠な「心室細動（VF）」を最後まで抱え持っていた者が敗北！', col: 'rose' },
+          { id: 'game2', code: 'memory', lbl: 'GAME 02', title: '改訂長谷川簡易知能評価スケールに引っかかるな！', icon: 'brain', desc: '【救急神経衰弱】全40疾患グループ対応の神経衰弱バトル！', col: 'blue' },
+          { id: 'game3', code: 'jinuki', lbl: 'GAME 03', title: '救急 隠れた疾患を当てろ', icon: 'search', desc: '【救急ジジ抜き＋VF/DCペア】全54枚から1枚が事前封印！孤立カードから病態を推理せよ！', col: 'amber' },
+          { id: 'game4', code: 'jack', lbl: 'GAME 04', title: '99ジャック', icon: 'crosshair', desc: '【救急ブラックジャック】3択クイズに答えて98.99を目指せ！99.00を超えると急変（バースト）！', col: 'teal' }
+        ];
+        games.forEach(g => {
+          const isReady = currentGameAccess[g.id];
+          c.innerHTML += `
+            <div onclick="${isReady ? `app.selectGame('${g.code}')` : `utils.showToast('${g.title} は現在管理システムからロックされています')`}" 
+                 class="cursor-pointer group relative overflow-hidden rounded-2xl border p-5 sm:p-6 shadow-xl transition-all duration-300 ${isReady ? `bg-gradient-to-br from-slate-900 via-slate-900/90 to-${g.col}-950/40 border-${g.col}-900/40 hover:border-${g.col}-500 active:scale-98` : 'bg-slate-900/50 border-slate-800 opacity-60'}">
+              <div class="flex items-start justify-between mb-3">
+                <span class="text-xs font-mono px-2.5 py-1 rounded-md ${isReady ? `bg-${g.col}-500/20 text-${g.col}-300 border-${g.col}-500/30` : 'bg-slate-800 text-slate-400'} font-semibold border">${g.lbl}</span>
+                <span class="text-xs px-2.5 py-0.5 rounded-full ${isReady ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1' : 'bg-slate-700/60 text-slate-300 border border-slate-600'} font-bold">${isReady ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>出動可能' : '<i data-lucide="lock" class="w-3 h-3 mr-1 inline"></i>LOCK'}</span>
+              </div>
+              <div class="flex items-center gap-3 mb-2 relative z-10">
+                <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center transition ${isReady ? `bg-${g.col}-600/20 border border-${g.col}-500/30 text-${g.col}-400` : 'bg-slate-800 text-slate-500'}"><i data-lucide="${g.icon}" class="w-6 h-6"></i></div>
+                <h3 class="text-base sm:text-xl font-bold ${isReady ? 'text-white' : 'text-slate-400'}">${g.title}</h3>
+              </div>
+              <p class="text-xs ${isReady ? 'text-slate-400' : 'text-slate-500'} relative z-10 leading-relaxed">${g.desc}</p>
+            </div>
+          `;
+        });
+        if (window.lucide) lucide.createIcons();
+      },
+
+      applyModeBadgeUI: (mode) => {
+        state.mode = mode;
+        const tag = document.getElementById('lobby-mode-tag'), title = document.getElementById('lobby-mode-title'), badge = document.getElementById('current-mode-badge');
+        const turnBadge = document.getElementById('game-turn-text');
+        const memoryConfig = document.getElementById('memory-only-config');
+        const babanukiConfig = document.getElementById('babanuki-only-config');
+        const jackConfig = document.getElementById('jack-only-config');
+        const aiRow = document.getElementById('ai-autofill-config-row');
+        const aiCheck = document.getElementById('config-auto-fill-ai');
+        const soloBtn = document.getElementById('btn-solo-ai');
+        const maxSelect = document.getElementById('config-max-players');
+
+        document.querySelectorAll('.jack-player-opt').forEach(el => {
+          el.classList.toggle('hidden', mode !== 'jack');
+        });
+        if (mode !== 'jack' && maxSelect && parseInt(maxSelect.value, 10) > 6) {
+          maxSelect.value = '6';
+        }
+
+        if (mode === 'babanuki') {
+          if(tag) tag.textContent = 'GAME 01'; if(title) title.textContent = '致死性不整脈を回避せよ！';
+          if(badge) { badge.textContent = '不整脈を回避せよ！'; badge.className = 'text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-rose-900/60 text-rose-300 border border-rose-700'; }
+          if(turnBadge) { turnBadge.textContent = '不整脈を回避せよ！'; turnBadge.className = 'text-[11px] sm:text-xs px-2.5 py-1 rounded-full bg-rose-950 text-rose-300 border border-rose-700 font-bold'; }
+          document.getElementById('btn-open-jinuki-tracker')?.classList.add('hidden');
+          memoryConfig?.classList.add('hidden');
+          babanukiConfig?.classList.remove('hidden');
+          jackConfig?.classList.add('hidden');
+          aiRow?.classList.remove('hidden');
+          if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（AI演習）';
+        } else if (mode === 'memory') {
+          if(tag) tag.textContent = 'GAME 02'; if(title) title.textContent = '救急神経衰弱バトル';
+          if(badge) { badge.textContent = '神経衰弱バトル'; badge.className = 'text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-blue-900/60 text-blue-300 border border-blue-600'; }
+          document.getElementById('btn-open-jinuki-tracker')?.classList.add('hidden');
+          memoryConfig?.classList.remove('hidden');
+          babanukiConfig?.classList.add('hidden');
+          jackConfig?.classList.add('hidden');
+          aiRow?.classList.remove('hidden');
+          if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（AI演習）';
+        } else if (mode === 'jinuki') {
+          if(tag) tag.textContent = 'GAME 03'; if(title) title.textContent = '救急 隠れた疾患を当てろ';
+          if(badge) { badge.textContent = '隠れカード推理'; badge.className = 'text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-amber-900/60 text-amber-300 border border-amber-700'; }
+          if(turnBadge) { turnBadge.textContent = '隠れカードを当てろ'; turnBadge.className = 'text-[11px] sm:text-xs px-2.5 py-1 rounded-full bg-amber-950 text-amber-300 border border-amber-700 font-bold'; }
+          document.getElementById('btn-open-jinuki-tracker')?.classList.remove('hidden');
+          memoryConfig?.classList.add('hidden');
+          babanukiConfig?.classList.remove('hidden');
+          jackConfig?.classList.add('hidden');
+          aiRow?.classList.remove('hidden');
+          if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（AI演習）';
+        } else if (mode === 'jack') {
+          if(tag) tag.textContent = 'GAME 04'; if(title) title.textContent = '99ジャック';
+          if(badge) { badge.textContent = '99ジャック'; badge.className = 'text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-teal-900/60 text-teal-300 border border-teal-600'; }
+          document.getElementById('btn-open-jinuki-tracker')?.classList.add('hidden');
+          memoryConfig?.classList.add('hidden');
+          babanukiConfig?.classList.add('hidden');
+          jackConfig?.classList.remove('hidden');
+          if(aiCheck) aiCheck.checked = false;
+          aiRow?.classList.add('hidden');
+          if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（1 VS 1 救急AI対戦）';
+        }
+        app.renderOpenRoomsList();
+      },
+
+      selectGame: (mode) => {
+        app.applyModeBadgeUI(mode);
+        app.showScreen('view-lobby');
+      },
+
+      updateLobbyConfigUI: () => {
+        const maxP = parseInt(document.getElementById('config-max-players')?.value || 4, 10);
+        const teamMode = document.getElementById('config-team-mode');
+        if(maxP < 4 && teamMode) teamMode.value = 'solo';
+      },
+
+      handleOpenRoomSignal: (payload) => {
+        if(!payload || !payload.code) return;
+        if(payload.action === 'close' || !payload.isOpen) {
+          delete state.openRooms[payload.code];
+        } else {
+          state.openRooms[payload.code] = { ...payload, updatedAt: Date.now() };
+        }
+        app.renderOpenRoomsList();
+      },
+
+      broadcastRoomSignal: (action = 'update') => {
+        if(!state.room.isHost || state.room.isSolo || !state.room.code) return;
+        const payload = {
+          action: (action === 'close' || !state.room.isOpen || state.phase !== 'waiting') ? 'close' : 'update',
+          code: state.room.code,
+          hostName: state.me.name,
+          mode: state.mode,
+          curPlayers: state.players.length,
+          maxPlayers: state.config.maxPlayers,
+          isOpen: !!state.room.isOpen
+        };
+        socket.emit('send_chat', {
+          roomCode: 'GLOBAL',
+          name: '__SYS__',
+          message: '__SYS_ROOM__:' + JSON.stringify(payload)
+        });
+      },
+
+      renderOpenRoomsList: () => {
+        const box = document.getElementById('open-rooms-list');
+        if(!box) return;
+        const now = Date.now();
+        const modeNames = { babanuki: 'GAME 01: ババ抜き', memory: 'GAME 02: 神経衰弱', jinuki: 'GAME 03: ジジ抜き', jack: 'GAME 04: 99ジャック' };
+        const activeList = Object.values(state.openRooms).filter(r => (now - r.updatedAt < 15000) && r.isOpen && r.curPlayers < r.maxPlayers && r.mode === state.mode);
+
+        if(activeList.length === 0) {
+          box.innerHTML = '<div class="text-[11px] text-slate-500 text-center py-2">現在このモードで募集中のオープンルームはありません</div>';
+          return;
+        }
+
+        box.innerHTML = '';
+        activeList.forEach(r => {
+          box.innerHTML += `
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-emerald-500/40 hover:border-emerald-400 transition">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-extrabold text-white">${utils.escapeHtml(r.hostName)} の部隊</span>
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700">${r.curPlayers}/${r.maxPlayers}名</span>
+                </div>
+                <div class="text-[10px] text-slate-400 font-mono mt-0.5">${modeNames[r.mode] || r.mode} / CODE: ${utils.escapeHtml(r.code)}</div>
+              </div>
+              <button onclick="app.joinOpenRoomDirect('${utils.escapeHtml(r.code)}')" class="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-extrabold px-3.5 py-2 rounded-xl transition shadow-md">参加する</button>
+            </div>
+          `;
+        });
+      },
+
+      joinOpenRoomDirect: (code) => {
+        const codeInput = document.getElementById('input-join-code');
+        if(codeInput) codeInput.value = code;
+        const joinNameInput = document.getElementById('input-join-player-name');
+        const lobbyName = document.getElementById('input-player-name')?.value.trim();
+        if(joinNameInput && lobbyName) joinNameInput.value = lobbyName;
+        app.executeJoin();
+      },
+
+      toggleRoomOpenStatus: () => {
+        if(!state.room.isHost) return;
+        state.room.isOpen = !state.room.isOpen;
+        state.config.isOpenRoom = state.room.isOpen;
+        app.updateRoomUI();
+        app.broadcastRoomSignal(state.room.isOpen ? 'update' : 'close');
+        socket.emit('update_room', { roomCode: state.room.code, players: state.players, config: state.config });
+        utils.showToast(state.room.isOpen ? '🌐 オープンルーム（公開募集）に変更しました' : '🔒 クローズドルーム（コード限定）に変更しました');
+      },
+
+      readConfig: () => {
+        state.config.mode = state.mode;
+        state.config.maxPlayers = parseInt(document.getElementById('config-max-players')?.value || 4, 10);
+        state.config.turnTimeLimit = parseInt(document.getElementById('config-turn-time')?.value || 20, 10);
+        state.config.autoFillAI = state.mode === 'jack' ? false : (document.getElementById('config-auto-fill-ai')?.checked ?? true);
+        state.config.memoryPairs = parseInt(document.getElementById('config-memory-pairs')?.value || 40, 10);
+        state.config.teamMode = document.getElementById('config-team-mode')?.value || 'solo';
+        state.config.showMemoryDisease = document.getElementById('config-memory-show-disease')?.checked ?? true;
+        state.config.showGroupNum = document.getElementById('config-show-group-num')?.checked ?? true;
+        state.config.jackShowTotal = document.getElementById('config-jack-show-total')?.checked ?? true;
+        state.config.isOpenRoom = document.getElementById('config-is-open-room')?.checked ?? false;
+        state.me.name = document.getElementById('input-player-name')?.value.trim() || '救急隊員';
+        try { localStorage.setItem('ems_player_name', state.me.name); } catch(e){}
+      },
+
+      updateRoomUI: () => {
+        const maxEl = document.getElementById('room-summary-max');
+        const timerEl = document.getElementById('room-summary-timer');
+        const aiEl = document.getElementById('room-summary-ai');
+        if(maxEl) maxEl.innerHTML = `最大: <strong class="text-cyan-400">${state.config.maxPlayers}名</strong>`;
+        if(timerEl) timerEl.innerHTML = state.mode === 'jack' ? `クイズ制限: <strong class="text-amber-400">60秒</strong>` : `手番制限: <strong class="text-amber-400">${state.config.turnTimeLimit>=900?'無制限':state.config.turnTimeLimit+'秒'}</strong>`;
+        if(aiEl) aiEl.innerHTML = state.mode === 'jack' ? `合計表示: <strong class="text-teal-400">${state.config.jackShowTotal?'表示':'非表示(暗算)'}</strong>` : `AI自動: <strong class="text-emerald-400">${state.config.autoFillAI?'オン':'オフ'}</strong>`;
+
+        const isOpen = state.room.isHost ? !!state.room.isOpen : !!(state.config.isOpenRoom ?? false);
+        const statusBadge = document.getElementById('room-open-status-badge');
+        const toggleBtn = document.getElementById('btn-toggle-room-open');
+        if(statusBadge) {
+          statusBadge.textContent = isOpen ? '🌐 オープン公開中' : '🔒 クローズド (コード限定)';
+          statusBadge.className = isOpen
+            ? 'text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700'
+            : 'text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-950 text-amber-300 border border-amber-700';
+        }
+        if(toggleBtn) {
+          toggleBtn.classList.toggle('hidden', !state.room.isHost);
+          toggleBtn.textContent = isOpen ? '🔒 クローズドに変更' : '🌐 オープンに変更';
+        }
+        
+        const list = document.getElementById('room-members-list'); 
+        if(!list) return;
+        list.innerHTML = '';
+        const countEl = document.getElementById('room-member-count');
+        if(countEl) countEl.textContent = `${state.players.length} / ${state.config.maxPlayers} 名`;
+        
+        state.players.forEach((p, i) => {
+          const pColor = p.color || '#38bdf8';
+          list.innerHTML += `<div class="flex items-center p-3 rounded-xl bg-slate-950 border border-slate-800"><span class="w-6 h-6 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-xs mr-3 font-mono">${i + 1}</span><span class="w-3 h-3 rounded-full mr-2.5 flex-shrink-0" style="background-color: ${pColor}; box-shadow: 0 0 8px ${pColor}"></span><span class="text-sm font-semibold text-white mr-2">${utils.escapeHtml(p.name)}</span>${p.id === state.me.id ? '<span class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800 px-2 py-0.5 rounded-full">あなた</span>' : ''}${p.isAI ? '<span class="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded-full">救急AI</span>' : ''}</div>`;
+        });
+      },
+
+      createRoom: () => {
+        app.clearAllTimers(); state.phase = 'waiting';
+        app.readConfig();
+        if (state.mode === 'jack') state.config.autoFillAI = false;
+
+        let newCode = '';
+        do {
+          newCode = Math.floor(100000 + Math.random() * 900000).toString();
+        } while (state.openRooms && state.openRooms[newCode]);
+
+        state.room = { code: newCode, isHost: true, isSolo: false, isOpen: !!state.config.isOpenRoom };
+        const codeDisplay = document.getElementById('room-code-display');
+        if(codeDisplay) codeDisplay.textContent = state.room.code;
+        const myColor = pickUnusedColor([]);
+        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: myColor, totalInternal: 0, isStayed: false, isBusted: false }];
+        socket.emit('join_room', { roomCode: state.room.code, playerName: state.me.name, config: state.config });
+        document.getElementById('btn-start-game')?.classList.remove('hidden'); 
+        if (state.mode === 'jack') {
+          document.getElementById('host-ai-controls')?.classList.add('hidden');
+        } else {
+          document.getElementById('host-ai-controls')?.classList.remove('hidden');
+        }
+        app.updateRoomUI(); app.showScreen('view-room');
+
+        app.broadcastRoomSignal('update');
+        if(state.timers.openRoomBeacon) clearInterval(state.timers.openRoomBeacon);
+        state.timers.openRoomBeacon = setInterval(() => {
+          if(state.phase === 'waiting' && state.room.isHost) {
+            app.broadcastRoomSignal('update');
+          } else {
+            clearInterval(state.timers.openRoomBeacon);
+          }
+        }, 4000);
+      },
+
+      startSoloAI: () => {
+        app.readConfig(); state.room = { code: 'SOLO-AI', isHost: true, isSolo: true, isOpen: false };
+        if (state.mode === 'jack') {
+          state.config.maxPlayers = 2;
+          state.config.autoFillAI = true;
+        } else {
+          state.config.autoFillAI = true;
+        }
+        const myColor = pickUnusedColor([]);
+        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: myColor, totalInternal: 0, isStayed: false, isBusted: false }];
+        app.startGame(); 
+      },
+
+      showJoinModal: () => {
+        const lobbyName = document.getElementById('input-player-name')?.value.trim();
+        const joinNameInput = document.getElementById('input-join-player-name');
+        if (joinNameInput && lobbyName) {
+          joinNameInput.value = lobbyName;
+        }
+        document.getElementById('modal-join-room')?.classList.remove('hidden');
+      },
+      closeJoinModal: () => document.getElementById('modal-join-room')?.classList.add('hidden'),
+      
+      executeJoin: () => {
+        const codeInput = document.getElementById('input-join-code');
+        const code = codeInput ? codeInput.value.trim() : ''; 
+        if(code.length < 4) return utils.showToast('ルームコード（6桁）を入力してください');
+        
+        const joinNameInput = document.getElementById('input-join-player-name');
+        const lobbyNameInput = document.getElementById('input-player-name');
+        const joinName = joinNameInput ? joinNameInput.value.trim() : '';
+        if (joinName && lobbyNameInput) {
+          lobbyNameInput.value = joinName;
+        }
+
+        app.readConfig(); 
+        if (joinName) {
+          state.me.name = joinName;
+          try { localStorage.setItem('ems_player_name', state.me.name); } catch(e){}
+        }
+
+        state.room = { code: code, isHost: false, isSolo: false, isOpen: false };
+        const codeDisplay = document.getElementById('room-code-display');
+        if(codeDisplay) codeDisplay.textContent = state.room.code;
+        
+        socket.emit('join_room', { roomCode: code, playerName: state.me.name, config: state.config });
+        
+        document.getElementById('btn-start-game')?.classList.add('hidden');
+        document.getElementById('host-ai-controls')?.classList.add('hidden');
+        app.closeJoinModal(); 
+        app.updateRoomUI(); 
+        app.showScreen('view-room');
+        utils.showToast(`${utils.escapeHtml(state.me.name)} としてルーム [${code}] に合流しました！`);
+        app.addLogMessage(`${state.me.name} がルーム ${code} に参加しました`);
+      },
+
+      addBot: () => {
+        if(state.players.length >= state.config.maxPlayers) return utils.showToast('定員です');
+        const bIdx = state.players.filter(p=>p.isAI).length;
+        const botColor = pickUnusedColor(state.players);
+        state.players.push({ id: `ai_${Date.now()}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: botColor, totalInternal: 0, isStayed: false, isBusted: false });
+        app.updateRoomUI(); utils.showToast('AI隊員を追加しました');
+      },
+
+      removeBot: () => {
+        const idx = state.players.map(p=>p.isAI).lastIndexOf(true);
+        if(idx===-1) return utils.showToast('AI隊員はいません');
+        state.players.splice(idx, 1); app.updateRoomUI(); utils.showToast('AI隊員を解任しました');
+      },
+
+      startGame: () => {
+        if (state.mode === 'jack') {
+          if (state.room.isSolo) {
+            while(state.players.length < 2) {
+              const botColor = pickUnusedColor(state.players);
+              state.players.push({ id: `ai_${Date.now()}_0`, name: '救急隊員AI', isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: 2, color: botColor, totalInternal: 0, isStayed: false, isBusted: false });
+            }
+          }
+        } else if(state.room.isHost && state.config.autoFillAI) {
+          while(state.players.length < state.config.maxPlayers) {
+            const bIdx = state.players.filter(p=>p.isAI).length;
+            const botColor = pickUnusedColor(state.players);
+            state.players.push({ id: `ai_${Date.now()}_${bIdx}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: botColor, totalInternal: 0, isStayed: false, isBusted: false });
+          }
+        }
+        if(state.players.length < 2) return utils.showToast('最低2名必要です');
+
+        if(state.mode === 'memory' && state.config.teamMode !== 'solo') {
+          const teamsPresent = new Set(state.players.map(p => p.team));
+          const reqTeams = state.config.teamMode === 'team3' ? 3 : 2;
+          if(teamsPresent.size < reqTeams) return utils.showToast(`チーム戦モードでは、すべてのチームに最低1人所属している必要があります`);
+        }
+
+        if(state.mode === 'memory') app.startMemoryGameSession();
+        else if(state.mode === 'jack') app.startJackGameSession();
+        else app.startStandardCardGameSession();
+      }
+    };
 // ==========================================
-      // GAME 02: 救急神経衰弱バトル ロジック（スマホ対応・重複排除・最終セット修正済）
+      // GAME 02: 救急神経衰弱バトル ロジック（スマホ版常駐方向インジケーター・タップ消去対応）
       // ==========================================
       startMemoryGameSession: () => {
         app.clearAllTimers();
@@ -1445,26 +1953,12 @@
           }
         });
 
-       app.showScreen('view-memory-game');
+        app.showScreen('view-memory-game');
         app.renderMemoryGameTable();
         app.addLogMessage('救急神経衰弱バトルが開始されました。');
       },
 
       startMemoryTimer: () => {
-        if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
-        const limit = state.config.turnTimeLimit;
-        const timerEl = document.getElementById('memory-timer-display');
-        // ... (以下続く)
-        
-        if (limit >= 900) {
-          if(timerEl) timerEl.textContent = `手番制限: 無制限`;
-          return;
-        }
-
-        state.memoryState.timeLeft = limit;
-        if(timerEl) timerEl.textContent = `手番残り ${state.memoryState.timeLeft}秒`;
-
-        startMemoryTimer: () => {
         if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
         const limit = state.config.turnTimeLimit;
         const timerEl = document.getElementById('memory-timer-display');
@@ -1498,34 +1992,48 @@
         }, 1000);
       },
 
-      // 🔽 ここから下が新機能のプロパティとメソッド（appオブジェクトの中の正しい位置）
+      // 🆕 スマホ版専用：相手がめくったカードの方向を計算してインジケーターを更新（自分のターンまたは×タップ時は強制非表示）
       lastOpponentFlippedIdx: null,
+      mobileArrowManuallyDismissed: false,
+
+      dismissMobileOpponentArrow: (e) => {
+        if(e) e.stopPropagation();
+        app.mobileArrowManuallyDismissed = true;
+        document.getElementById('mobile-memory-dir-indicator')?.classList.add('hidden');
+        document.getElementById('mobile-edge-dir-indicator')?.classList.add('hidden');
+        document.getElementById('edge-arrow-up')?.classList.add('hidden');
+        document.getElementById('edge-arrow-down')?.classList.add('hidden');
+        document.getElementById('edge-arrow-left')?.classList.add('hidden');
+        document.getElementById('edge-arrow-right')?.classList.add('hidden');
+      },
+
       updateMobileOpponentArrow: () => {
+        const topBanner = document.getElementById('mobile-memory-dir-indicator');
+        const edgeContainer = document.getElementById('mobile-edge-dir-indicator');
         const upEl = document.getElementById('edge-arrow-up');
         const downEl = document.getElementById('edge-arrow-down');
         const leftEl = document.getElementById('edge-arrow-left');
         const rightEl = document.getElementById('edge-arrow-right');
-        if (!upEl || !downEl || !leftEl || !rightEl) return;
+        const arrowEl = document.getElementById('mobile-memory-dir-arrow');
+        const textEl = document.getElementById('mobile-memory-dir-text');
 
+        if (!topBanner || !edgeContainer || !upEl || !downEl || !leftEl || !rightEl) return;
+
+        // スマホ幅以外、または神経衰弱プレイ中以外は非表示
         if (window.innerWidth >= 640 || state.phase !== 'memory_playing') {
-          upEl.classList.add('hidden');
-          downEl.classList.add('hidden');
-          leftEl.classList.add('hidden');
-          rightEl.classList.add('hidden');
+          topBanner.classList.add('hidden');
+          edgeContainer.classList.add('hidden');
           return;
         }
 
         const currentP = state.players[state.turnIdx];
         const isOpponentTurn = currentP && (currentP.isAI || currentP.id !== state.me.id);
 
-        const flippedIndices = state.memoryState.cards
-          .map((c, i) => (c.isFlipped && !c.isMatched) ? i : null)
-          .filter(i => i !== null);
-
-        const container = document.getElementById('mobile-edge-dir-indicator');
-
-        if (!isOpponentTurn || flippedIndices.length === 0) {
-          container?.classList.add('hidden');
+        // 自分のターンになったら手動非表示フラグをリセットし、すべての矢印を完全に隠す
+        if (!isOpponentTurn) {
+          app.mobileArrowManuallyDismissed = false;
+          topBanner.classList.add('hidden');
+          edgeContainer.classList.add('hidden');
           upEl.classList.add('hidden');
           downEl.classList.add('hidden');
           leftEl.classList.add('hidden');
@@ -1534,31 +2042,86 @@
           return;
         }
 
+        // ユーザーが「×消す」で手動非表示にしている間は表示しない
+        if (app.mobileArrowManuallyDismissed) {
+          topBanner.classList.add('hidden');
+          edgeContainer.classList.add('hidden');
+          return;
+        }
+
+        const flippedIndices = state.memoryState.cards
+          .map((c, i) => (c.isFlipped && !c.isMatched) ? i : null)
+          .filter(i => i !== null);
+
+        if (flippedIndices.length === 0) {
+          topBanner.classList.add('hidden');
+          edgeContainer.classList.add('hidden');
+          app.lastOpponentFlippedIdx = null;
+          return;
+        }
+
         const targetIdx = flippedIndices[flippedIndices.length - 1];
         app.lastOpponentFlippedIdx = targetIdx;
         const cardEl = document.getElementById(`memory-card-el-${targetIdx}`);
         if (!cardEl) {
-          container?.classList.add('hidden');
+          topBanner.classList.add('hidden');
+          edgeContainer.classList.add('hidden');
           return;
         }
 
-        container?.classList.remove('hidden');
+        // 上部バナーを表示
+        topBanner.classList.remove('hidden');
 
+        // 画面外判定（スクロール追従用フチ矢印）
         const rect = cardEl.getBoundingClientRect();
         const vh = window.innerHeight;
         const vw = window.innerWidth;
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
 
+        let vDir = '';
+        let hDir = '';
+        if (centerY < vh * 0.28) vDir = '上';
+        else if (centerY > vh * 0.72) vDir = '下';
+        if (centerX < vw * 0.35) hDir = '左';
+        else if (centerX > vw * 0.65) hDir = '右';
+
+        let arrow = '🎯';
+        let dirLabel = '画面中央付近';
+        if (vDir === '上' && hDir === '左') { arrow = '↖️'; dirLabel = '左上方向'; }
+        else if (vDir === '上' && hDir === '右') { arrow = '↗️'; dirLabel = '右上方向'; }
+        else if (vDir === '上') { arrow = '⬆️'; dirLabel = '上方向'; }
+        else if (vDir === '下' && hDir === '左') { arrow = '↙️'; dirLabel = '左下方向'; }
+        else if (vDir === '下' && hDir === '右') { arrow = '↘️'; dirLabel = '右下方向'; }
+        else if (vDir === '下') { arrow = '⬇️'; dirLabel = '下方向'; }
+        else if (hDir === '左') { arrow = '⬅️'; dirLabel = '左方向'; }
+        else if (hDir === '右') { arrow = '➡️'; dirLabel = '右方向'; }
+
+        if(arrowEl) arrowEl.textContent = arrow;
+        if(textEl) textEl.textContent = `${currentP.name} が【${dirLabel}】をめくりました`;
+
+        // 画面外にあるかどうかに応じてフチ矢印を表示
         const isAbove = rect.bottom < 60;
         const isBelow = rect.top > vh - 80;
         const isLeft = rect.right < 40;
         const isRight = rect.left > vw - 40;
 
-        upEl.classList.toggle('hidden', !isAbove);
-        downEl.classList.toggle('hidden', !isBelow);
-        leftEl.classList.toggle('hidden', !isLeft);
-        rightEl.classList.toggle('hidden', !isRight);
+        if (isAbove || isBelow || isLeft || isRight) {
+          edgeContainer.classList.remove('hidden');
+          upEl.classList.toggle('hidden', !isAbove);
+          downEl.classList.toggle('hidden', !isBelow);
+          leftEl.classList.toggle('hidden', !isLeft);
+          rightEl.classList.toggle('hidden', !isRight);
+        } else {
+          edgeContainer.classList.add('hidden');
+          upEl.classList.add('hidden');
+          downEl.classList.add('hidden');
+          leftEl.classList.add('hidden');
+          rightEl.classList.add('hidden');
+        }
       },
 
+      // 矢印タップ時に該当カードへスムーズスクロール＆黄色く2回強調点滅
       scrollToOpponentFlippedCard: () => {
         if (app.lastOpponentFlippedIdx === null) return;
         const cardEl = document.getElementById(`memory-card-el-${app.lastOpponentFlippedIdx}`);
@@ -1607,7 +2170,7 @@
         grid.innerHTML = '';
         state.memoryState.cards.forEach((card, idx) => {
           if (card.isMatched) {
-            grid.innerHTML += `<div id="memory-card-el-${idx}" class="aspect-[3/4] w-full rounded-xl border border-dashed border-slate-700/20 opacity-10 pointer-events-none"></div>`;
+            grid.innerHTML += `<div class="aspect-[3/4] w-full rounded-xl border border-dashed border-slate-700/20 opacity-10 pointer-events-none"></div>`;
             return;
           }
           const isFlipped = card.isFlipped;
@@ -1837,7 +2400,7 @@
                   <div class="my-auto py-1 px-1 bg-white rounded-lg text-center">${showDisease ? `<div class="text-[10px] font-black text-slate-900 mb-0.5">${utils.escapeHtml(c2.title)}</div>` : ''}<div class="text-[10px] font-bold text-slate-800 leading-tight">${utils.escapeHtml(c2.desc)}</div></div>
                 </div>
               </div>
-              <button id="btn-skip-memory-result" class="w-full bg-amber-600 hover:bg-amber-500 active:scale-95 text-white font-bold py-3 rounded-xl text-xs transition shadow-md">${isMatch ? '疾患ボードへ配置する ▶' : '確認完了 (次へ進む)'}</button>
+              <button id="btn-skip-memory-result" class="w-full bg-amber-600 hover:bg-amber-500 active:scale-95 text-white font-bold py-3.5 rounded-xl text-xs sm:text-sm transition shadow-md">${isMatch ? '疾患ボードへ配置する ▶' : '確認完了 (次へ進む)'}</button>
             </div>
           `;
         }
@@ -1861,13 +2424,6 @@
 
       advanceMemoryTurnCounterclockwise: () => {
         if (state.timers.aiDelay) clearTimeout(state.timers.aiDelay);
-        document.getElementById('mobile-edge-dir-indicator')?.classList.add('hidden');
-        document.getElementById('edge-arrow-up')?.classList.add('hidden');
-        document.getElementById('edge-arrow-down')?.classList.add('hidden');
-        document.getElementById('edge-arrow-left')?.classList.add('hidden');
-        document.getElementById('edge-arrow-right')?.classList.add('hidden');
-        app.lastOpponentFlippedIdx = null;
-
         state.memoryState.selectedCardIndices = [];
         state.memoryState.isProcessingTurn = false;
         state.memoryState.waitingForBoardPlacement = false;
@@ -1977,6 +2533,194 @@
         }
       },
 
+      selectMatchedStock: (idx) => {
+        state.memoryState.selectedStockIdx = idx;
+        app.renderFullMemoryBoardModal();
+      },
+
+      renderFullMemoryBoardModal: () => {
+        const grid = document.getElementById('full-memory-board-grid');
+        const stockEl = document.getElementById('matched-stock-indicator');
+        const guideEl = document.getElementById('memory-board-guide-text');
+        if(!grid) return;
+        grid.innerHTML = '';
+
+        if (!state.memoryState.playerBoards[state.me.id]) {
+          state.memoryState.playerBoards[state.me.id] = {};
+        }
+        const myBoard = state.memoryState.playerBoards[state.me.id];
+        const stocks = state.memoryState.matchedStock;
+        if(state.memoryState.selectedStockIdx >= stocks.length) {
+          state.memoryState.selectedStockIdx = Math.max(0, stocks.length - 1);
+        }
+        const activePair = stocks[state.memoryState.selectedStockIdx];
+
+        if(stockEl) {
+          stockEl.textContent = stocks.length > 0 
+            ? `未配置の獲得ペア: ${stocks.length} 組` 
+            : `獲得ストック: なし`;
+        }
+
+        if(guideEl) {
+          if(activePair) {
+            guideEl.innerHTML = `
+              <div class="bg-slate-950 border-2 border-amber-500/80 rounded-2xl p-2.5 sm:p-3 mb-1 shadow-lg">
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-[11px] sm:text-xs font-extrabold text-amber-400">👇 この2枚が示す疾患枠を下から選んでタップ！（回答権1回）</span>
+                  ${stocks.length > 1 ? `<div class="flex gap-1">${stocks.map((st, i) => `<button onclick="app.selectMatchedStock(${i})" class="px-2 py-0.5 rounded text-[10px] font-bold ${i===state.memoryState.selectedStockIdx ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-300'}">ペア${i+1}</button>`).join('')}</div>` : ''}
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-left">
+                  <div class="bg-slate-900 border border-slate-700 p-2 rounded-xl text-[11px] text-slate-200"><span class="text-cyan-400 font-bold mr-1">[1]</span>${utils.escapeHtml(activePair.cards[0].desc)}</div>
+                  <div class="bg-slate-900 border border-slate-700 p-2 rounded-xl text-[11px] text-slate-200"><span class="text-cyan-400 font-bold mr-1">[2]</span>${utils.escapeHtml(activePair.cards[1].desc)}</div>
+                </div>
+              </div>
+            `;
+          } else {
+            guideEl.innerHTML = `場で問題文カードを2枚揃えると、該当する疾患枠に2枚1組ではめ込むことができます。`;
+          }
+        }
+
+        state.memoryState.boardSlots.forEach((slot, sIdx) => {
+          const isFilled = !!myBoard[sIdx]?.filled;
+          const matchedCards = myBoard[sIdx]?.cards || [];
+          
+          grid.innerHTML += `
+            <div class="p-3 rounded-2xl border-2 ${isFilled ? 'border-emerald-500 bg-slate-950' : (activePair ? 'border-amber-500/70 bg-slate-800/90 hover:border-amber-400 cursor-pointer active:scale-98' : 'border-slate-800 bg-slate-900/60 opacity-75')} flex flex-col justify-between transition shadow-md" ${!isFilled && activePair ? `onclick="app.placeCardToBoardSlot(${sIdx})"` : ''}>
+              <div class="flex justify-between items-center mb-2 border-b border-slate-800 pb-1.5">
+                <span class="text-xs font-extrabold ${isFilled ? 'text-emerald-300' : 'text-white'}">${utils.escapeHtml(slot.title)}</span>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full ${isFilled ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold' : 'bg-slate-900 text-slate-400'}">${isFilled ? '✅ 格納済' : '空き'}</span>
+              </div>
+              ${isFilled ? `
+                <div class="space-y-1 text-[10px] text-slate-300 bg-slate-900/90 p-2 rounded-xl border border-emerald-500/30">
+                  <div class="truncate">・${utils.escapeHtml(matchedCards[0]?.desc || '')}</div>
+                  <div class="truncate">・${utils.escapeHtml(matchedCards[1]?.desc || '')}</div>
+                </div>
+              ` : `
+                <div class="h-11 rounded-xl flex items-center justify-center text-xs font-bold ${activePair ? 'text-amber-300 bg-amber-950/40 border border-dashed border-amber-500/60' : 'text-slate-500 bg-slate-950 border border-slate-800'}">
+                  ${activePair ? '📥 タップしてここにはめ込む' : 'ペア未獲得'}
+                </div>
+              `}
+            </div>
+          `;
+        });
+      },
+
+      placeCardToBoardSlot: (sIdx) => {
+        const stocks = state.memoryState.matchedStock;
+        if(stocks.length === 0) return utils.showToast('配置できる獲得ペアがありません');
+        
+        const slot = state.memoryState.boardSlots[sIdx];
+        if (!state.memoryState.playerBoards[state.me.id]) {
+          state.memoryState.playerBoards[state.me.id] = {};
+        }
+        const myBoard = state.memoryState.playerBoards[state.me.id];
+        if(myBoard[sIdx]?.filled) return utils.showToast('この疾患枠はすでに埋まっています');
+
+        const activeIdx = state.memoryState.selectedStockIdx || 0;
+        const activePair = stocks[activeIdx];
+        if(!activePair) return;
+
+        if(Number(slot.num) !== Number(activePair.num)) {
+          stocks.splice(activeIdx, 1);
+          state.memoryState.selectedStockIdx = 0;
+
+          const returnIds = activePair.cards.map(c => c.id);
+          state.memoryState.cards.forEach(c => {
+            if(Number(c.num) === Number(activePair.num) || returnIds.includes(c.id)) {
+              c.isMatched = false;
+              c.isFlipped = false;
+            }
+          });
+
+          utils.showToast(`❌ 不一致！「${slot.title}」ではありません。カードが場に戻りました`);
+          app.addLogMessage(`${state.me.name} が疾患あてはめに失敗し、ペア (Gr.${activePair.num}) が場に戻されました。`);
+
+          socket.emit('game_action', {
+            roomCode: state.room.code,
+            type: 'memory_sync',
+            mode: 'memory',
+            turnIdx: state.turnIdx,
+            memoryState: {
+              cards: state.memoryState.cards,
+              boardSlots: state.memoryState.boardSlots,
+              playerBoards: state.memoryState.playerBoards
+            }
+          });
+
+          app.renderFullMemoryBoardModal();
+          app.renderMemoryGameTable();
+
+          if(stocks.length === 0) {
+            document.getElementById('modal-memory-board')?.classList.add('hidden');
+            state.memoryState.waitingForBoardPlacement = false;
+            app.advanceMemoryTurnCounterclockwise();
+          }
+          return;
+        }
+
+        stocks.splice(activeIdx, 1);
+        state.memoryState.selectedStockIdx = 0;
+        const myP = state.players.find(p => p.id === state.me.id);
+        myBoard[sIdx] = { filled: true, color: myP?.color || '#38bdf8', cards: activePair.cards };
+
+        utils.showToast(`🎉 正解！「${slot.title}」の枠に2枚のカードをはめ込みました！`);
+        app.addLogMessage(`${state.me.name} がボードの「${slot.title}」を完成させました！`);
+
+        const totalSlots = state.memoryState.boardSlots.length;
+        const filledCount = Object.keys(myBoard).filter(k => myBoard[k]?.filled).length;
+        const remainingCards = state.memoryState.cards.filter(c => !c.isMatched).length;
+        const isGameComplete = (filledCount >= totalSlots || (remainingCards === 0 && stocks.length === 0));
+
+        socket.emit('game_action', {
+          roomCode: state.room.code,
+          type: 'memory_sync',
+          mode: 'memory',
+          turnIdx: state.turnIdx,
+          gameEnded: isGameComplete,
+          memoryState: {
+            cards: state.memoryState.cards,
+            boardSlots: state.memoryState.boardSlots,
+            playerBoards: state.memoryState.playerBoards
+          }
+        });
+
+        app.renderFullMemoryBoardModal();
+        app.renderMemoryGameTable();
+
+        if(isGameComplete) {
+          document.getElementById('modal-memory-board')?.classList.add('hidden');
+          state.memoryState.waitingForBoardPlacement = false;
+          setTimeout(() => app.endMemoryGame(), 700);
+          return;
+        }
+
+        if(stocks.length === 0) {
+          document.getElementById('modal-memory-board')?.classList.add('hidden');
+          state.memoryState.waitingForBoardPlacement = false;
+          app.advanceMemoryTurnCounterclockwise();
+        }
+      },
+
+      endMemoryGame: () => {
+        if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
+        state.phase = 'ended';
+        const scores = state.players.map(p => {
+          const b = state.memoryState.playerBoards[p.id] || {};
+          const cnt = Object.keys(b).filter(k => b[k]?.filled).length;
+          return { id: p.id, count: cnt };
+        });
+        scores.sort((a, b) => b.count - a.count);
+        state.ranks = scores.map(s => s.id);
+        state.players.forEach(p => {
+          p.rank = state.ranks.indexOf(p.id) + 1;
+        });
+        document.getElementById('modal-memory-board')?.classList.add('hidden');
+        app.showResults();
+      },
+
+      // ==========================================
+      // GAME 01 & 03: ババ抜き・ジジ抜き ロジック（スマホ操作最適化）
+      // ==========================================
       startStandardCardGameSession: () => {
         state.phase = 'initial_discard';
         state.discardPile = [];
@@ -2397,10 +3141,10 @@ humanReady: () => {
         chatContent?.classList.toggle('hidden', tab !== 'chat');
         logContent?.classList.toggle('hidden', tab !== 'log');
 
-        const inactiveCls = 'py-2 px-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center gap-1';
-        if(btnAnnounce) btnAnnounce.className = tab === 'announce' ? 'py-2 px-2 rounded-xl text-xs font-bold bg-amber-600 text-white transition flex items-center justify-center gap-1' : inactiveCls;
-        if(btnChat) btnChat.className = tab === 'chat' ? 'py-2 px-2 rounded-xl text-xs font-bold bg-cyan-600 text-white transition flex items-center justify-center gap-1' : inactiveCls;
-        if(btnLog) btnLog.className = tab === 'log' ? 'py-2 px-2 rounded-xl text-xs font-bold bg-emerald-600 text-white transition flex items-center justify-center gap-1' : inactiveCls;
+        const inactiveCls = 'py-2.5 px-2 rounded-xl text-xs font-bold bg-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center gap-1';
+        if(btnAnnounce) btnAnnounce.className = tab === 'announce' ? 'py-2.5 px-2 rounded-xl text-xs font-bold bg-amber-600 text-white transition flex items-center justify-center gap-1' : inactiveCls;
+        if(btnChat) btnChat.className = tab === 'chat' ? 'py-2.5 px-2 rounded-xl text-xs font-bold bg-cyan-600 text-white transition flex items-center justify-center gap-1' : inactiveCls;
+        if(btnLog) btnLog.className = tab === 'log' ? 'py-2.5 px-2 rounded-xl text-xs font-bold bg-emerald-600 text-white transition flex items-center justify-center gap-1' : inactiveCls;
 
         if(tab === 'announce') document.getElementById('badge-dot-announce')?.classList.add('hidden');
         if(tab === 'chat') document.getElementById('badge-dot-chat')?.classList.add('hidden');
@@ -2436,16 +3180,17 @@ humanReady: () => {
           const isTgt = (isMyTurn && targetId === p.id);
           const pColor = p.color || '#38bdf8';
           
-          let h = `<div class="p-2.5 sm:p-3 rounded-2xl border flex flex-col justify-between ${isCur?'bg-cyan-950/40 border-cyan-500 shadow-md':isTgt && !state.hasDrawnThisTurn?'bg-amber-950/40 border-amber-500/80 animate-pulse':'bg-slate-900/80 border-slate-800'}">
-                    <div class="flex items-center justify-between"><div class="flex items-center gap-1.5 truncate"><span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${pColor}"></span><span class="text-xs font-bold text-white truncate">${utils.escapeHtml(p.name)}</span></div><span class="text-[10px] bg-slate-800 px-2 rounded-full text-slate-300 font-mono flex-shrink-0">${p.hand.length}枚</span></div>`;
+          let h = `<div class="p-3 rounded-2xl border flex flex-col justify-between ${isCur?'bg-cyan-950/40 border-cyan-500 shadow-md':isTgt && !state.hasDrawnThisTurn?'bg-amber-950/40 border-amber-500/80 animate-pulse':'bg-slate-900/80 border-slate-800'}">
+                    <div class="flex items-center justify-between mb-2"><div class="flex items-center gap-1.5 truncate"><span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${pColor}"></span><span class="text-xs sm:text-sm font-bold text-white truncate">${utils.escapeHtml(p.name)}</span></div><span class="text-xs bg-slate-800 px-2.5 py-0.5 rounded-full text-cyan-400 font-mono font-bold flex-shrink-0">${p.hand.length}枚</span></div>`;
           if (p.isCleared) h += '<span class="text-xs font-bold text-emerald-400 mt-2">🎉 クリア</span>';
           else {
-            h += '<div class="flex flex-wrap gap-1.5 mt-2">';
+            h += '<div class="flex flex-wrap gap-2 mt-2">';
             p.hand.forEach((_, cIdx) => { 
               if(isTgt && !state.hasDrawnThisTurn) {
-                h += `<button onclick="this.disabled=true; app.drawCardFrom('${p.id}', ${cIdx})" class="w-7 h-10 bg-amber-700 border-2 border-amber-300 rounded-lg text-white font-bold text-xs shadow active:scale-90 transition">?</button>`;
+                // 🆕 スマホの指でタップしやすいよう大きめのサイズに最適化（w-9 h-12）
+                h += `<button onclick="this.disabled=true; app.drawCardFrom('${p.id}', ${cIdx})" class="w-9 h-12 bg-amber-700 hover:bg-amber-600 border-2 border-amber-300 rounded-xl text-white font-extrabold text-sm shadow-md active:scale-90 transition flex items-center justify-center">?</button>`;
               } else {
-                h += `<div class="w-5 h-8 bg-slate-800 border border-slate-700 rounded-md"></div>`;
+                h += `<div class="w-7 h-11 bg-slate-800 border border-slate-700 rounded-xl shadow-inner"></div>`;
               }
             });
             h += '</div>';
@@ -2521,9 +3266,9 @@ humanReady: () => {
         const btnDiscard = document.getElementById('btn-discard-pair');
         if (btnDiscard) {
             if (state.selectedMyCards.length === 2) {
-                btnDiscard.className = 'bg-cyan-600 text-white text-xs font-extrabold px-3.5 py-2.5 rounded-xl active:scale-95 transition duration-300 shadow-[0_0_15px_rgba(8,145,178,0.6)] cursor-pointer';
+                btnDiscard.className = 'flex-1 sm:flex-initial bg-cyan-600 hover:bg-cyan-500 text-white text-xs sm:text-sm font-extrabold px-5 py-3 rounded-xl active:scale-95 transition duration-200 shadow-[0_0_15px_rgba(8,145,178,0.6)] cursor-pointer';
             } else {
-                btnDiscard.className = 'bg-slate-800 text-slate-500 text-xs font-extrabold px-3.5 py-2.5 rounded-xl border border-slate-700 transition duration-300 opacity-60 pointer-events-none';
+                btnDiscard.className = 'flex-1 sm:flex-initial bg-slate-800 text-slate-500 text-xs sm:text-sm font-extrabold px-4 py-3 rounded-xl border border-slate-700 transition duration-200 opacity-60 pointer-events-none';
             }
         }
         if (window.lucide) lucide.createIcons();
@@ -2795,7 +3540,7 @@ humanReady: () => {
       rematch: () => state.room.isSolo ? app.startSoloAI() : app.returnToPortal(),
 
       // ==========================================
-      // 管理室（CMS）ロジック
+      // 管理室（CMS）ロジック（スマホ操作・5行表示対応）
       // ==========================================
       adminClicks: 0, adminTimer: null,
       openAdmin: () => { 
@@ -2835,9 +3580,9 @@ humanReady: () => {
         if(window.lucide) lucide.createIcons();
       },
       renderAdminCards: () => {
-        const tb = document.getElementById('admin-card-table-body'); 
-        if(!tb) return;
-        tb.innerHTML='';
+        const listContainer = document.getElementById('admin-card-list-container'); 
+        if(!listContainer) return;
+        listContainer.innerHTML = '';
         const selector = document.getElementById('admin-deck-selector');
         const f = selector ? selector.value : 'all';
         let d = currentCardDB;
@@ -2849,40 +3594,67 @@ humanReady: () => {
         d.forEach(c => {
           const isJack = (c.suit === 'J');
           const subInfoHtml = isJack
-            ? `<div id="tv-${c.id}" class="text-[11px]"><span class="px-1.5 py-0.5 rounded bg-slate-800 text-teal-300 font-bold mr-1">${utils.escapeHtml(c.borderColor || c.title || '緑')}</span><span class="text-slate-400 font-mono">他択: ${c.opt1} / ${c.opt2}</span></div>
-               <div id="te-${c.id}" class="hidden space-y-1">
-                 <input id="te-color-${c.id}" class="w-full bg-slate-950 border border-slate-700 p-1 rounded text-[11px] text-white" placeholder="ふち色(赤,青など)" value="${utils.escapeHtml(c.borderColor || c.title || '緑')}">
-                 <div class="flex gap-1">
-                   <input id="te-o1-${c.id}" type="number" step="any" class="w-1/2 bg-slate-950 border border-slate-700 p-1 rounded text-[11px] text-white" placeholder="選択肢1" value="${c.opt1 ?? 1}">
-                   <input id="te-o2-${c.id}" type="number" step="any" class="w-1/2 bg-slate-950 border border-slate-700 p-1 rounded text-[11px] text-white" placeholder="選択肢2" value="${c.opt2 ?? 2}">
+            ? `<div id="tv-${c.id}" class="text-xs mb-1.5"><span class="px-2 py-0.5 rounded bg-slate-800 text-teal-300 font-bold mr-1.5">${utils.escapeHtml(c.borderColor || c.title || '緑')}</span><span class="text-slate-300 font-mono">他択選択肢: ${c.opt1} / ${c.opt2}</span></div>
+               <div id="te-${c.id}" class="hidden space-y-2 mt-1">
+                 <div>
+                   <label class="block text-[10px] text-slate-400 mb-0.5">カテゴリ色（ふち色）</label>
+                   <input id="te-color-${c.id}" class="w-full bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-white" value="${utils.escapeHtml(c.borderColor || c.title || '緑')}">
+                 </div>
+                 <div class="flex gap-2">
+                   <div class="flex-1"><label class="block text-[10px] text-slate-400 mb-0.5">選択肢1</label><input id="te-o1-${c.id}" type="number" step="any" class="w-full bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-white" value="${c.opt1 ?? 1}"></div>
+                   <div class="flex-1"><label class="block text-[10px] text-slate-400 mb-0.5">選択肢2</label><input id="te-o2-${c.id}" type="number" step="any" class="w-full bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-white" value="${c.opt2 ?? 2}"></div>
                  </div>
                </div>`
-            : `<span id="tv-${c.id}">${utils.escapeHtml(c.title)}</span><input id="te-${c.id}" class="hidden w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-white focus:border-cyan-500 focus:outline-none" value="${utils.escapeHtml(c.title)}">`;
+            : `<div id="tv-${c.id}" class="text-xs font-bold text-cyan-300 mb-1">${utils.escapeHtml(c.title)}</div>
+               <div id="te-${c.id}" class="hidden mt-1">
+                 <label class="block text-[10px] text-slate-400 mb-0.5">タイトル・疾患名</label>
+                 <input id="te-input-${c.id}" class="w-full bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-white" value="${utils.escapeHtml(c.title)}">
+               </div>`;
 
-          tb.innerHTML += `<tr class="hover:bg-slate-800/50 transition border-b border-slate-800/50">
-            <td class="p-2 font-mono font-bold text-center text-slate-400">${c.id}</td>
-            <td class="p-2 font-mono text-center"><span id="nv-${c.id}">${c.num===0 && c.suit==='JOKER'?'⚡':c.num}</span><input id="ne-${c.id}" type="number" step="any" class="hidden w-16 bg-slate-950 border border-slate-700 p-1 rounded text-xs text-center text-white focus:border-cyan-500 focus:outline-none" value="${c.num}"></td>
-            <td class="p-2 font-bold text-center ${SUIT_COLORS[c.suit]||''}"><span id="sv-${c.id}">${SUIT_ICONS[c.suit]||c.suit}</span>
-              <select id="se-${c.id}" class="hidden bg-slate-950 border border-slate-700 p-1 rounded text-xs text-white focus:border-cyan-500 focus:outline-none">
-                <option value="C" ${c.suit==='C'?'selected':''}>♣(C)</option>
-                <option value="S" ${c.suit==='S'?'selected':''}>♠(S)</option>
-                <option value="H" ${c.suit==='H'?'selected':''}>♥(H)</option>
-                <option value="D" ${c.suit==='D'?'selected':''}>♦(D)</option>
-                <option value="M" ${c.suit==='M'?'selected':''}>🧠(M)</option>
-                <option value="J" ${c.suit==='J'?'selected':''}>🎯(99J)</option>
-                <option value="JOKER" ${c.suit==='JOKER'?'selected':''}>⚡(JOKER)</option>
-              </select>
-            </td>
-            <td class="p-2">${subInfoHtml}</td>
-            <td class="p-2"><span id="dv-${c.id}">${utils.escapeHtml(c.desc)}</span><textarea id="de-${c.id}" class="hidden w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-white h-12 focus:border-cyan-500 focus:outline-none">${utils.escapeHtml(c.desc)}</textarea></td>
-            <td class="p-2 text-center flex items-center justify-center gap-1">
-              <button id="be-${c.id}" onclick="app.editCard(${c.id})" class="text-[10px] bg-slate-800 border border-slate-600 hover:bg-slate-700 text-cyan-400 px-2 py-1.5 rounded transition">編集</button>
-              <button id="bs-${c.id}" onclick="app.saveCard(${c.id})" class="hidden text-[10px] bg-emerald-700 hover:bg-emerald-600 text-white px-2 py-1.5 rounded transition shadow-md">保存</button>
-              <button onclick="app.deleteCard(${c.id})" class="text-[10px] bg-rose-950/80 border border-rose-800 text-rose-300 px-2 py-1.5 rounded transition hover:bg-rose-900">削除</button>
-            </td>
-          </tr>`;
+          listContainer.innerHTML += `
+            <div class="p-3 bg-slate-900/90 border border-slate-800 rounded-2xl flex flex-col gap-2 shadow-sm">
+              <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-mono font-bold text-slate-400 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">ID:${c.id}</span>
+                  <div class="flex items-center gap-1 font-mono text-xs">
+                    <span class="text-slate-400">数値/Gr:</span>
+                    <span id="nv-${c.id}" class="font-bold text-white">${c.num===0 && c.suit==='JOKER'?'⚡':c.num}</span>
+                    <input id="ne-${c.id}" type="number" step="any" class="hidden w-20 bg-slate-900 border border-slate-700 p-1.5 rounded-xl text-xs text-center text-white" value="${c.num}">
+                  </div>
+                  <div class="font-bold text-xs ${SUIT_COLORS[c.suit]||''}">
+                    <span id="sv-${c.id}">${SUIT_ICONS[c.suit]||c.suit}</span>
+                    <select id="se-${c.id}" class="hidden bg-slate-900 border border-slate-700 p-1.5 rounded-xl text-xs text-white">
+                      <option value="C" ${c.suit==='C'?'selected':''}>♣(C)</option>
+                      <option value="S" ${c.suit==='S'?'selected':''}>♠(S)</option>
+                      <option value="H" ${c.suit==='H'?'selected':''}>♥(H)</option>
+                      <option value="D" ${c.suit==='D'?'selected':''}>♦(D)</option>
+                      <option value="M" ${c.suit==='M'?'selected':''}>🧠(M)</option>
+                      <option value="J" ${c.suit==='J'?'selected':''}>🎯(99J)</option>
+                      <option value="JOKER" ${c.suit==='JOKER'?'selected':''}>⚡(JOKER)</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button id="be-${c.id}" onclick="app.editCard(${c.id})" class="text-xs bg-slate-800 hover:bg-slate-700 active:scale-95 text-cyan-400 border border-slate-700 px-3 py-1.5 rounded-xl transition font-bold">編集</button>
+                  <button id="bs-${c.id}" onclick="app.saveCard(${c.id})" class="hidden text-xs bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white px-3 py-1.5 rounded-xl transition font-bold shadow-md">保存</button>
+                  <button onclick="app.deleteCard(${c.id})" class="text-xs bg-rose-950/80 hover:bg-rose-900 active:scale-95 text-rose-300 border border-rose-800 px-3 py-1.5 rounded-xl transition font-bold">削除</button>
+                </div>
+              </div>
+              
+              <div>${subInfoHtml}</div>
+
+              <div class="text-xs">
+                <label class="block text-[10px] text-slate-400 mb-0.5">問題文・解説・詳細</label>
+                <div id="dv-${c.id}" class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-slate-200 leading-relaxed">${utils.escapeHtml(c.desc)}</div>
+                <!-- 🆕 スマホでもゆったり5行分の高さで編集できるtextarea -->
+                <textarea id="de-${c.id}" rows="5" class="hidden w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-xs text-white leading-relaxed focus:outline-none focus:border-cyan-500 custom-scrollbar">${utils.escapeHtml(c.desc)}</textarea>
+              </div>
+            </div>
+          `;
         });
+        if (window.lucide) lucide.createIcons();
       },
+
       editCard: (id) => { 
         document.getElementById(`nv-${id}`)?.classList.add('hidden'); 
         document.getElementById(`ne-${id}`)?.classList.remove('hidden'); 
@@ -2895,11 +3667,12 @@ humanReady: () => {
         document.getElementById(`be-${id}`)?.classList.add('hidden'); 
         document.getElementById(`bs-${id}`)?.classList.remove('hidden'); 
       },
+
       saveCard: (id) => {
         const nVal = parseFloat(document.getElementById(`ne-${id}`)?.value ?? 1);
-        const sVal = document.getElementById(`se-${id}`)?.value || 'C';
+        const sVal = document.getElementById(`se-${id}`)?._value || document.getElementById(`se-${id}`)?.value || 'C';
         const d = document.getElementById(`de-${id}`)?.value || '';
-        const c = currentCardDB.find(x=>x.id===id);
+        const c = currentCardDB.find(x => x.id === id);
         if(c){
           c.num = isNaN(nVal) ? c.num : nVal;
           c.suit = sVal;
@@ -2914,15 +3687,17 @@ humanReady: () => {
             c.opt2 = isNaN(o2) ? 2 : o2;
             c.internalVal = Math.round(Number(c.num) * 100);
           } else {
-            const t = document.getElementById(`te-${id}`)?.value || '';
+            const t = document.getElementById(`te-input-${id}`)?.value || '';
             c.title = t;
           }
         } 
         saveDB(currentCardDB); 
         socket.emit('admin_update_cards', currentCardDB);
         app.renderAdminCards(); 
-        utils.showToast('<i data-lucide="check" class="w-4 h-4 inline mr-1"></i>保存し全端末に同期しました'); if(window.lucide) lucide.createIcons();
+        utils.showToast('<i data-lucide="check" class="w-4 h-4 inline mr-1"></i>保存し全端末に同期しました'); 
+        if(window.lucide) lucide.createIcons();
       },
+
       addNewCardPrompt: () => {
         const selector = document.getElementById('admin-deck-selector');
         const f = selector ? selector.value : 'all';
@@ -2937,6 +3712,7 @@ humanReady: () => {
         app.renderAdminCards();
         utils.showToast('新規カードを追加し全端末に同期しました');
       },
+
       deleteCard: (id) => {
         if(currentCardDB.length <= 10) return utils.showToast('これ以上削除できません');
         currentCardDB = currentCardDB.filter(c => c.id !== id);
@@ -2945,6 +3721,7 @@ humanReady: () => {
         app.renderAdminCards();
         utils.showToast('カードを削除し全端末に同期しました');
       },
+
       resetDB: () => { 
         currentCardDB = JSON.parse(JSON.stringify(DEFAULT_EMS_CARDS)); 
         saveDB(currentCardDB); 
