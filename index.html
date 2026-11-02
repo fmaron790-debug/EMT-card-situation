@@ -2656,29 +2656,6 @@
         rightEl.classList.toggle('hidden', !isRight);
       },
 
-        // 🎯 画角外にある時だけ、その方向に合わせて矢印バナー＆エッジ矢印を表示
-        let arrow = '⬇️';
-        let dirLabel = '下方向';
-        if (isAbove && isLeft) { arrow = '↖️'; dirLabel = '左上（画面外）'; }
-        else if (isAbove && isRight) { arrow = '↗️'; dirLabel = '右上（画面外）'; }
-        else if (isAbove) { arrow = '⬆️'; dirLabel = '上方向（画面外）'; }
-        else if (isBelow && isLeft) { arrow = '↙️'; dirLabel = '左下（画面外）'; }
-        else if (isBelow && isRight) { arrow = '↘️'; dirLabel = '右下（画面外）'; }
-        else if (isBelow) { arrow = '⬇️'; dirLabel = '下方向（画面外）'; }
-        else if (isLeft) { arrow = '⬅️'; dirLabel = '左方向（画面外）'; }
-        else if (isRight) { arrow = '➡️'; dirLabel = '右方向（画面外）'; }
-
-        if (arrowEl) arrowEl.textContent = arrow;
-        if (textEl) textEl.textContent = `${currentP.name} が【${dirLabel}】をめくりました`;
-
-        topBanner.classList.remove('hidden');
-        edgeContainer.classList.remove('hidden');
-        upEl.classList.toggle('hidden', !isAbove);
-        downEl.classList.toggle('hidden', !isBelow);
-        leftEl.classList.toggle('hidden', !isLeft);
-        rightEl.classList.toggle('hidden', !isRight);
-      },
-
       scrollToOpponentFlippedCard: () => {
         if (app.lastOpponentFlippedIdx === null) return;
         const cardEl = document.getElementById(`memory-card-el-${app.lastOpponentFlippedIdx}`);
