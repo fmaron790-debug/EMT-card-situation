@@ -765,20 +765,42 @@
 
         <div id="table-players-ring" class="w-full max-w-5xl flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-2.5 px-1"></div>
 
-        <!-- 🆕 スマホ版専用：相手がめくったカードの方向矢印インジケーター（sm:hidden でPC/タブレットでは非表示） -->
-        <div id="mobile-memory-dir-indicator" class="fixed top-20 left-1/2 -translate-x-1/2 z-40 hidden sm:hidden pointer-events-auto">
-          <div onclick="app.scrollToOpponentFlippedCard()" class="bg-slate-950/95 border-2 border-amber-400 text-amber-300 px-4 py-2 rounded-full shadow-[0_0_25px_rgba(251,191,36,0.7)] flex items-center gap-2.5 animate-bounce cursor-pointer active:scale-95">
-            <span id="mobile-memory-dir-arrow" class="text-xl font-black leading-none">⬇️</span>
-            <div class="text-left leading-tight">
-              <div id="mobile-memory-dir-text" class="text-[11px] font-extrabold text-white">相手が下方向をめくりました</div>
-              <div class="text-[9px] text-amber-300 font-mono">タップでカード位置へ移動</div>
+        <!-- 🆕 スマホ版専用：相手がめくったカードの常時方向矢印バナー（タップで移動・✕で手動消去・自分の番で自動消去） -->
+        <div id="mobile-memory-dir-indicator" class="fixed top-16 left-1/2 -translate-x-1/2 z-40 hidden sm:hidden pointer-events-auto w-[92%] max-w-xs">
+          <div class="bg-slate-950/95 border-2 border-amber-400 text-amber-300 px-3.5 py-2 rounded-2xl shadow-[0_0_25px_rgba(251,191,36,0.85)] flex items-center justify-between gap-2">
+            <div onclick="app.scrollToOpponentFlippedCard()" class="flex items-center gap-2.5 flex-1 cursor-pointer active:scale-95">
+              <span id="mobile-memory-dir-arrow" class="text-2xl font-black leading-none animate-bounce">⬇️</span>
+              <div class="text-left leading-tight">
+                <div id="mobile-memory-dir-text" class="text-[11px] font-extrabold text-white">相手が下方向をめくりました</div>
+                <div class="text-[9px] text-amber-300 font-mono mt-0.5">タップでそのカードへ移動</div>
+              </div>
             </div>
+            <button onclick="app.dismissMobileOpponentArrow(event)" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-[10px] font-bold flex-shrink-0 active:scale-90">
+              ✕ 消す
+            </button>
           </div>
         </div>
 
-        <div class="w-full max-w-5xl flex-1 bg-gradient-to-br from-[#5c3a21] via-[#432514] to-[#2a160b] border-2 sm:border-4 border-[#1a0d06] rounded-3xl p-2.5 sm:p-5 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] relative min-h-[420px] flex items-start justify-center overflow-y-auto">
+        <!-- 🆕 スマホ版専用：画面の端に常駐する上下左右エッジ矢印 -->
+        <div id="mobile-edge-dir-indicator" class="fixed inset-x-0 top-28 bottom-20 pointer-events-none z-40 hidden sm:hidden">
+          <div id="edge-arrow-up" class="absolute top-1 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 px-3.5 py-1.5 rounded-full text-xs font-black shadow-[0_0_20px_rgba(245,158,11,0.9)] pointer-events-auto flex items-center gap-2 animate-bounce hidden">
+            <span onclick="app.scrollToOpponentFlippedCard()" class="cursor-pointer">⬆️ 上のカードが開いています (移動)</span>
+            <button onclick="app.dismissMobileOpponentArrow(event)" class="bg-slate-950/20 px-1.5 py-0.5 rounded-full text-[10px]">✕</button>
+          </div>
+          <div id="edge-arrow-down" class="absolute bottom-1 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 px-3.5 py-1.5 rounded-full text-xs font-black shadow-[0_0_20px_rgba(245,158,11,0.9)] pointer-events-auto flex items-center gap-2 animate-bounce hidden">
+            <span onclick="app.scrollToOpponentFlippedCard()" class="cursor-pointer">⬇️ 下のカードが開いています (移動)</span>
+            <button onclick="app.dismissMobileOpponentArrow(event)" class="bg-slate-950/20 px-1.5 py-0.5 rounded-full text-[10px]">✕</button>
+          </div>
+          <div id="edge-arrow-left" onclick="app.scrollToOpponentFlippedCard()" class="absolute left-1.5 top-1/2 -translate-y-1/2 bg-amber-500 text-slate-950 p-2.5 rounded-full text-sm font-black shadow-[0_0_20px_rgba(245,158,11,0.9)] pointer-events-auto animate-pulse hidden cursor-pointer">
+            <span>⬅️</span>
+          </div>
+          <div id="edge-arrow-right" onclick="app.scrollToOpponentFlippedCard()" class="absolute right-1.5 top-1/2 -translate-y-1/2 bg-amber-500 text-slate-950 p-2.5 rounded-full text-sm font-black shadow-[0_0_20px_rgba(245,158,11,0.9)] pointer-events-auto animate-pulse hidden cursor-pointer">
+            <span>➡️</span>
+          </div>
+        </div>
+
+        <div id="memory-scroll-area" onscroll="app.updateMobileOpponentArrow()" class="w-full max-w-5xl flex-1 bg-gradient-to-br from-[#5c3a21] via-[#432514] to-[#2a160b] border-2 sm:border-4 border-[#1a0d06] rounded-3xl p-2.5 sm:p-5 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] relative min-h-[420px] flex items-start justify-center overflow-y-auto">
           <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
-          <!-- スマホでもカード文字が読めるようにモバイル3〜4列・タブレット6列・PC8列に最適化 -->
           <div id="memory-cards-grid" class="w-full max-w-5xl grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 gap-2 p-1 z-10"></div>
         </div>
       </section>
@@ -1130,29 +1152,29 @@
           </div>
         </div>
         
-        <div class="w-full flex-1 flex flex-col min-h-[300px] mt-2">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-3 border-b border-slate-700 pb-2">
-            <h4 class="text-sm font-bold text-white flex items-center gap-2"><i data-lucide="database" class="w-4 h-4"></i>問題カード データベース管理</h4>
-            <div class="flex flex-wrap items-center gap-2">
-              <select id="admin-deck-selector" onchange="app.renderAdminCards()" class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
-                <option value="all">マスターデータ (全カード)</option>
-                <option value="babanuki">GAME 01: ババ抜き用</option>
-                <option value="memory">GAME 02: 神経衰弱用 (全40グループ)</option>
-                <option value="jinuki">GAME 03: ジジ抜き用</option>
-                <option value="jack">GAME 04: 99ジャック用 (全228問)</option>
+        <div class="w-full flex-1 flex flex-col min-h-[340px] mt-2">
+          <div class="flex flex-col gap-2.5 mb-3 border-b border-slate-700 pb-3">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2"><i data-lucide="database" class="w-4 h-4"></i>問題カード データベース管理</h4>
+              <div class="flex items-center gap-2">
+                <button onclick="app.addNewCardPrompt()" class="text-xs bg-cyan-700 hover:bg-cyan-600 active:scale-95 text-white px-3.5 py-2 rounded-xl transition font-bold shadow">＋カード追加</button>
+                <button onclick="app.resetDB()" class="text-xs bg-rose-900/60 hover:bg-rose-800 active:scale-95 text-rose-300 border border-rose-800 px-3 py-2 rounded-xl transition">初期化</button>
+              </div>
+            </div>
+            <!-- 🆕 スマホでも5行すべてが同時に見えてワンタップで切り替えられるセレクトリスト -->
+            <div>
+              <label class="block text-[11px] font-bold text-cyan-300 mb-1">📂 表示・編集するデッキを選択（5行一覧表示）：</label>
+              <select id="admin-deck-selector" size="5" onchange="app.renderAdminCards()" class="w-full bg-slate-950 border-2 border-slate-700 rounded-xl p-2 text-xs sm:text-sm text-white focus:outline-none focus:border-cyan-500 custom-scrollbar leading-relaxed">
+                <option value="all" selected class="py-1.5 px-2 rounded">📋 マスターデータ (全カード一覧)</option>
+                <option value="babanuki" class="py-1.5 px-2 rounded">🃏 GAME 01: ババ抜き用カード</option>
+                <option value="memory" class="py-1.5 px-2 rounded">🧠 GAME 02: 神経衰弱用 (全40グループ)</option>
+                <option value="jinuki" class="py-1.5 px-2 rounded">🔍 GAME 03: ジジ抜き用カード</option>
+                <option value="jack" class="py-1.5 px-2 rounded">🎯 GAME 04: 99ジャック用 (全228問)</option>
               </select>
-              <button onclick="app.addNewCardPrompt()" class="text-xs bg-cyan-700 hover:bg-cyan-600 text-white px-3 py-1.5 rounded-lg transition font-bold">＋カード追加</button>
-              <button onclick="app.resetDB()" class="text-xs bg-rose-900/60 hover:bg-rose-800 text-rose-300 border border-rose-800 px-3 py-1.5 rounded-lg transition">初期化</button>
             </div>
           </div>
-          <div class="flex-1 bg-slate-900 rounded-xl border border-slate-700 overflow-y-auto custom-scrollbar relative">
-            <table class="w-full text-left text-xs text-slate-300">
-              <thead class="bg-slate-800 text-slate-400 font-mono sticky top-0 z-10 shadow-md">
-                <tr><th class="p-2 w-12 text-center">ID</th><th class="p-2 w-16 text-center">数値/Gr</th><th class="p-2 w-20 text-center">種別</th><th class="p-2 w-36">タイトル / 選択肢・ふち</th><th class="p-2">問題文</th><th class="p-2 w-24 text-center">操作</th></tr>
-              </thead>
-              <tbody id="admin-card-table-body" class="divide-y divide-slate-800/80"></tbody>
-            </table>
-          </div>
+          <!-- 🆕 スマホで横スクロール不要＆5行テキストエリアで編集しやすいカードリスト容器 -->
+          <div id="admin-card-table-body" class="flex-1 bg-slate-950 rounded-2xl border border-slate-800 overflow-y-auto custom-scrollbar p-2.5 space-y-3"></div>
         </div>
       </div>
     </div>
@@ -2498,39 +2520,76 @@
         }, 1000);
       },
 // 🆕 スマホ版：相手がめくったカードの方向を計算して矢印を表示する関数
+      // 🆕 スマホ版専用：相手がめくったカードの方向を常時追跡＆自分の番や✕タップで消去する関数
       lastOpponentFlippedIdx: null,
+      mobileArrowManuallyDismissed: false,
+
+      dismissMobileOpponentArrow: (e) => {
+        if (e) e.stopPropagation();
+        app.mobileArrowManuallyDismissed = true;
+        document.getElementById('mobile-memory-dir-indicator')?.classList.add('hidden');
+        document.getElementById('mobile-edge-dir-indicator')?.classList.add('hidden');
+        document.getElementById('edge-arrow-up')?.classList.add('hidden');
+        document.getElementById('edge-arrow-down')?.classList.add('hidden');
+        document.getElementById('edge-arrow-left')?.classList.add('hidden');
+        document.getElementById('edge-arrow-right')?.classList.add('hidden');
+      },
+
       updateMobileOpponentArrow: () => {
-        const indicator = document.getElementById('mobile-memory-dir-indicator');
+        const topBanner = document.getElementById('mobile-memory-dir-indicator');
+        const edgeContainer = document.getElementById('mobile-edge-dir-indicator');
+        const upEl = document.getElementById('edge-arrow-up');
+        const downEl = document.getElementById('edge-arrow-down');
+        const leftEl = document.getElementById('edge-arrow-left');
+        const rightEl = document.getElementById('edge-arrow-right');
         const arrowEl = document.getElementById('mobile-memory-dir-arrow');
         const textEl = document.getElementById('mobile-memory-dir-text');
-        if (!indicator || !arrowEl || !textEl) return;
 
-        // スマホ幅（640px未満）以外、または神経衰弱プレイ中以外は非表示
+        if (!topBanner || !edgeContainer || !upEl || !downEl || !leftEl || !rightEl) return;
+
+        // スマホ画面（幅640px未満）以外、または神経衰弱プレイ中以外は非表示
         if (window.innerWidth >= 640 || state.phase !== 'memory_playing') {
-          indicator.classList.add('hidden');
+          topBanner.classList.add('hidden');
+          edgeContainer.classList.add('hidden');
           return;
         }
 
         const currentP = state.players[state.turnIdx];
         const isOpponentTurn = currentP && (currentP.isAI || currentP.id !== state.me.id);
 
-        // 相手のターンでない場合、またはめくられているカードがない場合は矢印を消す
-        const flippedIndices = state.memoryState.cards
-          .map((c, i) => (c.isFlipped && !c.isMatched) ? i : null)
-          .filter(i => i !== null);
-
-        if (!isOpponentTurn || flippedIndices.length === 0) {
-          indicator.classList.add('hidden');
+        // 自分のターンになったら手動消去フラグをリセットし、すべての矢印を即座に消去
+        if (!isOpponentTurn) {
+          app.mobileArrowManuallyDismissed = false;
+          topBanner.classList.add('hidden');
+          edgeContainer.classList.add('hidden');
           app.lastOpponentFlippedIdx = null;
           return;
         }
 
-        // 直近めくられたカードのDOM要素を取得
+        // 「✕ 消す」ボタンで手動消去された場合は非表示を維持
+        if (app.mobileArrowManuallyDismissed) {
+          topBanner.classList.add('hidden');
+          edgeContainer.classList.add('hidden');
+          return;
+        }
+
+        const flippedIndices = state.memoryState.cards
+          .map((c, i) => (c.isFlipped && !c.isMatched) ? i : null)
+          .filter(i => i !== null);
+
+        if (flippedIndices.length === 0) {
+          topBanner.classList.add('hidden');
+          edgeContainer.classList.add('hidden');
+          app.lastOpponentFlippedIdx = null;
+          return;
+        }
+
         const targetIdx = flippedIndices[flippedIndices.length - 1];
         app.lastOpponentFlippedIdx = targetIdx;
         const cardEl = document.getElementById(`memory-card-el-${targetIdx}`);
         if (!cardEl) {
-          indicator.classList.add('hidden');
+          topBanner.classList.add('hidden');
+          edgeContainer.classList.add('hidden');
           return;
         }
 
@@ -2540,19 +2599,15 @@
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
 
-        // 画面のどの方向にあるかを判定（8方向＋画面内）
         let vDir = '';
         let hDir = '';
-
         if (centerY < vh * 0.28) vDir = '上';
         else if (centerY > vh * 0.72) vDir = '下';
-
         if (centerX < vw * 0.35) hDir = '左';
         else if (centerX > vw * 0.65) hDir = '右';
 
         let arrow = '🎯';
         let dirLabel = '画面中央付近';
-
         if (vDir === '上' && hDir === '左') { arrow = '↖️'; dirLabel = '左上方向'; }
         else if (vDir === '上' && hDir === '右') { arrow = '↗️'; dirLabel = '右上方向'; }
         else if (vDir === '上') { arrow = '⬆️'; dirLabel = '上方向'; }
@@ -2562,17 +2617,41 @@
         else if (hDir === '左') { arrow = '⬅️'; dirLabel = '左方向'; }
         else if (hDir === '右') { arrow = '➡️'; dirLabel = '右方向'; }
 
-        arrowEl.textContent = arrow;
-        textEl.textContent = `${currentP.name} が【${dirLabel}】をめくりました`;
-        indicator.classList.remove('hidden');
+        if (arrowEl) arrowEl.textContent = arrow;
+        if (textEl) textEl.textContent = `${currentP.name} が【${dirLabel}】をめくりました`;
+        topBanner.classList.remove('hidden');
+
+        // 画面外にカードがある場合は上下左右のエッジ矢印も点灯
+        const isAbove = rect.bottom < 70;
+        const isBelow = rect.top > vh - 90;
+        const isLeft = rect.right < 40;
+        const isRight = rect.left > vw - 40;
+
+        if (isAbove || isBelow || isLeft || isRight) {
+          edgeContainer.classList.remove('hidden');
+          upEl.classList.toggle('hidden', !isAbove);
+          downEl.classList.toggle('hidden', !isBelow);
+          leftEl.classList.toggle('hidden', !isLeft);
+          rightEl.classList.toggle('hidden', !isRight);
+        } else {
+          edgeContainer.classList.add('hidden');
+          upEl.classList.add('hidden');
+          downEl.classList.add('hidden');
+          leftEl.classList.add('hidden');
+          rightEl.classList.add('hidden');
+        }
       },
 
-      // 🆕 矢印バナーをタップしたらそのカードの位置までスムーズにスクロール
       scrollToOpponentFlippedCard: () => {
         if (app.lastOpponentFlippedIdx === null) return;
         const cardEl = document.getElementById(`memory-card-el-${app.lastOpponentFlippedIdx}`);
         if (cardEl) {
           cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          cardEl.classList.add('ring-4', 'ring-amber-300', 'scale-105');
+          setTimeout(() => {
+            cardEl.classList.remove('ring-4', 'ring-amber-300', 'scale-105');
+            app.updateMobileOpponentArrow();
+          }, 700);
         }
       },
 
@@ -2657,97 +2736,7 @@
         });
 
         app.renderMiniBoardPreview();
-        // 🆕 スマホ版の相手めくり方向矢印を更新
         app.updateMobileOpponentArrow();
-
-        if (currentP && currentP.isAI && (state.room.isHost || state.room.isSolo) && !state.memoryState.isProcessingTurn && state.memoryState.selectedCardIndices.length === 0) {
-          state.memoryState.isProcessingTurn = true;
-          if (state.timers.aiDelay) clearTimeout(state.timers.aiDelay);
-          state.timers.aiDelay = setTimeout(app.processAiMemoryTurn, 1400);
-        }
-      },
-
-      renderMemoryGameTable: () => {
-        const grid = document.getElementById('memory-cards-grid');
-        const turnInfo = document.getElementById('memory-turn-info');
-        const ring = document.getElementById('table-players-ring');
-        if(!grid) return;
-
-        const currentP = state.players[state.turnIdx];
-        const isMyTurn = (currentP && !currentP.isAI && currentP.id === state.me.id && !state.memoryState.isProcessingTurn && !state.memoryState.waitingForBoardPlacement);
-        if(turnInfo) turnInfo.textContent = `手番: ${currentP ? currentP.name : ''} ${isMyTurn ? '(あなた)' : ''}`;
-
-        const myP = state.players.find(p => p.id === state.me.id);
-        const miniDot = document.getElementById('mini-board-color-dot');
-        if (miniDot && myP?.color) miniDot.style.backgroundColor = myP.color;
-
-        if (state.phase === 'memory_playing' && !state.memoryState.waitingForBoardPlacement) {
-          app.startMemoryTimer();
-        }
-
-        if(ring) {
-          ring.innerHTML = '';
-          state.players.forEach((p, idx) => {
-            const isCur = (idx === state.turnIdx);
-            ring.innerHTML += `
-              <div class="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-2xl border text-[11px] sm:text-xs font-bold flex items-center gap-1.5 transition-all ${isCur ? 'bg-cyan-950/80 border-cyan-400 text-cyan-200 ring-2 ring-cyan-400/50 scale-105 shadow-lg' : 'bg-slate-900/80 border-slate-700 text-slate-400'}">
-                <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${p.color || '#38bdf8'}"></span>
-                <span>${utils.escapeHtml(p.name)}</span>
-                ${p.isAI ? '<span class="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-300">AI</span>' : ''}
-                ${isCur ? '<span class="text-[10px] text-amber-400 ml-0.5">▶手番</span>' : ''}
-              </div>
-            `;
-          });
-        }
-
-        grid.innerHTML = '';
-        state.memoryState.cards.forEach((card, idx) => {
-          if (card.isMatched) {
-            grid.innerHTML += `<div class="aspect-[3/4] w-full rounded-xl border border-dashed border-slate-700/20 opacity-10 pointer-events-none"></div>`;
-            return;
-          }
-          const isFlipped = card.isFlipped;
-          const guideClass = isMyTurn ? 'border-cyan-400 ring-2 ring-cyan-400/40' : 'border-cyan-900/60 hover:border-cyan-600';
-
-          const ecgCardBackHtml = `
-            <div class="w-full h-full flex flex-col items-center justify-between p-1">
-              <div class="w-full flex items-center justify-between text-[9px] text-cyan-400 font-mono">
-                <span class="font-bold flex items-center gap-0.5"><span>⚡</span> ECG</span>
-              </div>
-              <div class="w-full h-8 bg-slate-950/90 rounded-lg border border-cyan-500/40 flex items-center justify-center overflow-hidden shadow-inner my-auto">
-                <svg class="w-full h-full opacity-90" viewBox="0 0 100 30" preserveAspectRatio="none">
-                  <path d="M 0 15 L 18 15 L 23 5 L 28 25 L 33 15 L 55 15 L 60 3 L 65 27 L 70 15 L 100 15" fill="none" stroke="#22d3ee" stroke-width="2.5"/>
-                </svg>
-              </div>
-              <div class="text-[8px] text-slate-400 font-mono tracking-wider">EMS MONITOR</div>
-            </div>
-          `;
-
-          const showDisease = state.config.showMemoryDisease ?? true;
-          const cardFrontHtml = `
-            <div class="w-full h-full flex flex-col justify-between overflow-hidden">
-              <div class="flex items-center justify-between w-full leading-none px-0.5 mb-0.5">
-                <span class="font-mono bg-amber-400 text-slate-950 px-1 py-0.5 rounded text-[9px] sm:text-[10px] font-black leading-none shadow-sm">Gr.${card.num}</span>
-                ${showDisease ? `<span class="text-[9px] sm:text-[10px] font-extrabold text-indigo-900 truncate ml-1">${utils.escapeHtml(card.title)}</span>` : ''}
-              </div>
-              <div class="w-full flex-1 flex flex-col items-center justify-center text-center p-1 bg-white rounded-lg border border-slate-300 shadow-inner overflow-y-auto custom-scrollbar">
-                <div class="text-[10px] sm:text-[11px] font-extrabold text-slate-900 leading-snug break-words w-full">${utils.escapeHtml(card.desc)}</div>
-              </div>
-            </div>
-          `;
-
-          const boxCls = isFlipped
-            ? 'bg-amber-50 text-slate-900 border-amber-400 ring-4 ring-amber-400/60 z-20 scale-[1.03] shadow-[0_0_25px_rgba(251,191,36,0.7)]'
-            : 'bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 ' + guideClass + ' active:scale-95 z-10 text-slate-100';
-
-          grid.innerHTML += `
-            <div onclick="app.handleMemoryCardClick(${idx})" class="aspect-[3/4] w-full rounded-xl border-2 cursor-pointer transition-all duration-300 flex flex-col justify-between p-1 shadow-[0_10px_20px_rgba(0,0,0,0.6)] select-none relative overflow-hidden ${boxCls}">
-              ${isFlipped ? cardFrontHtml : ecgCardBackHtml}
-            </div>
-          `;
-        });
-
-        app.renderMiniBoardPreview();
 
         if (currentP && currentP.isAI && (state.room.isHost || state.room.isSolo) && !state.memoryState.isProcessingTurn && state.memoryState.selectedCardIndices.length === 0) {
           state.memoryState.isProcessingTurn = true;
@@ -4117,7 +4106,7 @@
       renderAdminCards: () => {
         const tb = document.getElementById('admin-card-table-body'); 
         if(!tb) return;
-        tb.innerHTML='';
+        tb.innerHTML = '';
         const selector = document.getElementById('admin-deck-selector');
         const f = selector ? selector.value : 'all';
         let d = currentCardDB;
@@ -4129,38 +4118,61 @@
         d.forEach(c => {
           const isJack = (c.suit === 'J');
           const subInfoHtml = isJack
-            ? `<div id="tv-${c.id}" class="text-[11px]"><span class="px-1.5 py-0.5 rounded bg-slate-800 text-teal-300 font-bold mr-1">${utils.escapeHtml(c.borderColor || c.title || '緑')}</span><span class="text-slate-400 font-mono">他択: ${c.opt1} / ${c.opt2}</span></div>
-               <div id="te-${c.id}" class="hidden space-y-1">
-                 <input id="te-color-${c.id}" class="w-full bg-slate-950 border border-slate-700 p-1 rounded text-[11px] text-white" placeholder="ふち色(赤,青など)" value="${utils.escapeHtml(c.borderColor || c.title || '緑')}">
-                 <div class="flex gap-1">
-                   <input id="te-o1-${c.id}" type="number" step="any" class="w-1/2 bg-slate-950 border border-slate-700 p-1 rounded text-[11px] text-white" placeholder="選択肢1" value="${c.opt1 ?? 1}">
-                   <input id="te-o2-${c.id}" type="number" step="any" class="w-1/2 bg-slate-950 border border-slate-700 p-1 rounded text-[11px] text-white" placeholder="選択肢2" value="${c.opt2 ?? 2}">
+            ? `<div id="tv-${c.id}" class="text-xs mb-1"><span class="px-2 py-0.5 rounded bg-slate-800 text-teal-300 font-bold mr-1.5">${utils.escapeHtml(c.borderColor || c.title || '緑')}</span><span class="text-slate-300 font-mono">他択選択肢: ${c.opt1} / ${c.opt2}</span></div>
+               <div id="te-${c.id}" class="hidden space-y-2 mt-1">
+                 <div>
+                   <label class="block text-[10px] text-slate-400 mb-0.5">ふち色 (緑, 赤, 青, 黄色, 紫, 黒など)</label>
+                   <input id="te-color-${c.id}" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-xs text-white" value="${utils.escapeHtml(c.borderColor || c.title || '緑')}">
+                 </div>
+                 <div class="grid grid-cols-2 gap-2">
+                   <div>
+                     <label class="block text-[10px] text-slate-400 mb-0.5">ダミー選択肢1</label>
+                     <input id="te-o1-${c.id}" type="number" step="any" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-xs text-white" value="${c.opt1 ?? 1}">
+                   </div>
+                   <div>
+                     <label class="block text-[10px] text-slate-400 mb-0.5">ダミー選択肢2</label>
+                     <input id="te-o2-${c.id}" type="number" step="any" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-xs text-white" value="${c.opt2 ?? 2}">
+                   </div>
                  </div>
                </div>`
-            : `<span id="tv-${c.id}">${utils.escapeHtml(c.title)}</span><input id="te-${c.id}" class="hidden w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-white focus:border-cyan-500 focus:outline-none" value="${utils.escapeHtml(c.title)}">`;
+            : `<div class="mb-1"><span id="tv-${c.id}" class="text-xs font-bold text-cyan-300">${utils.escapeHtml(c.title)}</span></div>
+               <input id="te-${c.id}" class="hidden w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-xs text-white focus:border-cyan-500 focus:outline-none mt-1" value="${utils.escapeHtml(c.title)}">`;
 
-          tb.innerHTML += `<tr class="hover:bg-slate-800/50 transition border-b border-slate-800/50">
-            <td class="p-2 font-mono font-bold text-center text-slate-400">${c.id}</td>
-            <td class="p-2 font-mono text-center"><span id="nv-${c.id}">${c.num===0 && c.suit==='JOKER'?'⚡':c.num}</span><input id="ne-${c.id}" type="number" step="any" class="hidden w-16 bg-slate-950 border border-slate-700 p-1 rounded text-xs text-center text-white focus:border-cyan-500 focus:outline-none" value="${c.num}"></td>
-            <td class="p-2 font-bold text-center ${SUIT_COLORS[c.suit]||''}"><span id="sv-${c.id}">${SUIT_ICONS[c.suit]||c.suit}</span>
-              <select id="se-${c.id}" class="hidden bg-slate-950 border border-slate-700 p-1 rounded text-xs text-white focus:border-cyan-500 focus:outline-none">
-                <option value="C" ${c.suit==='C'?'selected':''}>♣(C)</option>
-                <option value="S" ${c.suit==='S'?'selected':''}>♠(S)</option>
-                <option value="H" ${c.suit==='H'?'selected':''}>♥(H)</option>
-                <option value="D" ${c.suit==='D'?'selected':''}>♦(D)</option>
-                <option value="M" ${c.suit==='M'?'selected':''}>🧠(M)</option>
-                <option value="J" ${c.suit==='J'?'selected':''}>🎯(99J)</option>
-                <option value="JOKER" ${c.suit==='JOKER'?'selected':''}>⚡(JOKER)</option>
-              </select>
-            </td>
-            <td class="p-2">${subInfoHtml}</td>
-            <td class="p-2"><span id="dv-${c.id}">${utils.escapeHtml(c.desc)}</span><textarea id="de-${c.id}" class="hidden w-full bg-slate-950 border border-slate-700 p-1.5 rounded text-xs text-white h-12 focus:border-cyan-500 focus:outline-none">${utils.escapeHtml(c.desc)}</textarea></td>
-            <td class="p-2 text-center flex items-center justify-center gap-1">
-              <button id="be-${c.id}" onclick="app.editCard(${c.id})" class="text-[10px] bg-slate-800 border border-slate-600 hover:bg-slate-700 text-cyan-400 px-2 py-1.5 rounded transition">編集</button>
-              <button id="bs-${c.id}" onclick="app.saveCard(${c.id})" class="hidden text-[10px] bg-emerald-700 hover:bg-emerald-600 text-white px-2 py-1.5 rounded transition shadow-md">保存</button>
-              <button onclick="app.deleteCard(${c.id})" class="text-[10px] bg-rose-950/80 border border-rose-800 text-rose-300 px-2 py-1.5 rounded transition hover:bg-rose-900">削除</button>
-            </td>
-          </tr>`;
+          tb.innerHTML += `
+            <div class="p-3 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col gap-2 shadow-sm">
+              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
+                <div class="flex items-center gap-2">
+                  <span class="font-mono font-bold text-xs px-2 py-1 rounded-lg bg-slate-950 text-slate-400 border border-slate-800">ID:${c.id}</span>
+                  <div class="flex items-center gap-1 text-xs font-mono">
+                    <span class="text-slate-400">値/Gr:</span>
+                    <span id="nv-${c.id}" class="font-bold text-white">${c.num===0 && c.suit==='JOKER'?'⚡':c.num}</span>
+                    <input id="ne-${c.id}" type="number" step="any" class="hidden w-20 bg-slate-950 border border-slate-700 p-1.5 rounded-xl text-xs text-center text-white" value="${c.num}">
+                  </div>
+                  <div class="font-bold text-xs ${SUIT_COLORS[c.suit]||''}">
+                    <span id="sv-${c.id}">${SUIT_ICONS[c.suit]||c.suit}</span>
+                    <select id="se-${c.id}" class="hidden bg-slate-950 border border-slate-700 p-1.5 rounded-xl text-xs text-white">
+                      <option value="C" ${c.suit==='C'?'selected':''}>♣(C)</option>
+                      <option value="S" ${c.suit==='S'?'selected':''}>♠(S)</option>
+                      <option value="H" ${c.suit==='H'?'selected':''}>♥(H)</option>
+                      <option value="D" ${c.suit==='D'?'selected':''}>♦(D)</option>
+                      <option value="M" ${c.suit==='M'?'selected':''}>🧠(M)</option>
+                      <option value="J" ${c.suit==='J'?'selected':''}>🎯(99J)</option>
+                      <option value="JOKER" ${c.suit==='JOKER'?'selected':''}>⚡(JOKER)</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button id="be-${c.id}" onclick="app.editCard(${c.id})" class="text-xs bg-slate-800 border border-slate-600 hover:bg-slate-700 active:scale-95 text-cyan-400 px-3 py-1.5 rounded-xl font-bold transition">編集</button>
+                  <button id="bs-${c.id}" onclick="app.saveCard(${c.id})" class="hidden text-xs bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white px-3.5 py-1.5 rounded-xl font-bold transition shadow-md">保存</button>
+                  <button onclick="app.deleteCard(${c.id})" class="text-xs bg-rose-950/80 border border-rose-800 text-rose-300 px-3 py-1.5 rounded-xl font-bold transition hover:bg-rose-900 active:scale-95">削除</button>
+                </div>
+              </div>
+              <div>${subInfoHtml}</div>
+              <div>
+                <div id="dv-${c.id}" class="text-xs text-slate-200 bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 leading-relaxed">${utils.escapeHtml(c.desc)}</div>
+                <textarea id="de-${c.id}" rows="5" class="hidden w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl text-xs text-white leading-relaxed focus:border-cyan-500 focus:outline-none custom-scrollbar mt-1">${utils.escapeHtml(c.desc)}</textarea>
+              </div>
+            </div>`;
         });
       },
       editCard: (id) => { 
