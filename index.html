@@ -2545,24 +2545,39 @@
 
       updateMobileOpponentArrow: () => {
         const topBanner = document.getElementById('mobile-memory-dir-indicator');
+        const edgeContainer = document.getElementById('mobile-edge-dir-indicator');
+        const upEl = document.getElementById('edge-arrow-up');
+        const downEl = document.getElementById('edge-arrow-down');
+        const leftEl = document.getElementById('edge-arrow-left');
+        const rightEl = document.getElementById('edge-arrow-right');
         const arrowEl = document.getElementById('mobile-memory-dir-arrow');
         const textEl = document.getElementById('mobile-memory-dir-text');
 
-        if (!topBanner || !arrowEl || !textEl) return;
+        if (!topBanner || !edgeContainer || !upEl || !downEl || !leftEl || !rightEl) return;
 
-        // スマホ幅以外、または神経衰弱プレイ中以外は非表示
+        // スマホ画面（幅640px未満）以外、または神経衰弱プレイ中以外は非表示
         if (window.innerWidth >= 640 || state.phase !== 'memory_playing') {
           topBanner.classList.add('hidden');
+          edgeContainer.classList.add('hidden');
           return;
         }
 
         const currentP = state.players[state.turnIdx];
         const isOpponentTurn = currentP && (currentP.isAI || currentP.id !== state.me.id);
 
-        // 自分のターンまたは手動で消されている場合は非表示
-        if (!isOpponentTurn || app.mobileArrowManuallyDismissed) {
-          topBanner.classList.add('hidden');
+        // 自分のターンになったら手動消去フラグをリセットし、すべての矢印を完全に隠す
+        if (!isOpponentTurn) {
           app.mobileArrowManuallyDismissed = false;
+          topBanner.classList.add('hidden');
+          edgeContainer.classList.add('hidden');
+          app.lastOpponentFlippedIdx = null;
+          return;
+        }
+
+        // 「✕ 消す」ボタンで手動非表示にしている間は表示しない
+        if (app.mobileArrowManuallyDismissed) {
+          topBanner.classList.add('hidden');
+          edgeContainer.classList.add('hidden');
           return;
         }
 
@@ -2572,6 +2587,7 @@
 
         if (flippedIndices.length === 0) {
           topBanner.classList.add('hidden');
+          edgeContainer.classList.add('hidden');
           app.lastOpponentFlippedIdx = null;
           return;
         }
@@ -2581,39 +2597,9 @@
         const cardEl = document.getElementById(`memory-card-el-${targetIdx}`);
         if (!cardEl) {
           topBanner.classList.add('hidden');
+          edgeContainer.classList.add('hidden');
           return;
         }
-
-        // スマホの画面（ビューポート）内に入っているかチェック
-        const rect = cardEl.getBoundingClientRect();
-        const isVisible = (
-          rect.top >= 60 &&
-          rect.bottom <= window.innerHeight - 70 &&
-          rect.left >= 0 &&
-          rect.right <= window.innerWidth
-        );
-
-        // 画面内（画角内）に見えている時は矢印を隠す
-        if (isVisible) {
-          topBanner.classList.add('hidden');
-          return;
-        }
-
-        // 画面外（画角外）にある時は方向を判定して表示
-        let arrow = '⬇️';
-        let dirLabel = '下方向';
-        if (rect.bottom < 60) {
-          arrow = '⬆️';
-          dirLabel = '上方向';
-        } else if (rect.top > window.innerHeight - 70) {
-          arrow = '⬇️';
-          dirLabel = '下方向';
-        }
-
-        arrowEl.textContent = arrow;
-        textEl.textContent = `${currentP.name} が【${dirLabel}】をめくりました`;
-        topBanner.classList.remove('hidden');
-      },
 
         // 画面（およびスクロール領域）の画角外にあるかを判定
         const rect = cardEl.getBoundingClientRect();
@@ -2646,6 +2632,29 @@
           rightEl.classList.add('hidden');
           return;
         }
+
+        // 🎯 画角外にある時だけ、その方向に合わせて矢印バナー＆エッジ矢印を表示
+        let arrow = '⬇️';
+        let dirLabel = '下方向';
+        if (isAbove && isLeft) { arrow = '↖️'; dirLabel = '左上（画面外）'; }
+        else if (isAbove && isRight) { arrow = '↗️'; dirLabel = '右上（画面外）'; }
+        else if (isAbove) { arrow = '⬆️'; dirLabel = '上方向（画面外）'; }
+        else if (isBelow && isLeft) { arrow = '↙️'; dirLabel = '左下（画面外）'; }
+        else if (isBelow && isRight) { arrow = '↘️'; dirLabel = '右下（画面外）'; }
+        else if (isBelow) { arrow = '⬇️'; dirLabel = '下方向（画面外）'; }
+        else if (isLeft) { arrow = '⬅️'; dirLabel = '左方向（画面外）'; }
+        else if (isRight) { arrow = '➡️'; dirLabel = '右方向（画面外）'; }
+
+        if (arrowEl) arrowEl.textContent = arrow;
+        if (textEl) textEl.textContent = `${currentP.name} が【${dirLabel}】をめくりました`;
+
+        topBanner.classList.remove('hidden');
+        edgeContainer.classList.remove('hidden');
+        upEl.classList.toggle('hidden', !isAbove);
+        downEl.classList.toggle('hidden', !isBelow);
+        leftEl.classList.toggle('hidden', !isLeft);
+        rightEl.classList.toggle('hidden', !isRight);
+      },
 
         // 🎯 画角外にある時だけ、その方向に合わせて矢印バナー＆エッジ矢印を表示
         let arrow = '⬇️';
@@ -2769,7 +2778,7 @@
         if (currentP && currentP.isAI && (state.room.isHost || state.room.isSolo) && !state.memoryState.isProcessingTurn && state.memoryState.selectedCardIndices.length === 0) {
           state.memoryState.isProcessingTurn = true;
           if (state.timers.aiDelay) clearTimeout(state.timers.aiDelay);
-          state.timers.aiDelay = setTimeout(app.processAiMemoryTurn, 1400);
+          state.timers.aiDelay = setTimeout(app.processAiMemoryTurn, 3500);
         }
       },
 
