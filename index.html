@@ -2593,53 +2593,59 @@
           return;
         }
 
+        // 画面（およびスクロール領域）の画角外にあるかを判定
         const rect = cardEl.getBoundingClientRect();
-        const vh = window.innerHeight;
-        const vw = window.innerWidth;
+        const scrollArea = document.getElementById('memory-scroll-area');
+        const areaRect = scrollArea ? scrollArea.getBoundingClientRect() : { top: 65, bottom: window.innerHeight - 80, left: 0, right: window.innerWidth };
+
+        const topLimit = Math.max(65, areaRect.top);
+        const bottomLimit = Math.min(window.innerHeight - 80, areaRect.bottom);
+        const leftLimit = Math.max(0, areaRect.left);
+        const rightLimit = Math.min(window.innerWidth, areaRect.right);
+
+        // カードの中心が画角外に出ているかチェック
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
 
-        let vDir = '';
-        let hDir = '';
-        if (centerY < vh * 0.28) vDir = '上';
-        else if (centerY > vh * 0.72) vDir = '下';
-        if (centerX < vw * 0.35) hDir = '左';
-        else if (centerX > vw * 0.65) hDir = '右';
+        const isAbove = centerY < topLimit;
+        const isBelow = centerY > bottomLimit;
+        const isLeft = centerX < leftLimit;
+        const isRight = centerX > rightLimit;
 
-        let arrow = '🎯';
-        let dirLabel = '画面中央付近';
-        if (vDir === '上' && hDir === '左') { arrow = '↖️'; dirLabel = '左上方向'; }
-        else if (vDir === '上' && hDir === '右') { arrow = '↗️'; dirLabel = '右上方向'; }
-        else if (vDir === '上') { arrow = '⬆️'; dirLabel = '上方向'; }
-        else if (vDir === '下' && hDir === '左') { arrow = '↙️'; dirLabel = '左下方向'; }
-        else if (vDir === '下' && hDir === '右') { arrow = '↘️'; dirLabel = '右下方向'; }
-        else if (vDir === '下') { arrow = '⬇️'; dirLabel = '下方向'; }
-        else if (hDir === '左') { arrow = '⬅️'; dirLabel = '左方向'; }
-        else if (hDir === '右') { arrow = '➡️'; dirLabel = '右方向'; }
+        const isOffScreen = isAbove || isBelow || isLeft || isRight;
 
-        if (arrowEl) arrowEl.textContent = arrow;
-        if (textEl) textEl.textContent = `${currentP.name} が【${dirLabel}】をめくりました`;
-        topBanner.classList.remove('hidden');
-
-        // 画面外にカードがある場合は上下左右のエッジ矢印も点灯
-        const isAbove = rect.bottom < 70;
-        const isBelow = rect.top > vh - 90;
-        const isLeft = rect.right < 40;
-        const isRight = rect.left > vw - 40;
-
-        if (isAbove || isBelow || isLeft || isRight) {
-          edgeContainer.classList.remove('hidden');
-          upEl.classList.toggle('hidden', !isAbove);
-          downEl.classList.toggle('hidden', !isBelow);
-          leftEl.classList.toggle('hidden', !isLeft);
-          rightEl.classList.toggle('hidden', !isRight);
-        } else {
+        // 🎯 画角内（画面内）にカードが見えている時は矢印をすべて隠す
+        if (!isOffScreen) {
+          topBanner.classList.add('hidden');
           edgeContainer.classList.add('hidden');
           upEl.classList.add('hidden');
           downEl.classList.add('hidden');
           leftEl.classList.add('hidden');
           rightEl.classList.add('hidden');
+          return;
         }
+
+        // 🎯 画角外にある時だけ、その方向に合わせて矢印バナー＆エッジ矢印を表示
+        let arrow = '⬇️';
+        let dirLabel = '下方向';
+        if (isAbove && isLeft) { arrow = '↖️'; dirLabel = '左上（画面外）'; }
+        else if (isAbove && isRight) { arrow = '↗️'; dirLabel = '右上（画面外）'; }
+        else if (isAbove) { arrow = '⬆️'; dirLabel = '上方向（画面外）'; }
+        else if (isBelow && isLeft) { arrow = '↙️'; dirLabel = '左下（画面外）'; }
+        else if (isBelow && isRight) { arrow = '↘️'; dirLabel = '右下（画面外）'; }
+        else if (isBelow) { arrow = '⬇️'; dirLabel = '下方向（画面外）'; }
+        else if (isLeft) { arrow = '⬅️'; dirLabel = '左方向（画面外）'; }
+        else if (isRight) { arrow = '➡️'; dirLabel = '右方向（画面外）'; }
+
+        if (arrowEl) arrowEl.textContent = arrow;
+        if (textEl) textEl.textContent = `${currentP.name} が【${dirLabel}】をめくりました`;
+
+        topBanner.classList.remove('hidden');
+        edgeContainer.classList.remove('hidden');
+        upEl.classList.toggle('hidden', !isAbove);
+        downEl.classList.toggle('hidden', !isBelow);
+        leftEl.classList.toggle('hidden', !isLeft);
+        rightEl.classList.toggle('hidden', !isRight);
       },
 
       scrollToOpponentFlippedCard: () => {
@@ -4253,6 +4259,7 @@
       else if(app.adminClicks>=3) { clearTimeout(app.adminTimer); app.adminClicks=0; app.openAdmin(); }
     });
 
+window.addEventListener('scroll', () => { if (state.phase === 'memory_playing') app.updateMobileOpponentArrow(); }, { passive: true });
     window.onload = app.init;
   </script>
 </body>
