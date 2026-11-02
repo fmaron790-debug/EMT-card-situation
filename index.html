@@ -789,21 +789,24 @@
           </div>
         </div>
 
-        <!-- 🆕 スマホ版専用：画面の端に常駐する上下左右エッジ矢印 -->
-        <div id="mobile-edge-dir-indicator" class="fixed inset-x-0 top-28 bottom-20 pointer-events-none z-40 hidden sm:hidden">
-          <div id="edge-arrow-up" class="absolute top-1 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 px-3.5 py-1.5 rounded-full text-xs font-black shadow-[0_0_20px_rgba(245,158,11,0.9)] pointer-events-auto flex items-center gap-2 animate-bounce hidden">
-            <span onclick="app.scrollToOpponentFlippedCard()" class="cursor-pointer">⬆️ 上のカードが開いています (移動)</span>
-            <button onclick="app.dismissMobileOpponentArrow(event)" class="bg-slate-950/20 px-1.5 py-0.5 rounded-full text-[10px]">✕</button>
+        <!-- 🆕 スマホ版専用：画面のフチに常駐する画角外カードの数字・方向インジケーター -->
+        <div id="mobile-edge-dir-indicator" class="fixed inset-x-0 top-20 bottom-16 pointer-events-none z-40 hidden sm:hidden">
+          <!-- 上方向のフチ表示 -->
+          <div id="edge-arrow-up" class="absolute top-2 left-1/2 -translate-x-1/2 bg-amber-500/90 text-slate-950 px-3 py-1 rounded-full text-xs font-black shadow-[0_0_15px_rgba(245,158,11,0.8)] pointer-events-auto flex items-center gap-1.5 animate-bounce hidden cursor-pointer" onclick="app.scrollToOpponentFlippedCard()">
+            <span>⬆️ 上の画角外にカード (番号: <span id="edge-num-up" class="font-mono underline">?</span>)</span>
+            <button onclick="app.dismissMobileOpponentArrow(event)" class="bg-slate-950/30 hover:bg-slate-950/50 px-1.5 py-0.2 rounded-full text-[10px] ml-1">✕</button>
           </div>
-          <div id="edge-arrow-down" class="absolute bottom-1 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 px-3.5 py-1.5 rounded-full text-xs font-black shadow-[0_0_20px_rgba(245,158,11,0.9)] pointer-events-auto flex items-center gap-2 animate-bounce hidden">
-            <span onclick="app.scrollToOpponentFlippedCard()" class="cursor-pointer">⬇️ 下のカードが開いています (移動)</span>
-            <button onclick="app.dismissMobileOpponentArrow(event)" class="bg-slate-950/20 px-1.5 py-0.5 rounded-full text-[10px]">✕</button>
+          <!-- 下方向のフチ表示 -->
+          <div id="edge-arrow-down" class="absolute bottom-2 left-1/2 -translate-x-1/2 bg-amber-500/90 text-slate-950 px-3 py-1 rounded-full text-xs font-black shadow-[0_0_15px_rgba(245,158,11,0.8)] pointer-events-auto flex items-center gap-1.5 animate-bounce hidden cursor-pointer" onclick="app.scrollToOpponentFlippedCard()">
+            <span>⬇️ 下の画角外にカード (番号: <span id="edge-num-down" class="font-mono underline">?</span>)</span>
+            <button onclick="app.dismissMobileOpponentArrow(event)" class="bg-slate-950/30 hover:bg-slate-950/50 px-1.5 py-0.2 rounded-full text-[10px] ml-1">✕</button>
           </div>
-          <div id="edge-arrow-left" onclick="app.scrollToOpponentFlippedCard()" class="absolute left-1.5 top-1/2 -translate-y-1/2 bg-amber-500 text-slate-950 p-2.5 rounded-full text-sm font-black shadow-[0_0_20px_rgba(245,158,11,0.9)] pointer-events-auto animate-pulse hidden cursor-pointer">
-            <span>⬅️</span>
+          <!-- 左右のフチ表示 -->
+          <div id="edge-arrow-left" onclick="app.scrollToOpponentFlippedCard()" class="absolute left-2 top-1/2 -translate-y-1/2 bg-amber-500/90 text-slate-950 p-2 rounded-full text-xs font-black shadow-[0_0_15px_rgba(245,158,11,0.8)] pointer-events-auto animate-pulse hidden cursor-pointer">
+            <span>⬅️ 左</span>
           </div>
-          <div id="edge-arrow-right" onclick="app.scrollToOpponentFlippedCard()" class="absolute right-1.5 top-1/2 -translate-y-1/2 bg-amber-500 text-slate-950 p-2.5 rounded-full text-sm font-black shadow-[0_0_20px_rgba(245,158,11,0.9)] pointer-events-auto animate-pulse hidden cursor-pointer">
-            <span>➡️</span>
+          <div id="edge-arrow-right" onclick="app.scrollToOpponentFlippedCard()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-amber-500/90 text-slate-950 p-2 rounded-full text-xs font-black shadow-[0_0_15px_rgba(245,158,11,0.8)] pointer-events-auto animate-pulse hidden cursor-pointer">
+            <span>➡️ 右</span>
           </div>
         </div>
 
@@ -2552,6 +2555,8 @@
         const rightEl = document.getElementById('edge-arrow-right');
         const arrowEl = document.getElementById('mobile-memory-dir-arrow');
         const textEl = document.getElementById('mobile-memory-dir-text');
+        const numUpEl = document.getElementById('edge-num-up');
+        const numDownEl = document.getElementById('edge-num-down');
 
         if (!topBanner || !edgeContainer || !upEl || !downEl || !leftEl || !rightEl) return;
 
@@ -2565,19 +2570,11 @@
         const currentP = state.players[state.turnIdx];
         const isOpponentTurn = currentP && (currentP.isAI || currentP.id !== state.me.id);
 
-        // 自分のターンになったら手動消去フラグをリセットし、すべての矢印を完全に隠す
-        if (!isOpponentTurn) {
+        if (!isOpponentTurn || app.mobileArrowManuallyDismissed) {
           app.mobileArrowManuallyDismissed = false;
           topBanner.classList.add('hidden');
           edgeContainer.classList.add('hidden');
           app.lastOpponentFlippedIdx = null;
-          return;
-        }
-
-        // 「✕ 消す」ボタンで手動非表示にしている間は表示しない
-        if (app.mobileArrowManuallyDismissed) {
-          topBanner.classList.add('hidden');
-          edgeContainer.classList.add('hidden');
           return;
         }
 
@@ -2601,52 +2598,37 @@
           return;
         }
 
-        // 画面（およびスクロール領域）の画角外にあるかを判定
+        // 画面外（画角外）にあるかを判定
         const rect = cardEl.getBoundingClientRect();
-        const scrollArea = document.getElementById('memory-scroll-area');
-        const areaRect = scrollArea ? scrollArea.getBoundingClientRect() : { top: 65, bottom: window.innerHeight - 80, left: 0, right: window.innerWidth };
-
-        const topLimit = Math.max(65, areaRect.top);
-        const bottomLimit = Math.min(window.innerHeight - 80, areaRect.bottom);
-        const leftLimit = Math.max(0, areaRect.left);
-        const rightLimit = Math.min(window.innerWidth, areaRect.right);
-
-        // カードの中心が画角外に出ているかチェック
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-
-        const isAbove = centerY < topLimit;
-        const isBelow = centerY > bottomLimit;
-        const isLeft = centerX < leftLimit;
-        const isRight = centerX > rightLimit;
+        const isAbove = rect.bottom < 60;
+        const isBelow = rect.top > window.innerHeight - 70;
+        const isLeft = rect.right < 40;
+        const isRight = rect.left > window.innerWidth - 40;
 
         const isOffScreen = isAbove || isBelow || isLeft || isRight;
 
-        // 🎯 画角内（画面内）にカードが見えている時は矢印をすべて隠す
+        // 🎯 画角内（画面内）に見えている時はインジケーターをすべて隠す
         if (!isOffScreen) {
           topBanner.classList.add('hidden');
           edgeContainer.classList.add('hidden');
-          upEl.classList.add('hidden');
-          downEl.classList.add('hidden');
-          leftEl.classList.add('hidden');
-          rightEl.classList.add('hidden');
           return;
         }
 
-        // 🎯 画角外にある時だけ、その方向に合わせて矢印バナー＆エッジ矢印を表示
+        // 🎯 画角外にあるカードの「何番目のカードか（カード位置の目安IDまたは番号）」を取得
+        const displayCardNum = targetIdx + 1; // 1始まりのカード番号
+        if (numUpEl) numUpEl.textContent = displayCardNum;
+        if (numDownEl) numDownEl.textContent = displayCardNum;
+
+        // 上下左右の方向に応じたテキスト設定
         let arrow = '⬇️';
         let dirLabel = '下方向';
-        if (isAbove && isLeft) { arrow = '↖️'; dirLabel = '左上（画面外）'; }
-        else if (isAbove && isRight) { arrow = '↗️'; dirLabel = '右上（画面外）'; }
-        else if (isAbove) { arrow = '⬆️'; dirLabel = '上方向（画面外）'; }
-        else if (isBelow && isLeft) { arrow = '↙️'; dirLabel = '左下（画面外）'; }
-        else if (isBelow && isRight) { arrow = '↘️'; dirLabel = '右下（画面外）'; }
-        else if (isBelow) { arrow = '⬇️'; dirLabel = '下方向（画面外）'; }
-        else if (isLeft) { arrow = '⬅️'; dirLabel = '左方向（画面外）'; }
-        else if (isRight) { arrow = '➡️'; dirLabel = '右方向（画面外）'; }
+        if (isAbove) { arrow = '⬆️'; dirLabel = '上の画角外'; }
+        else if (isBelow) { arrow = '⬇️'; dirLabel = '下の画角外'; }
+        else if (isLeft) { arrow = '⬅️'; dirLabel = '左の画角外'; }
+        else if (isRight) { arrow = '➡️'; dirLabel = '右の画角外'; }
 
         if (arrowEl) arrowEl.textContent = arrow;
-        if (textEl) textEl.textContent = `${currentP.name} が【${dirLabel}】をめくりました`;
+        if (textEl) textEl.textContent = `${currentP.name} が [No.${displayCardNum}] をめくりました`;
 
         topBanner.classList.remove('hidden');
         edgeContainer.classList.remove('hidden');
