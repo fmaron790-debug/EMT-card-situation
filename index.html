@@ -73,6 +73,8 @@
 #mobile-memory-dir-indicator {
       position: fixed;
       top: 75px;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 999;
     }
   </style>
@@ -2543,39 +2545,24 @@
 
       updateMobileOpponentArrow: () => {
         const topBanner = document.getElementById('mobile-memory-dir-indicator');
-        const edgeContainer = document.getElementById('mobile-edge-dir-indicator');
-        const upEl = document.getElementById('edge-arrow-up');
-        const downEl = document.getElementById('edge-arrow-down');
-        const leftEl = document.getElementById('edge-arrow-left');
-        const rightEl = document.getElementById('edge-arrow-right');
         const arrowEl = document.getElementById('mobile-memory-dir-arrow');
         const textEl = document.getElementById('mobile-memory-dir-text');
 
-        if (!topBanner || !edgeContainer || !upEl || !downEl || !leftEl || !rightEl) return;
+        if (!topBanner || !arrowEl || !textEl) return;
 
-        // スマホ画面（幅640px未満）以外、または神経衰弱プレイ中以外は非表示
+        // スマホ幅以外、または神経衰弱プレイ中以外は非表示
         if (window.innerWidth >= 640 || state.phase !== 'memory_playing') {
           topBanner.classList.add('hidden');
-          edgeContainer.classList.add('hidden');
           return;
         }
 
         const currentP = state.players[state.turnIdx];
         const isOpponentTurn = currentP && (currentP.isAI || currentP.id !== state.me.id);
 
-        // 自分のターンになったら手動消去フラグをリセットし、すべての矢印を即座に消去
-        if (!isOpponentTurn) {
+        // 自分のターンまたは手動で消されている場合は非表示
+        if (!isOpponentTurn || app.mobileArrowManuallyDismissed) {
+          topBanner.classList.add('hidden');
           app.mobileArrowManuallyDismissed = false;
-          topBanner.classList.add('hidden');
-          edgeContainer.classList.add('hidden');
-          app.lastOpponentFlippedIdx = null;
-          return;
-        }
-
-        // 「✕ 消す」ボタンで手動消去された場合は非表示を維持
-        if (app.mobileArrowManuallyDismissed) {
-          topBanner.classList.add('hidden');
-          edgeContainer.classList.add('hidden');
           return;
         }
 
@@ -2585,7 +2572,6 @@
 
         if (flippedIndices.length === 0) {
           topBanner.classList.add('hidden');
-          edgeContainer.classList.add('hidden');
           app.lastOpponentFlippedIdx = null;
           return;
         }
@@ -2595,9 +2581,39 @@
         const cardEl = document.getElementById(`memory-card-el-${targetIdx}`);
         if (!cardEl) {
           topBanner.classList.add('hidden');
-          edgeContainer.classList.add('hidden');
           return;
         }
+
+        // スマホの画面（ビューポート）内に入っているかチェック
+        const rect = cardEl.getBoundingClientRect();
+        const isVisible = (
+          rect.top >= 60 &&
+          rect.bottom <= window.innerHeight - 70 &&
+          rect.left >= 0 &&
+          rect.right <= window.innerWidth
+        );
+
+        // 画面内（画角内）に見えている時は矢印を隠す
+        if (isVisible) {
+          topBanner.classList.add('hidden');
+          return;
+        }
+
+        // 画面外（画角外）にある時は方向を判定して表示
+        let arrow = '⬇️';
+        let dirLabel = '下方向';
+        if (rect.bottom < 60) {
+          arrow = '⬆️';
+          dirLabel = '上方向';
+        } else if (rect.top > window.innerHeight - 70) {
+          arrow = '⬇️';
+          dirLabel = '下方向';
+        }
+
+        arrowEl.textContent = arrow;
+        textEl.textContent = `${currentP.name} が【${dirLabel}】をめくりました`;
+        topBanner.classList.remove('hidden');
+      },
 
         // 画面（およびスクロール領域）の画角外にあるかを判定
         const rect = cardEl.getBoundingClientRect();
