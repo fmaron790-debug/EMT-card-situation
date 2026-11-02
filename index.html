@@ -69,6 +69,12 @@
       stroke-dasharray: 800;
       animation: ecg-draw 4.4s ease-in-out forwards;
     }
+
+#mobile-memory-dir-indicator {
+      position: fixed;
+      top: 75px;
+      z-index: 999;
+    }
   </style>
 </head>
 <body class="min-h-screen bg-slate-950 flex flex-col items-center justify-start text-slate-100 overflow-x-hidden pb-28">
@@ -766,7 +772,7 @@
         <div id="table-players-ring" class="w-full max-w-5xl flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-2.5 px-1"></div>
 
         <!-- 🆕 スマホ版専用：相手がめくったカードの常時方向矢印バナー（タップで移動・✕で手動消去・自分の番で自動消去） -->
-        <div id="mobile-memory-dir-indicator" class="fixed top-16 left-1/2 -translate-x-1/2 z-40 hidden sm:hidden pointer-events-auto w-[92%] max-w-xs">
+        <div id="mobile-memory-dir-indicator" class="fixed top-20 left-1/2 -translate-x-1/2 z-40 hidden sm:hidden pointer-events-auto w-[92%] max-w-xs">
           <div class="bg-slate-950/95 border-2 border-amber-400 text-amber-300 px-3.5 py-2 rounded-2xl shadow-[0_0_25px_rgba(251,191,36,0.85)] flex items-center justify-between gap-2">
             <div onclick="app.scrollToOpponentFlippedCard()" class="flex items-center gap-2.5 flex-1 cursor-pointer active:scale-95">
               <span id="mobile-memory-dir-arrow" class="text-2xl font-black leading-none animate-bounce">⬇️</span>
