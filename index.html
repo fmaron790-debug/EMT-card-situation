@@ -70,7 +70,7 @@
       animation: ecg-draw 4.4s ease-in-out forwards;
     }
 
-#mobile-memory-dir-indicator {
+    #mobile-memory-dir-indicator {
       position: fixed;
       top: 75px;
       left: 50%;
@@ -219,8 +219,7 @@
       { id: 179, suit: "M", num: 40, title: "統合失調症", desc: "治療薬の過量内服で悪性症候群の発症リスク" },
       { id: 180, suit: "M", num: 40, title: "統合失調症", desc: "妄想、異常行動、無関心、注意散漫、幻覚" }
     ];
-
-    // GAME 04（99ジャック用：全228問エクセル完全準拠データ [表示値, 内部値, 問題文, 選択肢1, 選択肢2, ふち色]）
+// GAME 04（99ジャック用：全228問エクセル完全準拠データ [表示値, 内部値, 問題文, 選択肢1, 選択肢2, ふち色]）
     const RAW_JACK_CARDS = [
       [0.9, 90, "生理食塩水の濃度（％）", 1, 0.09, "緑"],
       [11.4, 1140, "2023年の人口統計において、総人口のうち年少人口が占める割合", 12.5, 19, "緑"],
@@ -465,9 +464,271 @@
         borderColor: r[5]
       });
     });
+[1, 100, "凍傷分類で、損傷部が表皮までであり、灼熱感・発赤・腫脹を呈するのは何度であるか", 2, 3, "黒"],
+      [2, 200, "凍傷分類で、損傷部が真皮までであり、充血、疼痛、水泡形成を呈するのは何度であるか", 3, 4, "黒"],
+      [3, 300, "凍傷分類で、損傷部が皮下組織までで、暗赤褐色・壊死・潰瘍を呈するのは何度であるか", 4, 2, "黒"],
+      [4, 400, "凍傷分類で、損傷部が骨・筋組織までで、筋・骨・軟骨の壊死を呈するのは何度であるか", 3, 2, "黒"]
+    ];
 
-    const SUIT_ICONS = { C: '♣', S: '♠', H: '♥', D: '♦', M: '🧠', J: '🎯', JOKER: '⚡' };
-    const SUIT_COLORS = { C: 'text-emerald-400', S: 'text-indigo-400', H: 'text-rose-400', D: 'text-amber-400', M: 'text-cyan-400', J: 'text-teal-400', JOKER: 'text-amber-300' };
+    RAW_JACK_CARDS.forEach((r, idx) => {
+      DEFAULT_EMS_CARDS.push({
+        id: 201 + idx,
+        suit: "J",
+        num: r[0],
+        internalVal: r[1],
+        title: r[5],
+        desc: r[2],
+        opt1: r[3],
+        opt2: r[4],
+        borderColor: r[5]
+      });
+    });
+
+    // ==========================================
+    // GAME 05（救急かるた用：全225枚 修正反映済みデータ [ひらがな, 置き札(疾患名), 読み札(症候・治療法)]）
+    // ==========================================
+    const RAW_KARUTA_CARDS = [
+      ["あ", "アニサキス症", "激しい上腹部痛、悪心・嘔吐、生魚の喫食歴、内視鏡的虫体摘除"],
+      ["あ", "RSウイルス感染症", "発熱・鼻汁、喘鳴、乳幼児の細気管支炎、呼吸管理"],
+      ["あ", "亜急性硬化性全脳炎（SSPE）", "麻疹罹患後の発症、知能低下・性格変化、ミオクローヌス、進行性の経過"],
+      ["あ", "悪性高血圧", "急激な血圧上昇、眼底出血・乳頭浮腫、脳病変・高血圧脳症、降圧薬持続静注"],
+      ["い", "インフルエンザ感染症", "高熱・急激な発症、関節痛・筋肉痛、上気道症状、冬季に流行"],
+      ["い", "一過性脳虚血発作", "数分〜数時間で消失、片麻痺・構音障害、一過性黒内障、抗血小板療法"],
+      ["い", "イレウス", "周期的な腹痛、嘔気・嘔吐、排便・排ガス停止、典型例で機械音・腸蠕動音消失"],
+      ["い", "胃潰瘍", "心窩部痛、食事との関連痛、吐血・黒色便、PPI投与・ピロリ菌除菌"],
+      ["う", "うつ病", "抑うつ気分、興味・喜びの喪失、不眠・食欲低下、抗うつ薬・精神療法"],
+      ["う", "ウェルニッケ脳症", "ビタミンB1欠乏、眼球運動障害、歩行失調、ビタミンB1緊急投与"],
+      ["う", "うっ血性心不全", "呼吸困難・起坐呼吸、下肢浮腫、頸静脈怒張、利尿薬・酸素投与"],
+      ["う", "ウミヘビ咬傷", "海洋での咬傷、神経毒による麻痺、横紋筋融解症、抗血清投与"],
+      ["え", "A群溶血性レンサ球菌", "突発的な咽頭痛・発熱、苺舌・発疹、小児に好発、抗菌薬治療"],
+      ["え", "AIDS（後天性免疫不全症候群）", "免疫力著しい低下、日和見感染症合併、原因不明の発熱・体重減少、抗HIV療法"],
+      ["え", "壊死性筋膜炎", "激しい疼痛と腫脹、皮膚壊死・ガス産生、敗血症ショック、緊急外科的清創"],
+      ["え", "エボラ出血熱", "38度以上の高熱・頭痛、出血傾向（吐血・下血）、流行地域渡航歴、厳重な感染防護・隔離"],
+      ["お", "オピオイド中毒", "意識障害・昏睡、著しい縮瞳、呼吸抑制、ナロキソン投与"],
+      ["お", "横紋筋融解症", "激しい筋肉痛・筋力低下、ミオグロビン尿、急性腎不全合併、大量輸液"],
+      ["お", "横隔膜ヘルニア", "呼吸困難・チアノーゼ、腸蠕動音の胸部聴取、外傷や先天性、外科的修復"],
+      ["お", "オウム病", "発熱・頭痛・筋肉痛、乾いた咳、鳥類との接触歴、テトラサイクリン系抗菌薬"],
+      ["か", "壊血病", "ビタミンC欠乏、出血傾向・歯肉腫脹、倦怠感・関節痛、ビタミンC補充"],
+      ["か", "家族性QT延長症候群", "失神発作・めまい、心電図QT延長、致死性不整脈（TdP）、β遮断薬・ICD植込み"],
+      ["か", "感染性心内膜炎", "発熱・心雑音、自然治癒不可、人工弁や心疾患既往、抗菌薬長期投与・外科手術"],
+      ["か", "肝性脳症", "意識障害・羽ばたき振戦、黄疸・腹水、肝疾患既往"],
+      ["き", "気管性喘息", "呼気性喘鳴・呼吸困難、発作性の咳、アレルゲン曝露、気管支拡張薬吸入・ステロイド"],
+      ["き", "気管内異物", "突発的な激しい咳・窒息感、吸気性喘鳴、チアノーゼ、陥没呼吸・シーソー呼吸"],
+      ["き", "急性呼吸窮迫（促拍）症候群（ARDS）", "急性の重度呼吸困難、著しい低酸素血症、両側肺浸潤影、非心原性肺水腫"],
+      ["き", "筋萎縮性側索硬化症（ALS）", "進行性の筋力低下・筋萎縮、球麻痺症状、呼吸筋麻痺、呼吸器装着"],
+      ["く", "くる病", "ビタミンD欠乏、骨の変形・成長障害、低カルシウム血症、ビタミンD・カルシウム補充"],
+      ["く", "くも膜下出血", "突然の激しい頭痛、嘔吐・項部硬直、脳動脈瘤破裂、緊急手術（コイル塞栓・クリッピング）"],
+      ["く", "クッシング症候群", "中心性肥満・満月様顔貌、高血圧・耐糖能異常、紫斑・皮膚線条、原因疾患の外科切除"],
+      ["く", "クローン病", "慢性的な腹痛・下痢、体重減少・血便、消化管の全層性炎症・狭窄、栄養療法・免疫抑制薬"],
+      ["け", "血友病", "関節内出血・皮下出血、止血困難・出血傾向、凝固因子の先天異常、凝固因子製剤の補充"],
+      ["け", "血胸", "胸部外傷後の呼吸困難、患部の呼吸音減弱・打診濁音、胸腔内への血液貯留、胸腔ドレナージ・開胸止血"],
+      ["け", "結核", "微熱・寝汗・体重減少、長引く咳・血痰、既往歴・免疫低下、救急隊員のN95装着"],
+      ["け", "頸髄損傷", "四肢麻痺・感覚障害、横隔膜麻痺による呼吸障害、頸部過屈曲・過伸展、全身固定・呼吸管理"],
+      ["こ", "甲状腺クリーゼ", "高熱・頻脈、激しい嘔吐・下痢、意識障害、抗甲状腺薬・副腎皮質ステロイド"],
+      ["こ", "高カリウム血症", "心電図変化（テント状T波）、筋力低下・しびれ、腎機能障害、グルコン酸カルシウム・インスリン療法"],
+      ["こ", "コンパートメント症候群", "患部の激しい疼痛、蒼白・脈拍消失・麻痺、骨折や挫滅組織の圧迫、緊急減張切開術"],
+      ["こ", "高山病", "頭痛・めまい・嘔気、低気圧・低酸素環境、高所登山初期に好発、酸素投与・下山"],
+      ["さ", "サルモネラ", "発熱・腹痛・下痢、鶏卵や食肉の喫食歴、血便を伴う急性腸炎、水分補給・抗菌薬"],
+      ["さ", "SARS（重症急性呼吸器症候群）", "高熱・乾いた咳・呼吸困難、コロナウイルスによる飛沫・接触感染、急速な肺病変の進行"],
+      ["さ", "細菌性肺炎", "高熱・悪寒・膿性痰、胸痛・呼吸困難、聴診での湿性ラ音、抗菌薬投与・酸素療法"],
+      ["さ", "再生不良性貧血", "貧血症状（倦怠感・動悸）、出血傾向、易感染性、造血幹細胞移植・免疫抑制療法"],
+      ["し", "シアン中毒", "意識障害・呼吸困難、アーモンド臭、鮮紅色の皮膚、亜硝酸ナトリウム・チオ硫酸ナトリウム投与"],
+      ["し", "子宮外妊娠", "下腹部痛・不規則性性器出血、妊娠反応陽性、卵管破裂によるショック、緊急外科手術"],
+      ["し", "小脳出血", "突然の激しい後頭部痛・めまい、構音障害・歩行失調、共同偏視・嘔吐、血腫除去術・血圧管理"],
+      ["し", "心筋梗塞", "胸部圧迫感・締め付けられる痛み、冷汗・嘔気、心電図ST上昇、緊急冠動脈カテーテル治療（PCI）"],
+      ["す", "膵炎", "上腹部から背部へ抜ける激痛、持続的な嘔気・嘔吐、暴飲暴食や胆石が誘因、絶食・大量輸液・蛋白分解酵素阻害薬"],
+      ["す", "睡眠時無呼吸症候群", "日中の強い眠気・倦怠感、いびき・無呼吸の指摘、高血圧・心血管合併症リスク、CPAP療法"],
+      ["す", "水腎症", "側腹部痛・腎仙痛、血尿・尿路感染合併、尿路閉塞、尿路ドレナージ"],
+      ["す", "水痘", "発熱と全身性の発疹・水疱、強いかゆみ、小児に好発、救急隊員はN95装着"],
+      ["せ", "精巣捻転（精索捻転）", "突発的な激しい陰嚢内疼痛、下腹部痛・悪心、思春期に好発、緊急手術による精巣固定"],
+      ["せ", "脊髄損傷", "感覚障害・運動麻痺、排尿・排便障害、脊椎の外傷・脱臼骨折、全身固定・呼吸循環管理"],
+      ["せ", "切迫流産", "性器出血・下腹部痛、子宮収縮の存在、妊娠初期に好発、安静・子宮収縮抑制薬"],
+      ["せ", "潜水病（潜函病）", "関節痛・筋肉痛、めまい・耳鳴り・麻痺、急激な減圧による窒素気泡発生、高気圧酸素療法"],
+      ["そ", "双極性障害", "躁状態とうつ状態の繰り返し、活動性の極端な変動、衝動的行動、気分安定薬・精神療法"],
+      ["そ", "鼠経ヘルニア", "鼠経部の腫瘤・脱出、嵌頓時の激しい疼痛・嘔吐、立位や腹圧で増強、用手還納または緊急手術"],
+      ["そ", "僧房弁狭窄症", "労作時呼吸困難・息切れ、喀血・心房細動合併、リウマチ熱の既往、利尿薬・弁置換術"],
+      ["そ", "足底腱膜炎", "かかとの底部や土踏まずの痛み、朝の一歩目が特に痛む、ランニングや長時間歩行が誘因、ストレッチ・消炎鎮痛薬"],
+      ["た", "胆石症", "右上腹部から心窩部の発作性疼痛、黄疸・発熱、脂肪食の摂取が誘因、マーフィー徴候"],
+      ["た", "帯状疱疹", "神経痛に続く帯状の水疱・発疹、体の片側に好発、ウイルスの再活性化、抗ヘルペスウイルス薬・鎮痛薬"],
+      ["た", "多臓器不全", "2つ以上の臓器の機能不全、ショック・敗血症の終末像、全身性炎症反応症候群、ICUでの全身管理"],
+      ["た", "単純ヘルペスウイルス感染症", "口唇や性器の群発性水疱・潰瘍、疼痛・灼熱感、疲労や免疫低下で再発、抗ヘルペスウイルス薬"],
+      ["ち", "中耳炎", "耳の激しい痛み・耳漏、発熱・難聴、上気道炎に続発して小児に好発、抗菌薬投与・鼓膜切開"],
+      ["ち", "腸管出血性大腸菌感染症", "激しい腹痛・頻回の血便、O157などの感染、溶血性尿毒症症候群（HUS）の合併、下痢止めは原則禁忌・輸液"],
+      ["ち", "中心性脊髄損傷", "上肢の運動麻痺が下肢より強い、手先の巧緻運動障害、高齢者の頸椎過伸展損傷に好発、頸部固定・保存または手術"],
+      ["ち", "虫垂炎", "心窩部痛から右下腹部への移行痛、マックバーニー点圧痛・反跳痛、発熱・白血球増多、抗菌薬または虫垂切除術"],
+      ["つ", "椎骨脳底動脈循環不全", "めまい・ふらつき・視野障害、構音障害・嚥下障害、後頭葉・脳幹の血流低下、抗血小板療法・血流改善薬"],
+      ["つ", "痛風", "足の親指の付け根の激痛・発赤・腫脹、高尿酸血症、尿酸結晶による関節炎、NSAIDs・コルヒチン・尿酸降下薬"],
+      ["つ", "椎間板ヘルニア", "腰痛・下肢の放散痛・しびれ、前屈動作や坐位で増悪、ラセーグ徴候陽性、消炎鎮痛薬・神経ブロック・手術"],
+      ["つ", "つわり", "妊娠初期の悪心・嘔吐、食欲不振・においに敏感、脱水や電解質異常、ビタミンB1補給・点滴輸液"],
+      ["て", "低カルシウム血症（テタニー）", "手足のしびれ・助産婦手、筋肉の痙攣・硬直、過換気や副甲状腺機能低下、グルコン酸カルシウム静注"],
+      ["て", "てんかん（てんかん発作）", "突然の意識消失・全身けいれん、数分での自然終息、脳の過剰な電気活動、ミダゾラム投与・気道確保・酸素投与"],
+      ["て", "低血糖", "冷汗・動悸・手の震え、空腹感・意識障害・昏睡、インスリン過剰や絶食、ブドウ糖の投与"],
+      ["て", "鉄欠乏性貧血", "顔面蒼白・易疲労感・動悸、スプーン状爪、慢性出血が原因、鉄剤の投与"],
+      ["と", "糖尿病", "口渇・多飲・多尿、急激な体重減少、高血糖・HbA1c上昇、食事運動療法・インスリンや経口血糖降下薬"],
+      ["と", "特発性食道破裂（ブールハーヴェ症候群）", "激しい嘔吐後の突発的な胸背部痛、縦隔気腫・皮下気腫、ショック状態、緊急外科手術"],
+      ["と", "特発性血小板減少性紫斑病", "皮膚の紫斑・点状出血、鼻出血・歯肉出血、血小板数の著しい減少、ステロイド・免疫グロブリン・脾摘"],
+      ["と", "統合失調症", "幻覚・妄想、思考のまとまりの障害、意欲低下・感情の平板化、抗精神病薬の投与"],
+      ["な", "ナルコレプシー", "日中の耐えがたい発作的眠気、情動脱力発作（カタプレキシー）、入眠時幻覚・睡眠麻痺、中枢神経刺激薬"],
+      ["な", "内痔核", "排便時の鮮血出血、肛門部の異物感・脱出、いきみや長時間の座位が誘因、軟膏・硬化療法・結紮切除術"],
+      ["な", "ナッツクラッカー症候群", "左側腹部痛・血尿、左腎静脈の圧迫閉塞、思春期のやせた女性に好発、経過観察または外科手術"],
+      ["な", "内耳炎", "めまい・平衡障害・難聴、耳鳴り・耳閉感、中耳炎からの波及やウイルス感染、抗菌薬・ステロイド"],
+      ["に", "尿管結石", "突然の激しい側腹部・背部痛、血尿、嘔気・嘔吐を伴う、水分摂取・NSAIDs投与"],
+      ["に", "尿路感染症", "排尿痛・残尿感・頻尿、混濁尿・発熱、女性やカテーテル留置患者に好発、抗菌薬投与・水分摂取"],
+      ["に", "妊娠高血圧症候群", "妊娠中の高血圧と蛋白尿、頭痛・視力障害、子癇発作への移行に注意、降圧管理・安静・分娩検討"],
+      ["に", "乳幼児突然死症候群", "乳児が予兆なく睡眠中に死亡、原因不明の呼吸停止、うつぶせ寝や喫煙環境がリスク、あおむけ寝の推奨"],
+      ["ね", "熱性けいれん", "乳幼児期の急激な発熱に伴う全身けいれん、数分で自然停止、予後良好なことが多い、ジアゼパム坐剤等の検討"],
+      ["ね", "猫ひっかき病", "猫に引っかかれた受傷歴、リンパ節の腫脹・疼痛、バルトネラ菌感染、自然軽快または抗菌薬"],
+      ["ね", "ネフローゼ症候群", "大量の蛋白尿、著しい全身の浮腫、低アルブミン血症・高脂血症、ステロイド療法・利尿薬・塩分制限"],
+      ["ね", "熱中症", "めまい・立ちくらみ・こむら返り、高体温・意識障害、高温多湿環境での脱水、冷却・水分塩分補給・輸液"],
+      ["の", "脳卒中", "片麻痺・顔面麻痺・構音障害（FAST）、突然の頭痛・意識障害、脳梗塞・脳出血・くも膜下出血、迅速な搬送・画像診断"],
+      ["の", "ノロウイルス感染症", "突然の激しい嘔吐・水様下痢、発熱・腹痛、冬季の集団感染・二枚貝喫食、水分補給・次亜塩素酸消毒"],
+      ["の", "脳ヘルニア", "意識障害の急激な悪化、瞳孔不同・対光反射消失、頭蓋内圧亢進による脳組織偏位、緊急減圧手術・高浸透圧利尿薬"],
+      ["の", "脳炎", "発熱・頭痛・意識障害、けいれん・精神症状、ウイルス感染による脳実質の炎症、アシクロビル等の抗ウイルス薬"],
+      ["は", "播種性血管内凝固症候群", "全身の微小血管で血栓形成、止血困難・紫斑、敗血症や悪性腫瘍が基礎疾患、抗凝固療法・原因疾患治療"],
+      ["は", "敗血症", "高熱または低体温・頻脈・頻呼吸、血圧低下・ショック、感染症を契機とした臓器障害、早期の抗菌薬投与・大量輸液"],
+      ["は", "廃用症候群", "長期臥床による筋力低下・関節拘縮、深部静脈血栓症・褥瘡の発生、身体機能の低下、早期離床・リハビリ"],
+      ["は", "肺血栓塞栓症", "突発的な呼吸困難・胸痛、片側下肢の腫脹・疼痛、長期臥床や手術後が誘因、抗凝固療法・血栓溶解療法"],
+      ["ひ", "百日咳", "長引くけいれん性の激しい咳、吸気時の笛声音（ウープ）、乳児では無呼吸発作に注意、マクロライド系抗菌薬"],
+      ["ひ", "日和見感染症", "免疫力が低下した宿主での感染症、通常は無害な病原体による発症、がんやステロイド使用が背景、抗微生物薬投与"],
+      ["ひ", "肥大型心筋症", "労作時呼吸困難・胸痛・失神、心室中隔の非対称性肥大、若年者の突然死の原因、β遮断薬・ICD植込み"],
+      ["ひ", "皮下出血", "打撲などによる皮膚下の出血、紫斑・疼痛・腫脹、血液疾患による場合は要注意、冷却・圧迫・安静（RICE処置）"],
+      ["ふ", "フェニルケトン尿症", "先天的なアミノ酸代謝異常、知能発達障害・けいれん、特異な尿臭、新生児マススクリーニング・低フェニルアラニン食"],
+      ["ふ", "副腎クリーゼ", "急激な血圧低下・ショック、著しい倦怠感・嘔気・腹痛、コルチゾールの急激な欠乏、ヒドロコルチゾン緊急静注・輸液"],
+      ["ふ", "フグ中毒", "口唇や舌のしびれ、四肢の麻痺・呼吸筋麻痺、テトロドトキシンによる神経毒、人工呼吸管理（特異的解毒薬なし）"],
+      ["ふ", "不安定型狭心症", "安静時にも起こる胸部圧迫感、発作の頻度や強さの増大、心筋梗塞への移行リスク大、抗血小板薬・硝酸薬・緊急カテーテル"],
+      ["へ", "扁桃炎（扁桃周囲膿瘍）", "激しい咽頭痛・嚥下痛、高熱・開口障害、扁桃周囲への膿の貯留、抗菌薬投与・切開排膿"],
+      ["へ", "片頭痛", "ズキズキと脈打つ片側性の頭痛、悪心・光や音への過敏、閃輝暗点の前兆、トリプタン製剤・NSAIDs"],
+      ["へ", "変形関節症", "関節の痛み・こわばり、関節の変形・可動域制限、加齢や負荷による軟骨摩耗、運動療法・消炎鎮痛薬・関節内注射"],
+      ["へ", "閉塞性動脈硬化症", "間欠性跛行（歩行時の下肢疼痛）、下肢の冷感・足背動脈触知低下、動脈硬化による血流障害、抗血小板薬・血行再建術"],
+      ["ほ", "発作性上室性頻拍", "突然始まり突然止まる規則正しい頻脈、動悸・胸部不快感、リエントリー回路が原因、迷走神経刺激手技・アデノシン三リン酸（ATP）"],
+      ["ほ", "蜂窩織炎", "皮膚深部から皮下組織の細菌感染、局所の発赤・腫脹・熱感・疼痛、小さな傷や水虫が侵入門戸、抗菌薬投与・患部冷却挙上"],
+      ["ほ", "ホルネル症候群", "縮瞳・眼瞼下垂・眼球陥凹・発汗低下、頚部交感神経系の障害、肺尖部腫瘍や脳幹病変が原因、原因疾患の治療"],
+      ["ほ", "本態性高血圧", "原因疾患が特定できない持続的な高血圧、高血圧全体の約9割を占める、生活習慣や遺伝的要因、減塩・運動・降圧薬内服"],
+      ["ま", "マイコプラズマ感染症", "長引く頑固な乾いた咳・発熱、学童期や若年者に好発、聴診所見に乏しい肺炎、マクロライド系抗菌薬"],
+      ["ま", "マロリー・ワイス症候群", "激しい嘔吐の後に起こる吐血、食道胃接合部の粘膜縦走裂傷、飲酒後の嘔吐に好発、内視鏡的止血術・PPI投与"],
+      ["ま", "慢性腎不全", "尿毒症症状（倦怠感・食欲不振・浮腫）、高カリウム血症・代謝性アシドーシス、数か月以上の不可逆的腎機能低下、たんぱく制限食・血液透析"],
+      ["ま", "マラリア", "周期的な高熱・悪寒戦慄・発汗、熱帯・亜熱帯地域への渡航歴、ハマダラカが媒介する原虫感染、抗マラリア薬の投与"],
+      ["み", "ミオクロニー欠神てんかん", "両上肢や肩の律動的なミオクロニー発作、重度の意識減損（欠神）、小児期に発症、バルプロ酸等の抗てんかん薬"],
+      ["み", "水俣病", "求心性視野狭窄・運動失調・感覚障害、構音障害・聴力障害、メチル水銀（有機水銀）中毒、キレート剤・リハビリテーション"],
+      ["み", "ミヤール・ギュブレール症候群", "病巣側の末梢性顔面神経麻痺と外転神経麻痺、反対側の片麻痺（交代性片麻痺）、橋腹側部の脳梗塞や出血、脳卒中急性期治療"],
+      ["み", "みずぼうそう", "発熱と全身の紅斑・水疱・痂皮の混在、強いかゆみ、空気感染・飛沫感染・接触感染、救急隊員はN95装着"],
+      ["む", "無症候性心筋虚血", "胸痛などの自覚症状を欠く心筋虚血、心電図のST低下等で発見、糖尿病患者や高齢者に多い、抗血小板薬・リスク管理"],
+      ["む", "ムンプスウイルス感染症（流行性耳下腺炎）", "片側または両側の耳下腺の腫脹・疼痛、発熱・嚥下痛、無菌性髄膜炎や難聴の合併に注意、鎮痛解熱・安静"],
+      ["む", "無気肺", "呼吸困難・チアノーゼ、患側の呼吸音減弱・胸郭運動低下、気道閉塞による肺胞の虚脱、気道吸引・気管支鏡・体位ドレナージ"],
+      ["む", "無菌性髄膜炎", "発熱・激しい頭痛・嘔吐、項部硬直・ケルニッヒ徴候、エンテロウイルス等の感染が主体、安静・輸液による脱水補正"],
+      ["め", "メニエール病", "激しい回転性めまいの反復、難聴・耳鳴り・耳閉感の随伴、内耳の内リンパ水腫が原因、イソソルビド（利尿薬）・抗めまい薬"],
+      ["め", "メッケル憩室炎", "無痛性の大量血便または右下腹部痛、虫垂炎と類似した症状、回腸に残存した先天性憩室の炎症、外科的切除術"],
+      ["め", "迷走神経反射", "立ちくらみ・悪心・冷汗・顔面蒼白、一過性の意識消失（失神）、長時間の立位や疼痛・精神的緊張が誘因、下肢挙上・安静臥位"],
+      ["め", "メタノール中毒", "視力低下・視野狭窄・失明、頭痛・めまい・重度の代謝性アシドーシス、燃料用アルコール等の誤飲、エタノール・ホメピゾール投与・血液透析"],
+      ["も", "網膜剥離", "飛蚊症・光視症、視野欠損（カーテンが引かれる感覚）・視力低下、網膜が色素上皮から剥がれる、光凝固術・硝子体手術"],
+      ["も", "もやもや病", "小児では過換気時の脳虚血発作（片麻痺等）、成人では頭蓋内出血が多い、ウィリス動脈輪の進行性閉塞と異常血管網、血行再建バイパス手術"],
+      ["も", "門脈圧亢進症", "食道胃静脈瘤・腹水・脾腫、メデューサの頭（腹壁静脈怒張）、肝硬変が最大の原因、内視鏡的静脈瘤結紮術・利尿薬"],
+      ["も", "網膜中心静脈閉塞症", "突然の片眼の視力低下・視野障害、眼底全体の火炎状出血、高血圧や動脈硬化が危険因子、抗VEGF薬硝子体内注射・レーザー治療"],
+      ["や", "薬剤性難聴", "両側性の感音難聴・耳鳴り・めまい、アミノグリコシド系抗菌薬や白金製剤・ループ利尿薬が原因、原因薬剤の直ちに中止・ビタミン剤"],
+      ["や", "野兎病", "急激な高熱・悪寒・頭痛、侵入部位の潰瘍と所属リンパ節の腫脹、野生ウサギ等の剥皮やマダニ刺咬、ストレプトマイシン・テトラサイクリン系抗菌薬"],
+      ["や", "薬物依存", "薬物への強烈な渇望・使用の制御不能、耐性の形成と離脱症状（禁断症状）、精神的・身体的依存、断薬支援・認知行動療法"],
+      ["や", "薬剤性肝障害", "全身倦怠感・食欲不振・黄疸、発熱・発疹・肝逸脱酵素（AST/ALT）上昇、医薬品やサプリメントの服用歴、原因薬物の即時中止"],
+      ["ゆ", "有機リン中毒", "縮瞳・発汗・流涎・気道分泌増加、徐脈・筋線維束攣縮・呼吸麻痺、コリンエステラーゼ阻害によるアセチルコリン過剰、アトロピン・PAM投与"],
+      ["ゆ", "有機薬剤中毒", "めまい・頭痛・酩酊感・意識障害、麻酔作用や造血器・肝腎障害、塗装や洗浄作業での有機溶剤吸入、新鮮な空気下への救出・高濃度酸素投与"],
+      ["よ", "溶血性尿毒症症候群", "溶血性貧血・血小板減少・急性腎不全の3主徴、腸管出血性大腸菌（O157等）感染に続発、小児や高齢者に好発、輸液管理・血液透析・輸血"],
+      ["よ", "腰椎症", "慢性的な腰痛・腰背部のこわばり、下肢のしびれ・間欠性跛行、加齢による椎間板や椎体の変形、消炎鎮痛薬・コルセット・温熱理学療法"],
+      ["よ", "葉酸欠乏症", "巨赤芽球性貧血（動悸・息切れ・めまい）、ハンター舌炎・白髪、緑黄色野菜不足やアルコール多飲・妊娠、葉酸製剤の内服補充"],
+      ["よ", "溶血性貧血", "貧血・黄疸（間接ビリルビン上昇）・脾腫、褐色尿・胆石の合併、赤血球寿命の短縮と破壊亢進、副腎皮質ステロイド・脾臓摘出"],
+      ["ら", "ラクナ梗塞", "片麻痺や構音障害・感覚障害、意識障害や失語などの皮質症状を伴わない、脳深部の穿通枝動脈の閉塞（15mm未満）、抗血小板療法・血圧管理"],
+      ["ら", "ラッサ熱", "高熱・咽頭痛・胸背部痛・粘膜出血、ショック・難聴の合併、西アフリカでのマストミス（野ネズミ）排泄物接触、リバビリン投与・第1種感染症隔離"],
+      ["ら", "卵巣嚢腫茎捻転", "突然の激しい下腹部痛（片側性）、悪心・嘔吐・腹膜刺激症状、肥大した卵巣腫瘍の茎部が回転して虚血、緊急腹腔鏡下手術（捻転解除・摘出）"],
+      ["ら", "雷撃症", "心停止（心室細動・心静止）・呼吸停止、シダ状の皮膚紅斑（電紋）・鼓膜穿孔、落雷による超高圧電流の瞬間通電、直ちに胸骨圧迫（CPR）・AED除細動"],
+      ["り", "リウマチ", "朝のこわばり・左右対称性の多発関節炎、関節の腫脹・変形（スワンネック変形等）、滑膜を主座とする自己免疫疾患、メトトレキサート等の抗リウマチ薬"],
+      ["り", "緑内障（発作）", "急激な激しい眼痛・頭痛・霧視、悪心・嘔吐・結膜充血・瞳孔散大（対光反射消失）、隅角閉塞による眼圧の急上昇、高浸透圧薬点滴・縮瞳薬点眼・レーザー虹彩切開"],
+      ["り", "良性発作性頭位めまい症（BPPV）", "頭の位置を変えた時に生じる回転性めまい、数十秒〜1分以内で自然軽快、難聴や耳鳴りを伴わない・後半規管への耳石迷入、エプリー法（頭位治療）"],
+      ["り", "流行性角結膜炎", "結膜の強い充血・多量の眼脂（めやに）・流涙、異物感・耳前リンパ節の腫脹と圧痛、アデノウイルス8型等による接触感染、手指消毒・タオル共有禁止"],
+      ["る", "ループス腎炎", "蛋白尿・血尿・全身の浮腫（ネフローゼ）、高血圧・進行性の腎機能低下、全身性エリテマトーデス（SLE）の主要合併症、ステロイドパルス療法・免疫抑制薬"],
+      ["る", "涙嚢炎", "目頭（内眼角下部）の発赤・腫脹・激しい疼痛、流涙・眼脂・圧迫による膿の逆流、鼻涙管閉塞に伴う涙嚢の細菌感染、抗菌薬の点眼内服・涙嚢鼻腔吻合術"],
+      ["る", "涙鼻祖", "常時涙があふれる流涙症・眼脂、先天性または後天性の鼻涙管通過障害、乳幼児や高齢者にみられる涙道閉塞、涙嚢マッサージ・ブジー開放術"],
+      ["れ", "レジオネラ症（肺炎）", "高熱・呼吸困難・意識障害（せん妄）、下痢・腹痛・多臓器不全への急速進行、循環式浴槽や温泉・加湿器のエアロゾル吸入、ニューキノロン系・マクロライド系抗菌薬"],
+      ["れ", "レビー小体型認知症", "リアルで具体的な幻視、パーキンソン症状（筋強剛・小刻み歩行）、認知機能の激しい日内変動・レム睡眠行動障害、コリンエステラーゼ阻害薬・環境調整"],
+      ["れ", "レイノー病", "寒冷刺激や精神的緊張による手指の蒼白化、紫藍（チアノーゼ）から紅潮へと変化する3相性色調変化、しびれや冷感・疼痛、保温・禁煙・カルシウム拮抗薬"],
+      ["れ", "レプトスピラ症", "急激な発熱・悪寒・結膜充血・腓腹筋痛、重症型（ワイル病）では黄疸・出血・腎不全、ネズミの尿に汚染された水や土壌との接触、ペニシリン系・テトラサイクリン系抗菌薬"],
+      ["ろ", "ロタウイルス感染症", "白色〜米のとぎ汁様の水様下痢、激しい嘔吐・発熱、乳幼児の冬季〜春先の急性胃腸炎・けいれん合併、経口補水療法・輸液による脱水治療"],
+      ["ろ", "ロコモティブシンドローム", "片脚立ち困難・歩行速度の低下、階段昇降や立ち上がり動作の障害、骨・関節・筋肉など運動器の衰えによる要介護リスク、ロコトレ（スクワット・開眼片脚立ち）"],
+      ["ろ", "老年症候群", "誤嚥・転倒・尿失禁・認知症・うつ・せん妄、加齢に伴う心身機能低下（フレイル・サルコペニア）、複数の慢性疾患と多剤併用、多職種による包括的リハビリ・ケア"],
+      ["ろ", "肋間神経痛", "肋骨に沿った片側性の鋭い電撃痛、深呼吸・咳・体幹の回旋で疼痛増悪、帯状疱疹後や胸椎変性・肋骨骨折後、消炎鎮痛薬・神経ブロック療法"],
+      ["わ", "ワレンベルグ症候群", "回転性めまい・嚥下障害・構音障害（嗄声）、病巣側の顔面温痛覚障害とホルネル症候群・小脳失調、反対側の体幹上下肢の温痛覚障害、椎骨動脈・後下小脳動脈閉塞の治療"],
+      ["わ", "腕神経叢引き抜き損傷", "片側上肢全体の完全運動麻痺と感覚脱失、ホルネル症候群の合併・激しい引き抜き損傷痛、バイク事故等での肩甲帯と頸部の過度の牽引、肋間神経移行術・リハビリ"],
+      ["わ", "腕頭動脈閉塞症", "右上肢の脈拍減弱・血圧低下・冷感・だるさ、めまい・失神・一過性脳虚血発作（鎖骨下動脈盗血症候群）、動脈硬化や高安動脈炎が原因、血管内治療（ステント）・バイパス術"],
+      ["が", "眼窩底吹き抜け骨折", "眼球の上転障害・複視（物が二重に見える）、頬部〜上唇の知覚麻痺・眼球陥凹、ボールや拳など鈍的外力による眼窩内圧急上昇、眼窩底整復手術（絞扼時は緊急）"],
+      ["が", "外耳炎", "耳痛（耳介を引っ張ったり耳珠を押すと増強）、外耳道のかゆみ・耳漏・耳閉感、過度な耳掃除や水泳後の細菌・真菌感染、外耳道清掃・抗菌薬やステロイド点耳"],
+      ["が", "顔面神経麻痺", "額のしわ寄せ不能・閉眼不能（ベル現象）、口角下垂・水や食べ物がこぼれる・味覚障害、単純ヘルペス（ベル麻痺）や水痘帯状疱疹ウイルス（ハント症候群）、副腎皮質ステロイド・抗ウイルス薬"],
+      ["が", "外傷性頸部症候群", "頸部痛・項部硬直・肩こり・可動域制限、頭痛・めまい・耳鳴り・上肢のしびれ、自動車追突事故などによる頸椎の過伸展・過屈曲、安静・消炎鎮痛薬・理学療法"],
+      ["ぎ", "ギランバレー症候群", "両下肢から上行する左右対称性の弛緩性運動麻痺、腱反射の減弱・消失、呼吸筋麻痺や自律神経障害、先行する感冒やカンピロバクター腸炎、免疫グロブリン静注療法・血漿交換"],
+      ["ぎ", "偽痛風", "膝関節などの大関節の急激な疼痛・腫脹・発赤、発熱を伴う急性関節炎、関節軟骨へのピロリン酸カルシウム結晶の沈着・高齢者に好発、NSAIDs・関節穿刺排液・ステロイド注入"],
+      ["ぎ", "逆流性食道炎", "胸やけ・呑酸（酸っぱい液体が上がる）、食後や前屈位・臥位での症状増悪、下部食道括約筋の弛緩による胃酸逆流、プロトンポンプ阻害薬（PPI）・食後すぐ横にならない"],
+      ["ぐ", "偶発性低体温", "直腸温（深部体温）35℃未満への低下、初期のシバリング（震え）から意識障害・徐脈・J波（オズボーン波）出現、寒冷環境への曝露や高齢者の屋内発症、保温・加温輸液・復温処置"],
+      ["ぐ", "グッドパスチャー症候群", "肺胞出血による血痰・喀血・呼吸困難、急速進行性糸球体腎炎による血尿・急性腎不全、抗糸球体基底膜（抗GBM）抗体による自己免疫疾患、血漿交換療法・ステロイドパルス・免疫抑制薬"],
+      ["ぐ", "群発頭痛", "片側の眼窩周囲〜側頭部のえぐられるような激痛、同側の結膜充血・流涙・鼻閉・鼻汁・縮瞳、数週間〜数か月の群発期に毎日ほぼ同じ時刻（夜間）に出現、純酸素吸入（7〜10L/分）・スマトリプタン皮下注"],
+      ["げ", "劇症型溶血性レンサ球菌感染症", "四肢の激しい疼痛と急速に拡大する発赤・腫脹、発熱から数十時間以内に壊死性筋膜炎・ショック・多臓器不全へ進行、人食いバクテリアとも呼ばれる致死性の高い感染症、大量ペニシリン系抗菌薬・緊急デブリードマン"],
+      ["げ", "減圧症", "関節痛・筋肉痛・皮膚のかゆみや大理石様斑紋（I型）、麻痺・知覚障害・めまい・呼吸困難（II型）、スキューバダイビング等の急浮上による体内の窒素気泡化、100%高濃度酸素投与・再圧治療（高気圧酸素）"],
+      ["げ", "原発性アルドステロン症", "治療抵抗性の高血圧、低カリウム血症による筋力低下・四肢麻痺・多飲多尿、副腎皮質腫瘍や過形成からのアルドステロン過剰分泌、アルドステロン拮抗薬・腹腔鏡下副腎摘出術"],
+      ["げ", "劇症型肝炎", "高度の黄疸・全身倦怠感・羽ばたき振戦、意識障害（肝性脳症II度以上）とプロトロンビン時間40%以下、初発症状から8週以内の急性肝不全、血漿交換・血液濾過透析・肝移植"],
+      ["ご", "誤嚥性肺炎", "発熱・咳嗽・粘稠な膿性痰・酸素化低下、食事中のむせや食後の痰増加・夜間咳嗽、脳血管障害や加齢による嚥下反射・咳反射の低下、抗菌薬投与・口腔ケア・嚥下リハビリ"],
+      ["ざ", "坐骨神経痛", "臀部から大腿後面・下腿・足先への鋭い放散痛、しびれ・知覚鈍麻・歩行障害、腰椎椎間板ヘルニアや腰部脊柱管狭窄症・梨状筋症候群が原因、消炎鎮痛薬・神経ブロック・ストレッチ"],
+      ["ざ", "挫滅症候群（クラッシュ症候群）", "圧迫解除後の急速な循環血液量減少性ショック、ミオグロビン尿（赤褐色尿）と急性腎不全、高カリウム血症による致死性不整脈、瓦礫の下敷きなど長時間の筋肉圧迫、救出前からの大量生食輸液・血液浄化療法"],
+      ["じ", "腎盂腎炎", "悪寒戦慄を伴う38℃以上の高熱、腰背部痛・肋骨脊柱角（CVA）叩打痛、排尿痛・頻尿・膿尿・細菌尿、大腸菌などの上行性感染、抗菌薬投与・十分な水分補給と安静"],
+      ["じ", "常位胎盤早期剝離", "突然の激しい持続性下腹部痛・板状硬（お腹が硬くなる）、少量の暗赤色性器出血、胎動減少・胎児機能不全・DICや出血性ショックの合併、妊娠高血圧や腹部外傷がリスク、急速遂娩（緊急帝王切開）・母体蘇生"],
+      ["じ", "十二指腸潰瘍", "空腹時や夜間の心窩部痛（食事摂取で軽快）、胸やけ・悪心・黒色便（タール便）、若年者に比較的多く胃酸分泌過多とピロリ菌感染が原因、プロトンポンプ阻害薬（PPI）・ピロリ菌除菌・内視鏡止血"],
+      ["じ", "上腸間膜動脈閉塞症", "突然発症する激しい腹痛（初期は腹膜刺激症状に乏しい）、下血・嘔吐から急速に腸管壊死・汎発性腹膜炎・ショックへ進行、心房細動による血栓塞栓が主因、造影CT診断・緊急血栓除去術または腸管切除"],
+      ["ず", "髄膜炎（細菌性）", "高熱・激しい頭痛・噴射性嘔吐、項部硬直・ケルニッヒ徴候・ブルジンスキー徴候、意識障害・けいれん、髄液の細胞数増多と糖低下、血液培養後の迅速な抗菌薬＋デキサメタゾン静注"],
+      ["ず", "頭蓋骨陥没骨折", "頭部外傷部位の陥没変形・頭皮裂傷、局所の疼痛・脳実質損傷による片麻痺やけいれん、鈍器打撃や角への衝突による直達外力、開放性や5mm以上の陥没・神経症状があれば整復挙上手術"],
+      ["ず", "頭蓋底損傷", "ブラックアイ（パンダの目徴候）・バトル徴候（耳介後部皮下出血）、髄液鼻漏・髄液耳漏・鼻出血・耳出血、脳神経麻痺（嗅覚障害・視力障害・顔面神経麻痺）、経鼻エアウェイや経鼻胃管は原則禁忌・感染予防"],
+      ["ぜ", "全身性エリテマトーデス", "顔面の蝶形紅斑・日光過敏症・口腔内潰瘍、発熱・多発関節痛・ループス腎炎・漿膜炎、若い女性に好発する抗核抗体・抗dsDNA抗体陽性の膠原病、副腎皮質ステロイド・ヒドロキシクロロキン・免疫抑制薬"],
+      ["ぜ", "前立腺肥大", "尿勢低下・排尿困難・腹圧排尿、頻尿・夜間頻尿・残尿感・尿閉、高齢男性の内腺（移行領域）の肥大による尿道圧迫、α1遮断薬・5α還元酵素阻害薬・経尿道的前立腺切除術（TURP）"],
+      ["ぜ", "前置胎盤", "妊娠中期〜後期の警告出血に続く無痛性の大量性器出血（鮮紅色）、腹痛や子宮収縮を伴わないことが多い、胎盤が内子宮口を覆う状態、内診は厳禁・安静管理・帝王切開術"],
+      ["ぜ", "前庭神経炎", "突発する激しい回転性めまい（数日間持続）・悪心嘔吐、難聴や耳鳴りなどの蝸牛症状を全く伴わない、先行する上気道感染（感冒）の既往・健側向きの水平回旋混合性眼振、抗めまい薬・制吐薬・副腎皮質ステロイド"],
+      ["ぞ", "粟粒結核", "高熱・全身倦怠感・体重減少・呼吸困難、胸部X線・CTでの両肺野びまん性の微小粒状影、結核菌が血行性に全身諸臓器へ散布された重症型、高齢者や免疫不全者に好発、4剤併用抗結核薬・救急隊員はN95装着"],
+      ["ぞ", "造血器疾患（白血病など）", "発熱（易感染性）・貧血症状（動悸・倦怠感）・出血傾向（歯肉出血・紫斑）、骨痛・リンパ節腫脹・肝脾腫、骨髄での白血病細胞の無秩序な増殖と正常造血の抑制、多剤併用化学療法・分子標的薬・造血幹細胞移植"],
+      ["だ", "大動脈解離", "腰背部痛、血圧の左右差、移動する疼痛、引き裂かれるような痛み"],
+      ["だ", "WPW症候群", "心電図でのPR間隔短縮とデルタ波（QRS幅延長）、突然始まる動悸・頻脈発作（房室回帰性頻拍）、ケント束（副伝導路）の存在・偽性心室頻拍時の除細動準備、カテーテルアブレーション・抗不整脈薬（心房細動合併時はジギタリス・Ca拮抗薬禁忌)"],
+      ["だ", "大腿骨近位部骨折", "転倒後の股関節部痛・起立歩行不能、患肢の短縮と外旋変形、骨粗鬆症を有する高齢女性の転倒に好発、長期臥床を防ぐための早期手術（人工骨頭置換術・骨接合術）・リハビリ"],
+      ["だ", "ダウン症候群", "特徴的顔貌（眼裂斜上・鼻根平坦・内眼角贅皮）、筋緊張低下・精神運動発達遅滞、心室中隔欠損などの先天性心疾患や消化管奇形の合併、21番染色体のトリソミー、合併症の外科治療と療育支援"],
+      ["で", "溺水", "呼吸困難・咳嗽・ピンク色泡沫状痰（肺水腫）、低酸素血症・意識障害・低体温症、淡水または海水の気道内吸引による肺サーファクタント洗い出しと肺胞虚脱、早期の人工呼吸・高濃度酸素投与・陽圧換気（PEEP）"],
+      ["で", "電撃症", "電流斑（流入部と流出部の深い熱傷）、心室細動などの致死性不整脈・呼吸停止、強直性筋収縮による骨折や横紋筋融解症、電源遮断による二次災害防止・心肺蘇生（CPR）と除細動・大量輸液"],
+      ["で", "デング熱", "突然の高熱・激しい頭痛・眼窩痛・関節筋肉痛、解熱時期に出現する全身の小紅斑（皮疹）と血小板減少、ネッタイシマカ・ヒトスジシマカによるデングウイルス媒介、水分補給・アセトアミノフェン（アスピリン等のNSAIDsは出血助長のため禁忌）"],
+      ["で", "電気性眼炎", "強い眼痛・異物感・羞明（まぶしさ）・流涙、結膜充血・開瞼困難、アーク溶接作業や殺菌灯・雪山（雪目）での紫外線曝露から数時間後に発症、角膜上皮の点状欠損、抗菌薬・角膜保護点眼・冷却安静"],
+      ["ど", "動脈硬化", "自覚症状なく進行し血管内腔の狭窄・閉塞や瘤形成を引き起こす、脳梗塞・心筋梗塞・大動脈瘤・閉塞性動脈硬化症の基盤病態、高血圧・脂質異常症・糖尿病・喫煙・加齢が危険因子、生活習慣改善・スタチンや抗血小板薬"],
+      ["ど", "洞不全症候群（SSS）", "めまい・ふらつき・失神（アダムス・ストークス発作）、易疲労感・息切れ、洞結節の機能低下による高度洞性徐脈・洞停止・徐脈頻脈症候群、恒久的ペースメーカー植込み術・急性期はアトロピン"],
+      ["ど", "動脈管開存症", "連続性雑音（機械様雑音）・脈圧増大（跳躍脈）、多呼吸・哺乳不良・体重増加不良（心不全症状）、大動脈と肺動脈をつなぐ動脈管が出生後も閉鎖しない先天性心疾患、インドメタシン投与（未熟児）・カテーテル閉鎖術または外科結紮"],
+      ["ど", "毒蛇咬傷", "咬傷部の2つの牙痕・激しい疼痛・急速に広がる腫脹と皮下出血、複視・眼瞼下垂（マムシ）や横紋筋融解・DIC（ヤマカガシ）、急性腎不全や出血性ショックへの進行、安静固定（激しく動かさない）・抗毒素血清投与・破傷風トキソイド"],
+      ["ば", "バンコマイシン耐性黄色ブドウ球菌感染症", "創部感染・肺炎・敗血症などの難治性感染症、既存の特効薬バンコマイシンが効かない多剤耐性菌感染、長期入院や抗菌薬長期投与患者での接触感染、厳重な標準・接触予防策（個室隔離）・リネゾリド等の投与"],
+      ["ば", "梅毒", "第1期の硬性下疳（痛みのないしこり・潰瘍）と鼠径リンパ節腫脹、第2期のバラ疹・扁平コンジローマ、梅毒トレポネーマによる性感染症（母子感染で先天梅毒）、ペニシリン系抗菌薬の投与"],
+      ["び", "びまん性軸索損傷", "受傷直後からの高度の意識障害（6時間以上の昏睡）、頭部CTで粗大な血腫や挫傷がないにもかかわらず意識が回復しない、交通外傷などの強い回転加速度による脳白質軸索の広範な断裂、頭蓋内圧管理・全身集中治療・高次脳機能リハビリ"],
+      ["び", "ビリルビン脳症", "嗜眠・哺乳力低下・筋緊張低下（初期）、甲高い泣き声・後弓反張・発熱・けいれん（中期）、アテトーゼ型脳性麻痺や感音難聴（後遺症）、新生児期の非抱合型（間接）ビリルビン著明高値による大脳基底核沈着（核黄疸）、光線療法・交換輸血"],
+      ["び", "ビタミンB１２欠乏症", "巨赤芽球性貧血（動悸・息切れ・白髪）とハンター舌炎、下肢のしびれ・深部感覚障害・運動失調（亜急性連合性脊髄変性症）、胃全摘後（内因子欠乏）や極端な菜食主義が原因、ビタミンB12製剤の非経口（筋注・静注）または内服補充"],
+      ["び", "鼻出血", "鼻腔からの出血（約9割が鼻中隔前下部のキーゼルバッハ部位からの出血）、高血圧や抗凝固薬内服者では後方の蝶口蓋動脈領域からの大量出血に注意、血液の嚥下による嘔気や黒色吐物、座位で少し前屈みになり小鼻（鼻翼）を10〜15分しっかり圧迫"],
+      ["ぶ", "ブルガダ症候群", "夜間睡眠中や安静時の突然の心室細動（ポックリ病）、失神発作の既往や突然死の家族歴、心電図のV1〜V3誘導での特徴的なcoved型（またはsaddle-back型）ST上昇、アジア人成人男性に好発、植込み型除細動器（ICD）の装着"],
+      ["ぶ", "ブドウ膜炎", "霧視（かすみ目）・飛蚊症・羞明・眼痛・毛様充血、前房蓄膿や角膜後面沈着物、ベーチェット病・サルコイドーシス・原田病（三大ぶどう膜炎）や感染症が原因、副腎皮質ステロイド点眼・散瞳薬点眼・原因疾患の全身治療"],
+      ["ぶ", "ブドウ球菌性熱傷用皮膚症候群（SSSS）", "口囲や眼周囲の発赤と放射状亀裂、全身の皮膚が熱傷（やけど）のように赤くなりわずかな摩擦で水疱・表皮剥離を起こす（ニコルスキー現象陽性）、発熱・皮膚の激しい疼痛、乳幼児に好発する黄色ブドウ球菌の表皮剥脱毒素が原因、抗菌薬全身投与と輸液・皮膚保護"],
+      ["ぼ", "ボツリヌス食中毒", "複視・眼瞼下垂・散瞳・構音障害・嚥下困難、四肢の対称性弛緩性麻痺から呼吸筋麻痺（呼吸不全）へ進行、意識は清明で発熱を伴わない、真空パック食品・缶詰・乳児の蜂蜜摂取によるボツリヌス毒素、人工呼吸管理・抗毒素血清投与"],
+      ["ぼ", "膀胱炎", "排尿痛（特に排尿終末時痛）・頻尿・残尿感、尿混濁（膿尿）・血尿、発熱は原則として伴わない、尿道の短い女性に好発する大腸菌などの逆行性感染、抗菌薬の短期間内服・十分な水分摂取と排尿我慢の回避"],
+      ["ぼ", "房室ブロック", "めまい・ふらつき・失神（アダムス・ストークス発作）、徐脈による心不全症状、心電図でのPR延長（1度）・QRS脱落（2度ウェンケバッハイ型／モビッツII型）・房室解離（3度完全房室ブロック）、モビッツII型と3度はペースメーカー植込み適応"],
+      ["ぱ", "パラコート中毒", "口腔・咽頭・食道の腐食性疼痛と嘔吐、数日後に急速に進行する不可逆的な肺線維症と呼吸不全、肝腎不全の合併、除草剤の誤飲や自殺企図、酸素投与は肺線維化を劇的に悪化させるため原則禁忌（低酸素管理）・吸着剤投与"],
+      ["ぱ", "パラチフス", "1〜2週間の潜伏期後の持続する高熱（稽留熱）、比較的徐脈・バラ疹・脾腫・下痢または便秘、パラチフスA菌に汚染された水や食物の経口摂取（海外渡航歴）、ニューキノロン系または第3世代セフェム系抗菌薬"],
+      ["ぱ", "パーキンソン病", "安静時振戦（丸薬丸め運動）・筋強剛（歯車様固縮）・無動（仮面様顔貌・小字症）・姿勢反射障害（突進現象）の4大徴候、自律神経症状（便秘・起立性低血圧）、中脳黒質のドパミン神経細胞の変性脱落、L-ドパ（レボドパ）製剤・リハビリ"]
+    ];
+
+    RAW_KARUTA_CARDS.forEach((r, idx) => {
+      DEFAULT_EMS_CARDS.push({
+        id: 501 + idx,
+        suit: "K",
+        num: idx + 1,
+        kana: r[0],
+        title: r[1],
+        desc: r[2],
+        imgUrl: ""
+      });
+    });
+
+    const SUIT_ICONS = { C: '♣', S: '♠', H: '♥', D: '♦', M: '🧠', J: '🎯', K: '🎴', JOKER: '⚡' };
+    const SUIT_COLORS = { C: 'text-emerald-400', S: 'text-indigo-400', H: 'text-rose-400', D: 'text-amber-400', M: 'text-cyan-400', J: 'text-teal-400', K: 'text-fuchsia-400', JOKER: 'text-amber-300' };
     const JACK_BORDER_STYLES = {
       '緑': 'border-green-500 shadow-[0_0_12px_rgba(34,197,94,0.3)]',
       '赤': 'border-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.3)]',
@@ -494,7 +755,7 @@
         const s = localStorage.getItem('ems_db'); 
         if(s) {
           const parsed = JSON.parse(s);
-          if(parsed.some(c => c.suit === 'M') && parsed.some(c => c.suit === 'J')) return parsed;
+          if(parsed.some(c => c.suit === 'M') && parsed.some(c => c.suit === 'J') && parsed.some(c => c.suit === 'K')) return parsed;
         }
       } catch(e){} 
       const defaultFull = JSON.parse(JSON.stringify(DEFAULT_EMS_CARDS));
@@ -502,7 +763,7 @@
       return defaultFull;
     }
     function saveDB(data) { localStorage.setItem('ems_db', JSON.stringify(data)); }
-    function loadAccess() { try { const s = localStorage.getItem('ems_acc'); if(s) return JSON.parse(s); } catch(e){} return { game1: true, game2: true, game3: true, game4: true }; }
+    function loadAccess() { try { const s = localStorage.getItem('ems_acc'); if(s) return JSON.parse(s); } catch(e){} return { game1: true, game2: true, game3: true, game4: true, game5: true }; }
     function saveAccess(data) { localStorage.setItem('ems_acc', JSON.stringify(data)); }
 
     let currentCardDB = loadDB();
@@ -623,6 +884,27 @@
               </label>
             </div>
 
+            <!-- 救急かるた用設定（AI音声読み上げ / テキストゆっくり表示 切替スイッチ ＆ 角のひらがな位置） -->
+            <div id="karuta-only-config" class="hidden pt-3 border-t border-slate-800/60 space-y-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-xs font-bold text-fuchsia-300 block">AI音声読み上げを有効にする（ゆっくり固定）</span>
+                  <span class="text-[10px] text-slate-400">※ON: AIゆっくり音声＋テキスト表示 ／ OFF: テキストのみ文頭からゆっくり表示</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input id="config-karuta-read-mode" type="checkbox" checked class="sr-only peer">
+                  <div class="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-fuchsia-600"></div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-slate-800/40">
+                <span class="text-xs font-bold text-slate-200">置き札の上部角のひらがな配置</span>
+                <select id="config-karuta-corner" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-bold text-fuchsia-300">
+                  <option value="left" selected>左上隅に大きく表示</option>
+                  <option value="right">右上隅に大きく表示</option>
+                </select>
+              </div>
+            </div>
+
             <div id="ai-autofill-config-row" class="flex items-center justify-between pt-2 border-t border-slate-800/60">
               <span class="text-xs font-bold text-slate-200">不足枠の救急AI自動補充</span>
               <label class="relative inline-flex items-center cursor-pointer">
@@ -669,8 +951,7 @@
           </div>
         </div>
       </section>
-
-      <!-- VIEW 3: WAITING ROOM -->
+<!-- VIEW 3: WAITING ROOM -->
       <section id="view-room" class="w-full max-w-xl flex flex-col items-center py-4 sm:py-6 hidden animate-fade-in">
         <div class="w-full bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl">
           <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
@@ -746,8 +1027,7 @@
           <div id="my-cards-container" class="w-full flex items-center gap-2.5 overflow-x-auto py-3 px-2 custom-scrollbar min-h-[165px]"></div>
         </div>
       </section>
-
-      <!-- VIEW 4-2: MEMORY GAME TABLE -->
+<!-- VIEW 4-2: MEMORY GAME TABLE -->
       <section id="view-memory-game" class="w-full flex-1 flex flex-col items-center justify-start hidden animate-fade-in">
         <div class="w-full max-w-5xl bg-slate-900/95 border border-blue-500/50 rounded-2xl p-2.5 sm:p-3 mb-2.5 flex flex-wrap items-center justify-between gap-2 shadow-lg">
           <div class="flex items-center gap-2">
@@ -773,7 +1053,7 @@
 
         <div id="table-players-ring" class="w-full max-w-5xl flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-2.5 px-1"></div>
 
-        <!-- 🆕 スマホ版専用：相手がめくったカードの常時方向矢印バナー（タップで移動・✕で手動消去・自分の番で自動消去） -->
+        <!-- スマホ版専用：相手がめくったカードの常時方向矢印バナー -->
         <div id="mobile-memory-dir-indicator" class="fixed top-20 left-1/2 -translate-x-1/2 z-40 hidden sm:hidden pointer-events-auto w-[92%] max-w-xs">
           <div class="bg-slate-950/95 border-2 border-amber-400 text-amber-300 px-3.5 py-2 rounded-2xl shadow-[0_0_25px_rgba(251,191,36,0.85)] flex items-center justify-between gap-2">
             <div onclick="app.scrollToOpponentFlippedCard()" class="flex items-center gap-2.5 flex-1 cursor-pointer active:scale-95">
@@ -783,34 +1063,11 @@
                 <div class="text-[9px] text-amber-300 font-mono mt-0.5">タップでそのカードへ移動</div>
               </div>
             </div>
-            <button onclick="app.dismissMobileOpponentArrow(event)" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-[10px] font-bold flex-shrink-0 active:scale-90">
-              ✕ 消す
-            </button>
+            <button onclick="app.mobileArrowManuallyDismissed=true; document.getElementById('mobile-memory-dir-indicator').classList.add('hidden');" class="px-2.5 py-1.5 rounded-xl bg-slate-800 text-slate-200 border border-slate-600 text-[10px] font-bold">✕</button>
           </div>
         </div>
 
-        <!-- 🆕 スマホ版専用：画面のフチに常駐する画角外カードの数字・方向インジケーター -->
-        <div id="mobile-edge-dir-indicator" class="fixed inset-x-0 top-20 bottom-16 pointer-events-none z-40 hidden sm:hidden">
-          <!-- 上方向のフチ表示（画角外にあるカードの番号を表示） -->
-          <div id="edge-arrow-up" class="absolute top-2 left-1/2 -translate-x-1/2 bg-amber-500/95 text-slate-950 px-3.5 py-1 rounded-full text-xs font-black shadow-[0_0_20px_rgba(245,158,11,0.9)] pointer-events-auto flex items-center gap-2 animate-bounce hidden cursor-pointer" onclick="app.scrollToOpponentFlippedCard()">
-            <span>⬆️ 上の画角外にカード (No.<span id="edge-num-up" class="font-mono underline">?</span>)</span>
-            <button onclick="app.dismissMobileOpponentArrow(event)" class="bg-slate-950/30 hover:bg-slate-950/50 px-1.5 py-0.5 rounded-full text-[10px] ml-1">✕</button>
-          </div>
-          <!-- 下方向のフチ表示（画角外にあるカードの番号を表示） -->
-          <div id="edge-arrow-down" class="absolute bottom-2 left-1/2 -translate-x-1/2 bg-amber-500/95 text-slate-950 px-3.5 py-1 rounded-full text-xs font-black shadow-[0_0_20px_rgba(245,158,11,0.9)] pointer-events-auto flex items-center gap-2 animate-bounce hidden cursor-pointer" onclick="app.scrollToOpponentFlippedCard()">
-            <span>⬇️ 下の画角外にカード (No.<span id="edge-num-down" class="font-mono underline">?</span>)</span>
-            <button onclick="app.dismissMobileOpponentArrow(event)" class="bg-slate-950/30 hover:bg-slate-950/50 px-1.5 py-0.5 rounded-full text-[10px] ml-1">✕</button>
-          </div>
-          <!-- 左右のフチ表示 -->
-          <div id="edge-arrow-left" onclick="app.scrollToOpponentFlippedCard()" class="absolute left-2 top-1/2 -translate-y-1/2 bg-amber-500/95 text-slate-950 p-2.5 rounded-full text-xs font-black shadow-[0_0_20px_rgba(245,158,11,0.9)] pointer-events-auto animate-pulse hidden cursor-pointer">
-            <span>⬅️ 左</span>
-          </div>
-          <div id="edge-arrow-right" onclick="app.scrollToOpponentFlippedCard()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-amber-500/95 text-slate-950 p-2.5 rounded-full text-xs font-black shadow-[0_0_20px_rgba(245,158,11,0.9)] pointer-events-auto animate-pulse hidden cursor-pointer">
-            <span>➡️ 右</span>
-          </div>
-        </div>
-
-        <div id="memory-scroll-area" onscroll="app.updateMobileOpponentArrow()" class="w-full max-w-5xl flex-1 bg-gradient-to-br from-[#5c3a21] via-[#432514] to-[#2a160b] border-2 sm:border-4 border-[#1a0d06] rounded-3xl p-2.5 sm:p-5 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] relative min-h-[420px] flex items-start justify-center overflow-y-auto">
+        <div id="memory-scroll-area" class="w-full max-w-5xl flex-1 bg-gradient-to-br from-[#5c3a21] via-[#432514] to-[#2a160b] border-2 sm:border-4 border-[#1a0d06] rounded-3xl p-2.5 sm:p-5 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] relative min-h-[420px] flex items-start justify-center overflow-y-auto">
           <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
           <div id="memory-cards-grid" class="w-full max-w-5xl grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 gap-2 p-1 z-10"></div>
         </div>
@@ -829,17 +1086,14 @@
           </div>
         </div>
 
-        <!-- 参加プレイヤー状態一覧 -->
         <div id="jack-players-container" class="w-full max-w-5xl grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2.5"></div>
 
-        <!-- 中央：共通山札＆アクションエリア -->
         <div class="w-full max-w-5xl my-1.5 bg-gradient-to-br from-slate-900 via-teal-950/30 to-slate-900 border-2 border-teal-800/60 rounded-3xl p-4 sm:p-5 flex flex-col items-center justify-center shadow-2xl relative">
           <div id="jack-announcement-banner" class="text-xs sm:text-sm font-bold text-teal-200 mb-3.5 text-center px-3 py-2 rounded-xl bg-slate-950/80 border border-teal-800/60 w-full max-w-xl">
             山札からカードを引くか、ステイアンドプレイを宣言してください
           </div>
 
           <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 w-full">
-            <!-- 共通山札 -->
             <div onclick="app.jackDrawCard()" id="jack-deck-card" class="w-24 h-36 sm:w-28 sm:h-40 rounded-2xl border-2 border-cyan-400 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 p-2 flex flex-col items-center justify-between cursor-pointer hover:scale-105 active:scale-95 transition shadow-[0_0_25px_rgba(6,182,212,0.4)] select-none">
               <div class="w-full flex items-center justify-between text-[9px] text-cyan-400 font-mono">
                 <span class="font-bold">⚡ ECG</span>
@@ -853,7 +1107,6 @@
               <div class="text-[10px] text-teal-300 font-extrabold tracking-wider">タップで引く</div>
             </div>
 
-            <!-- 操作ボタン群 -->
             <div class="flex flex-col gap-2.5 flex-1 max-w-xs">
               <button id="btn-jack-hit" onclick="app.jackDrawCard()" class="w-full bg-teal-600 hover:bg-teal-500 active:scale-95 text-white font-extrabold text-xs sm:text-sm px-5 py-3.5 rounded-2xl transition shadow-[0_0_20px_rgba(13,148,136,0.5)] flex items-center justify-center gap-2">
                 <i data-lucide="plus-circle" class="w-4 h-4"></i><span>ドロー（問題に挑戦）</span>
@@ -865,7 +1118,6 @@
           </div>
         </div>
 
-        <!-- 自分の手札と合計値エリア -->
         <div class="w-full max-w-5xl bg-slate-900/95 border border-slate-800 rounded-3xl p-3.5 sm:p-4 shadow-2xl flex flex-col items-center mt-1.5">
           <div class="w-full flex flex-wrap items-center justify-between gap-2 mb-2">
             <div class="flex items-center gap-2">
@@ -882,6 +1134,43 @@
             </div>
           </div>
           <div id="jack-my-cards-container" class="w-full flex items-center gap-2.5 overflow-x-auto py-2.5 px-2 custom-scrollbar min-h-[165px]"></div>
+        </div>
+      </section>
+<!-- VIEW 4-5: KARUTA GAME TABLE (救急かるた) -->
+      <section id="view-karuta-game" class="w-full flex-1 flex flex-col items-center justify-start hidden animate-fade-in">
+        <div class="w-full max-w-5xl bg-slate-900/95 border border-fuchsia-500/50 rounded-2xl p-2.5 sm:p-3 mb-2.5 flex flex-wrap items-center justify-between gap-2 shadow-lg">
+          <div class="flex items-center gap-2">
+            <span class="text-xs px-2.5 py-1 rounded-full bg-fuchsia-950 text-fuchsia-300 border border-fuchsia-600 font-bold">🎴 救急かるた</span>
+            <span id="karuta-progress-badge" class="text-xs font-mono font-bold text-white bg-slate-950 px-2.5 py-1 rounded-xl border border-slate-800">残り 50 / 50 枚</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-karuta-replay-voice" onclick="app.replayKarutaVoice()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-fuchsia-300 border border-fuchsia-700/60 text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1">
+              <i data-lucide="volume-2" class="w-3.5 h-3.5"></i><span>もう一度読む</span>
+            </button>
+            <button id="btn-karuta-next" onclick="app.startNextKarutaRound()" class="hidden bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-extrabold px-4 py-1.5 rounded-xl transition shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+              次の読み札へ ▶
+            </button>
+          </div>
+        </div>
+
+        <div id="karuta-players-bar" class="w-full max-w-5xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 mb-2.5"></div>
+
+        <div class="w-full max-w-5xl bg-gradient-to-br from-slate-900 via-fuchsia-950/30 to-slate-900 border-2 border-fuchsia-500/60 rounded-3xl p-4 sm:p-5 mb-3 shadow-2xl relative min-h-[115px] flex flex-col justify-center">
+          <div id="karuta-yomi-corner-kana" class="absolute top-3 left-3 w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-fuchsia-950/90 border-2 border-fuchsia-400 text-fuchsia-200 font-black text-xl sm:text-2xl flex items-center justify-center shadow-lg">？</div>
+          
+          <div class="pl-12 sm:pl-14 pr-2">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-fuchsia-300 bg-fuchsia-950/80 px-2.5 py-0.5 rounded-full border border-fuchsia-700/60">AI読み手（症候・治療法）</span>
+              <span id="karuta-round-status" class="text-[11px] font-bold text-amber-300 animate-pulse">読み上げ中... 該当する疾患の取り札を最速でタッチ！</span>
+            </div>
+            <div id="karuta-yomifuda-text" class="text-sm sm:text-lg font-extrabold text-white leading-relaxed min-h-[2.5rem] tracking-wide">
+              準備中...
+            </div>
+          </div>
+        </div>
+
+        <div class="w-full max-w-5xl flex-1 bg-gradient-to-br from-[#132a13] via-[#0f2210] to-[#081308] border-2 sm:border-4 border-[#2d4c2b] rounded-3xl p-2.5 sm:p-4 shadow-[inset_0_0_50px_rgba(0,0,0,0.85)] overflow-y-auto max-h-[60vh] custom-scrollbar">
+          <div id="karuta-board-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-2.5"></div>
         </div>
       </section>
 
@@ -901,8 +1190,7 @@
       
     </main>
   </div>
-
-  <!-- 画面下部の3連通信ドック -->
+<!-- 画面下部の3連通信ドック -->
   <div class="fixed bottom-2.5 left-1/2 -translate-x-1/2 z-40 w-full max-w-md px-3 pointer-events-none">
     <div class="bg-slate-900/95 border border-slate-700/90 backdrop-blur-md rounded-2xl p-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.8)] grid grid-cols-3 gap-1.5 pointer-events-auto">
       <button onclick="app.openCommModal('announce')" class="flex items-center justify-center gap-1 py-2.5 px-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-amber-400 border border-slate-700/60 transition active:scale-95 relative">
@@ -924,7 +1212,7 @@
   </div>
 
   <!-- MODALS -->
-  <!-- 99ジャック：3択クイズ＆正誤判定モーダル（スマホ対応スクロール付） -->
+  <!-- 99ジャック：3択クイズ＆正誤判定モーダル -->
   <div id="modal-jack-quiz" class="fixed inset-0 z-50 bg-black/90 hidden flex items-center justify-center p-3 sm:p-4 backdrop-blur-md">
     <div id="jack-quiz-box" class="w-full max-w-lg bg-slate-900 border-4 border-teal-500 rounded-3xl p-4 sm:p-6 shadow-[0_0_50px_rgba(20,184,166,0.4)] flex flex-col max-h-[92vh] overflow-y-auto custom-scrollbar">
       <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 mb-3">
@@ -973,7 +1261,7 @@
     </div>
   </div>
 
-  <!-- 神経衰弱：救急疾患ボードモーダル（スマホで最後の1枠まで確実にタップできるよう余白と高さを改善） -->
+  <!-- 神経衰弱：救急疾患ボードモーダル -->
   <div id="modal-memory-board" class="fixed inset-0 z-50 bg-black/90 hidden flex items-center justify-center p-2.5 sm:p-4 backdrop-blur-md">
     <div class="w-full max-w-4xl bg-slate-900 border-2 border-blue-500 rounded-3xl p-4 sm:p-6 shadow-[0_0_50px_rgba(59,130,246,0.3)] flex flex-col max-h-[90vh]">
       <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 mb-3">
@@ -993,6 +1281,7 @@
     </div>
   </div>
 
+  <!-- 除細動（Defib）エフェクト用オーバーレイ -->
   <div id="defib-shock-overlay" class="fixed inset-0 z-50 pointer-events-none hidden flex items-center justify-center overflow-hidden">
     <div id="defib-flash-bg" class="absolute inset-0 bg-cyan-400/30 backdrop-invert"></div>
     <div class="relative z-10 flex flex-col items-center justify-center text-center p-6 w-full">
@@ -1032,8 +1321,7 @@
       </div>
     </div>
   </div>
-
-  <div id="modal-jinuki-tracker" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm">
+<div id="modal-jinuki-tracker" class="fixed inset-0 z-50 bg-black/80 hidden flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm">
     <div class="w-full max-w-2xl bg-slate-900 border border-amber-500/40 rounded-3xl p-4 sm:p-6 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
       <div class="flex items-center justify-between mb-4"><h3 class="text-base font-bold text-white flex items-center gap-2"><i data-lucide="search" class="w-5 h-5 text-amber-400"></i>現場事後検証 推理シート</h3><button onclick="app.closeTracker()" class="p-2 bg-slate-800 text-slate-400 rounded-xl hover:text-white transition"><i data-lucide="x" class="w-5 h-5"></i></button></div>
       <div id="jinuki-tracker-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs"></div>
@@ -1160,6 +1448,13 @@
                 <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
               </label>
             </div>
+            <div class="flex justify-between items-center p-3 bg-slate-900 rounded-xl border border-slate-800 sm:col-span-2">
+              <span class="text-xs font-bold text-fuchsia-300">GAME 05: 救急かるた（全225枚・50音ランダム選出）</span>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="toggle-game5" onchange="app.saveAdminAccess()" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+              </label>
+            </div>
           </div>
         </div>
         
@@ -1172,19 +1467,18 @@
                 <button onclick="app.resetDB()" class="text-xs bg-rose-900/60 hover:bg-rose-800 active:scale-95 text-rose-300 border border-rose-800 px-3 py-2 rounded-xl transition">初期化</button>
               </div>
             </div>
-            <!-- 🆕 スマホでも5行すべてが同時に見えてワンタップで切り替えられるセレクトリスト -->
             <div>
-              <label class="block text-[11px] font-bold text-cyan-300 mb-1">📂 表示・編集するデッキを選択（5行一覧表示）：</label>
-              <select id="admin-deck-selector" size="5" onchange="app.renderAdminCards()" class="w-full bg-slate-950 border-2 border-slate-700 rounded-xl p-2 text-xs sm:text-sm text-white focus:outline-none focus:border-cyan-500 custom-scrollbar leading-relaxed">
+              <label class="block text-[11px] font-bold text-cyan-300 mb-1">📂 表示・編集するデッキを選択（一覧表示）：</label>
+              <select id="admin-deck-selector" size="6" onchange="app.renderAdminCards()" class="w-full bg-slate-950 border-2 border-slate-700 rounded-xl p-2 text-xs sm:text-sm text-white focus:outline-none focus:border-cyan-500 custom-scrollbar leading-relaxed">
                 <option value="all" selected class="py-1.5 px-2 rounded">📋 マスターデータ (全カード一覧)</option>
                 <option value="babanuki" class="py-1.5 px-2 rounded">🃏 GAME 01: ババ抜き用カード</option>
                 <option value="memory" class="py-1.5 px-2 rounded">🧠 GAME 02: 神経衰弱用 (全40グループ)</option>
                 <option value="jinuki" class="py-1.5 px-2 rounded">🔍 GAME 03: ジジ抜き用カード</option>
                 <option value="jack" class="py-1.5 px-2 rounded">🎯 GAME 04: 99ジャック用 (全228問)</option>
+                <option value="karuta" class="py-1.5 px-2 rounded">🎴 GAME 05: 救急かるた用 (全225枚・画像対応)</option>
               </select>
             </div>
           </div>
-          <!-- 🆕 スマホで横スクロール不要＆5行テキストエリアで編集しやすいカードリスト容器 -->
           <div id="admin-card-table-body" class="flex-1 bg-slate-950 rounded-2xl border border-slate-800 overflow-y-auto custom-scrollbar p-2.5 space-y-3"></div>
         </div>
       </div>
@@ -1192,7 +1486,6 @@
   </div>
 
   <div id="toast-box" class="fixed bottom-20 z-50 transform -translate-y-2 opacity-0 pointer-events-none transition-all duration-300 bg-slate-800 border border-slate-700 text-white text-xs px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2"><span id="toast-text"></span></div>
-
 <script>
     let socket;
     try { socket = io(); } catch(e) { socket = { emit: () => {}, on: () => {} }; }
@@ -1217,7 +1510,7 @@
       activeCommTab: 'chat',
       room: { code: '', isHost: false, isSolo: false, isOpen: false },
       openRooms: {},
-      config: { mode: 'babanuki', maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true, jackShowTotal: true, isOpenRoom: false },
+      config: { mode: 'babanuki', maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true, jackShowTotal: true, karutaReadAloud: true, karutaCorner: 'left', isOpenRoom: false },
       me: { id: 'p_' + Math.random().toString(36).substring(2, 9), name: '救急隊員' },
       players: [],
       turnIdx: 0,
@@ -1229,7 +1522,7 @@
       ranks: [],
       quizResultCorrect: false,
       quizAnswered: false,
-      timers: { turn: null, aiDelay: null, memoryTimer: null, popupTimer: null, matchTimer: null, quizTimer: null, quizAutoClose: null, jackQuiz: null, bustModal: null, openRoomBeacon: null },
+      timers: { turn: null, aiDelay: null, memoryTimer: null, popupTimer: null, matchTimer: null, quizTimer: null, quizAutoClose: null, jackQuiz: null, bustModal: null, openRoomBeacon: null, karutaTypewriter: null, karutaAiTouch: null, karutaNextRound: null },
       
       memoryState: {
         cards: [],
@@ -1250,6 +1543,17 @@
         quizAnswered: false,
         timeLeft: 60,
         isProcessing: false
+      },
+
+      karutaState: {
+        boardCards: [],
+        readingQueue: [],
+        currentIndex: 0,
+        currentYomi: null,
+        displayedText: '',
+        roundLocked: false,
+        lastWinnerId: null,
+        lastTouchedCardId: null
       }
     };
 
@@ -1297,6 +1601,7 @@
         const g2 = document.getElementById('toggle-game2'); if(g2) g2.checked = !!currentGameAccess.game2;
         const g3 = document.getElementById('toggle-game3'); if(g3) g3.checked = !!currentGameAccess.game3;
         const g4 = document.getElementById('toggle-game4'); if(g4) g4.checked = !!currentGameAccess.game4;
+        const g5 = document.getElementById('toggle-game5'); if(g5) g5.checked = !!currentGameAccess.game5;
         if(window.lucide) lucide.createIcons();
       }
     });
@@ -1362,6 +1667,9 @@
       if(actionData.jackDeck !== undefined) {
         state.jackState.deck = actionData.jackDeck;
       }
+      if(actionData.karutaState) {
+        state.karutaState = { ...state.karutaState, ...actionData.karutaState };
+      }
       
       if(actionData.type === 'start') {
         if(state.mode === 'memory') {
@@ -1379,6 +1687,11 @@
           app.showScreen('view-jack-game');
           app.renderJackTable();
           app.processJackTurn();
+        } else if(state.mode === 'karuta') {
+          state.phase = 'karuta_playing';
+          app.showScreen('view-karuta-game');
+          app.renderKarutaTable();
+          app.playKarutaCurrentYomi();
         } else {
           state.phase = 'initial_discard';
           state.hasDrawnThisTurn = false;
@@ -1391,6 +1704,20 @@
           if(banner) banner.textContent = '初期手札のペアを破棄し、「手札確認完了」を押してください';
           app.renderTable();
         }
+      } else if(actionData.type === 'karuta_touch') {
+        app.renderKarutaTable();
+        if(actionData.winnerName && actionData.cardTitle) {
+          const stEl = document.getElementById('karuta-round-status');
+          if(stEl) stEl.textContent = `⚡ ${actionData.winnerName} が「${actionData.cardTitle}」を獲得！`;
+        }
+        if(actionData.gameEnded) {
+          state.phase = 'ended';
+          if('speechSynthesis' in window) window.speechSynthesis.cancel();
+          setTimeout(() => app.showResults(), 1500);
+        }
+      } else if(actionData.type === 'karuta_next') {
+        app.renderKarutaTable();
+        app.playKarutaCurrentYomi();
       } else if(actionData.type === 'memory_sync') {
         if(state.phase !== 'memory_playing' && state.phase !== 'ended') {
           state.phase = 'memory_playing';
@@ -1436,6 +1763,7 @@
       } else {
         if(state.mode === 'memory') app.renderMemoryGameTable();
         else if(state.mode === 'jack') app.renderJackTable();
+        else if(state.mode === 'karuta') app.renderKarutaTable();
         else app.renderTable();
       }
     });
@@ -1490,6 +1818,16 @@
               <li>手札の合計値が <strong class="text-rose-400">99.00以上</strong> になると急変（バースト：瞳孔散大・心拍呼吸停止）で敗北となります。</li>
             </ul>
           `;
+        } else if (state.mode === 'karuta') {
+          titleTxt = 'GAME 05: 救急かるた（疾患×症候）';
+          htmlTxt = `
+            <div class="p-3 bg-fuchsia-950/30 border border-fuchsia-900/50 rounded-2xl mb-3"><strong class="text-fuchsia-300">【ゲームの目的】</strong><br>全225枚のカードプールから各ひらがな1枚ずつ計50枚が選出！AI読み手が読み上げる「症候・治療法」から該当する「疾患名（置き札）」を最速でタッチする早押しカルタです。</div>
+            <ul class="list-disc list-inside space-y-2 text-slate-200">
+              <li>待機画面で「AI音声読み上げ（ゆっくり）」と「テキストのみゆっくり表示」を切り替えられます。</li>
+              <li>最大6人まで参加でき、一番最初に正しい置き札に触れたプレイヤーの得点（1枚獲得）になります。</li>
+              <li>50枚すべてが取られた時点で最も多くカードを保有していたプレイヤーが勝利となり、保有枚数が多い順に順位が決まります。</li>
+            </ul>
+          `;
         }
 
         if(titleEl) titleEl.textContent = titleTxt;
@@ -1542,7 +1880,7 @@
       },
 
       showScreen: (id) => {
-        ['view-portal', 'view-lobby', 'view-room', 'view-game', 'view-memory-game', 'view-jack-game', 'view-result'].forEach(s => {
+        ['view-portal', 'view-lobby', 'view-room', 'view-game', 'view-memory-game', 'view-jack-game', 'view-karuta-game', 'view-result'].forEach(s => {
           const el = document.getElementById(s);
           if (el) el.classList.toggle('hidden', s !== id);
         });
@@ -1575,7 +1913,8 @@
           { id: 'game1', code: 'babanuki', lbl: 'GAME 01', title: '致死性不整脈を回避せよ！', icon: 'activity', desc: '【救急ババ抜き】除細動が不可欠な「心室細動（VF）」を最後まで抱え持っていた者が敗北！', col: 'rose' },
           { id: 'game2', code: 'memory', lbl: 'GAME 02', title: '改訂長谷川簡易知能評価スケールに引っかかるな！', icon: 'brain', desc: '【救急神経衰弱】全40疾患グループ対応の神経衰弱バトル！', col: 'blue' },
           { id: 'game3', code: 'jinuki', lbl: 'GAME 03', title: '救急 隠れた疾患を当てろ', icon: 'search', desc: '【救急ジジ抜き＋VF/DCペア】全54枚から1枚が事前封印！孤立カードから病態を推理せよ！', col: 'amber' },
-          { id: 'game4', code: 'jack', lbl: 'GAME 04', title: '99ジャック', icon: 'crosshair', desc: '【救急ブラックジャック】3択クイズに答えて98.99を目指せ！99.00を超えると急変（バースト）！', col: 'teal' }
+          { id: 'game4', code: 'jack', lbl: 'GAME 04', title: '99ジャック', icon: 'crosshair', desc: '【救急ブラックジャック】3択クイズに答えて98.99を目指せ！99.00を超えると急変（バースト）！', col: 'teal' },
+          { id: 'game5', code: 'karuta', lbl: 'GAME 05', title: '救急かるた（疾患×症候）', icon: 'volume-2', desc: '【救急かるた】全225枚から50音50枚をランダム選出！AI読み手の症候・治療法から疾患札を最速奪取せよ！', col: 'fuchsia' }
         ];
         games.forEach(g => {
           const isReady = currentGameAccess[g.id];
@@ -1604,6 +1943,7 @@
         const memoryConfig = document.getElementById('memory-only-config');
         const babanukiConfig = document.getElementById('babanuki-only-config');
         const jackConfig = document.getElementById('jack-only-config');
+        const karutaConfig = document.getElementById('karuta-only-config');
         const aiRow = document.getElementById('ai-autofill-config-row');
         const aiCheck = document.getElementById('config-auto-fill-ai');
         const soloBtn = document.getElementById('btn-solo-ai');
@@ -1624,6 +1964,7 @@
           memoryConfig?.classList.add('hidden');
           babanukiConfig?.classList.remove('hidden');
           jackConfig?.classList.add('hidden');
+          karutaConfig?.classList.add('hidden');
           aiRow?.classList.remove('hidden');
           if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（AI演習）';
         } else if (mode === 'memory') {
@@ -1633,6 +1974,7 @@
           memoryConfig?.classList.remove('hidden');
           babanukiConfig?.classList.add('hidden');
           jackConfig?.classList.add('hidden');
+          karutaConfig?.classList.add('hidden');
           aiRow?.classList.remove('hidden');
           if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（AI演習）';
         } else if (mode === 'jinuki') {
@@ -1643,6 +1985,7 @@
           memoryConfig?.classList.add('hidden');
           babanukiConfig?.classList.remove('hidden');
           jackConfig?.classList.add('hidden');
+          karutaConfig?.classList.add('hidden');
           aiRow?.classList.remove('hidden');
           if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（AI演習）';
         } else if (mode === 'jack') {
@@ -1652,9 +1995,20 @@
           memoryConfig?.classList.add('hidden');
           babanukiConfig?.classList.add('hidden');
           jackConfig?.classList.remove('hidden');
+          karutaConfig?.classList.add('hidden');
           if(aiCheck) aiCheck.checked = false;
           aiRow?.classList.add('hidden');
           if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（1 VS 1 救急AI対戦）';
+        } else if (mode === 'karuta') {
+          if(tag) tag.textContent = 'GAME 05'; if(title) title.textContent = '救急かるた（疾患×症候）';
+          if(badge) { badge.textContent = '救急かるた'; badge.className = 'text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-fuchsia-900/60 text-fuchsia-300 border border-fuchsia-600'; }
+          document.getElementById('btn-open-jinuki-tracker')?.classList.add('hidden');
+          memoryConfig?.classList.add('hidden');
+          babanukiConfig?.classList.add('hidden');
+          jackConfig?.classList.add('hidden');
+          karutaConfig?.classList.remove('hidden');
+          aiRow?.classList.remove('hidden');
+          if(soloBtn) soloBtn.textContent = 'すぐ遊ぶ（AI演習）';
         }
         app.renderOpenRoomsList();
       },
@@ -1702,7 +2056,7 @@
         const box = document.getElementById('open-rooms-list');
         if(!box) return;
         const now = Date.now();
-        const modeNames = { babanuki: 'GAME 01: ババ抜き', memory: 'GAME 02: 神経衰弱', jinuki: 'GAME 03: ジジ抜き', jack: 'GAME 04: 99ジャック' };
+        const modeNames = { babanuki: 'GAME 01: ババ抜き', memory: 'GAME 02: 神経衰弱', jinuki: 'GAME 03: ジジ抜き', jack: 'GAME 04: 99ジャック', karuta: 'GAME 05: 救急かるた' };
         const activeList = Object.values(state.openRooms).filter(r => (now - r.updatedAt < 15000) && r.isOpen && r.curPlayers < r.maxPlayers && r.mode === state.mode);
 
         if(activeList.length === 0) {
@@ -1756,6 +2110,8 @@
         state.config.showMemoryDisease = document.getElementById('config-memory-show-disease')?.checked ?? true;
         state.config.showGroupNum = document.getElementById('config-show-group-num')?.checked ?? true;
         state.config.jackShowTotal = document.getElementById('config-jack-show-total')?.checked ?? true;
+        state.config.karutaReadAloud = document.getElementById('config-karuta-read-mode')?.checked ?? true;
+        state.config.karutaCorner = document.getElementById('config-karuta-corner')?.value || 'left';
         state.config.isOpenRoom = document.getElementById('config-is-open-room')?.checked ?? false;
         state.me.name = document.getElementById('input-player-name')?.value.trim() || '救急隊員';
         try { localStorage.setItem('ems_player_name', state.me.name); } catch(e){}
@@ -1766,7 +2122,7 @@
         const timerEl = document.getElementById('room-summary-timer');
         const aiEl = document.getElementById('room-summary-ai');
         if(maxEl) maxEl.innerHTML = `最大: <strong class="text-cyan-400">${state.config.maxPlayers}名</strong>`;
-        if(timerEl) timerEl.innerHTML = state.mode === 'jack' ? `クイズ制限: <strong class="text-amber-400">60秒</strong>` : `手番制限: <strong class="text-amber-400">${state.config.turnTimeLimit>=900?'無制限':state.config.turnTimeLimit+'秒'}</strong>`;
+        if(timerEl) timerEl.innerHTML = state.mode === 'jack' ? `クイズ制限: <strong class="text-amber-400">60秒</strong>` : state.mode === 'karuta' ? `読み上げ: <strong class="text-fuchsia-400">${state.config.karutaReadAloud ? 'AI音声+文字' : '文字のみ'}</strong>` : `手番制限: <strong class="text-amber-400">${state.config.turnTimeLimit>=900?'無制限':state.config.turnTimeLimit+'秒'}</strong>`;
         if(aiEl) aiEl.innerHTML = state.mode === 'jack' ? `合計表示: <strong class="text-teal-400">${state.config.jackShowTotal?'表示':'非表示(暗算)'}</strong>` : `AI自動: <strong class="text-emerald-400">${state.config.autoFillAI?'オン':'オフ'}</strong>`;
 
         const isOpen = state.room.isHost ? !!state.room.isOpen : !!(state.config.isOpenRoom ?? false);
@@ -1809,7 +2165,7 @@
         const codeDisplay = document.getElementById('room-code-display');
         if(codeDisplay) codeDisplay.textContent = state.room.code;
         const myColor = pickUnusedColor([]);
-        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: myColor, totalInternal: 0, isStayed: false, isBusted: false }];
+        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: myColor, totalInternal: 0, isStayed: false, isBusted: false, karutaScore: 0 }];
         socket.emit('join_room', { roomCode: state.room.code, playerName: state.me.name, config: state.config });
         document.getElementById('btn-start-game')?.classList.remove('hidden'); 
         if (state.mode === 'jack') {
@@ -1839,7 +2195,7 @@
           state.config.autoFillAI = true;
         }
         const myColor = pickUnusedColor([]);
-        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: myColor, totalInternal: 0, isStayed: false, isBusted: false }];
+        state.players = [{ id: state.me.id, name: state.me.name, isAI: false, hand: [], isCleared: false, isReady: false, rank: 0, team: 1, color: myColor, totalInternal: 0, isStayed: false, isBusted: false, karutaScore: 0 }];
         app.startGame(); 
       },
 
@@ -1890,7 +2246,7 @@
         if(state.players.length >= state.config.maxPlayers) return utils.showToast('定員です');
         const bIdx = state.players.filter(p=>p.isAI).length;
         const botColor = pickUnusedColor(state.players);
-        state.players.push({ id: `ai_${Date.now()}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: botColor, totalInternal: 0, isStayed: false, isBusted: false });
+        state.players.push({ id: `ai_${Date.now()}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: botColor, totalInternal: 0, isStayed: false, isBusted: false, karutaScore: 0 });
         app.updateRoomUI(); utils.showToast('AI隊員を追加しました');
       },
 
@@ -1905,14 +2261,14 @@
           if (state.room.isSolo) {
             while(state.players.length < 2) {
               const botColor = pickUnusedColor(state.players);
-              state.players.push({ id: `ai_${Date.now()}_0`, name: '救急隊員AI', isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: 2, color: botColor, totalInternal: 0, isStayed: false, isBusted: false });
+              state.players.push({ id: `ai_${Date.now()}_0`, name: '救急隊員AI', isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: 2, color: botColor, totalInternal: 0, isStayed: false, isBusted: false, karutaScore: 0 });
             }
           }
         } else if(state.room.isHost && state.config.autoFillAI) {
           while(state.players.length < state.config.maxPlayers) {
             const bIdx = state.players.filter(p=>p.isAI).length;
             const botColor = pickUnusedColor(state.players);
-            state.players.push({ id: `ai_${Date.now()}_${bIdx}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: botColor, totalInternal: 0, isStayed: false, isBusted: false });
+            state.players.push({ id: `ai_${Date.now()}_${bIdx}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: botColor, totalInternal: 0, isStayed: false, isBusted: false, karutaScore: 0 });
           }
         }
         if(state.players.length < 2) return utils.showToast('最低2名必要です');
@@ -1925,522 +2281,336 @@
 
         if(state.mode === 'memory') app.startMemoryGameSession();
         else if(state.mode === 'jack') app.startJackGameSession();
+        else if(state.mode === 'karuta') app.startKarutaGameSession();
         else app.startStandardCardGameSession();
       },
-
+// ==========================================
+      // GAME 05: 救急かるた 専用ロジック
       // ==========================================
-      // GAME 04: 99ジャック 専用ロジック
-      // ==========================================
-      startJackGameSession: () => {
+      startKarutaGameSession: () => {
         app.clearAllTimers();
-        state.phase = 'jack_playing';
-        state.turnIdx = 0;
+        state.phase = 'karuta_playing';
         state.ranks = [];
 
-        let deck = currentCardDB.filter(c => c.suit === 'J').map(c => ({
-          ...c,
-          internalVal: c.internalVal !== undefined ? Number(c.internalVal) : Math.round(Number(c.num) * 100)
-        }));
-        for (let i = deck.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [deck[i], deck[j]] = [deck[j], deck[i]];
+        const allKaruta = currentCardDB.filter(c => c.suit === 'K');
+        const kanaGroups = {};
+        allKaruta.forEach(c => {
+          const k = c.kana || 'あ';
+          if(!kanaGroups[k]) kanaGroups[k] = [];
+          kanaGroups[k].push(c);
+        });
+
+        let selected50 = [];
+        const uniqueKanas = Object.keys(kanaGroups);
+        uniqueKanas.forEach(k => {
+          const pool = kanaGroups[k];
+          const chosen = pool[Math.floor(Math.random() * pool.length)];
+          selected50.push({ ...chosen, isTaken: false, takenBy: null, takenColor: null });
+        });
+
+        if (selected50.length > 50) {
+          selected50.sort(() => Math.random() - 0.5);
+          selected50 = selected50.slice(0, 50);
+        } else if (selected50.length < 50) {
+          const usedIds = new Set(selected50.map(c => c.id));
+          const rest = allKaruta.filter(c => !usedIds.has(c.id)).sort(() => Math.random() - 0.5);
+          while(selected50.length < 50 && rest.length > 0) {
+            selected50.push({ ...rest.pop(), isTaken: false, takenBy: null, takenColor: null });
+          }
         }
 
-        state.jackState.deck = deck;
-        state.jackState.currentCard = null;
-        state.jackState.selectedOption = null;
-        state.jackState.quizAnswered = false;
-        state.jackState.isProcessing = false;
+        const boardCards = [...selected50].sort(() => Math.random() - 0.5);
+        const readingQueue = [...selected50].sort(() => Math.random() - 0.5);
 
         state.players.forEach(p => {
+          p.karutaScore = 0;
           p.hand = [];
-          p.totalInternal = 0;
-          p.isStayed = false;
-          p.isBusted = false;
-          p.isCleared = false;
           p.rank = 0;
         });
+
+        state.karutaState = {
+          boardCards,
+          readingQueue,
+          currentIndex: 0,
+          currentYomi: readingQueue[0] || null,
+          displayedText: '',
+          roundLocked: false,
+          lastWinnerId: null,
+          lastTouchedCardId: null
+        };
 
         socket.emit('game_action', {
           roomCode: state.room.code,
           type: 'start',
-          mode: 'jack',
+          mode: 'karuta',
           config: state.config,
           players: state.players,
-          turnIdx: state.turnIdx,
-          jackDeck: state.jackState.deck
+          karutaState: state.karutaState
         });
 
-        app.showScreen('view-jack-game');
-        app.renderJackTable();
-        app.addLogMessage('GAME 04: 99ジャックが開始されました（初期値 0 スタート）。');
-        app.processJackTurn();
+        app.showScreen('view-karuta-game');
+        app.renderKarutaTable();
+        app.addLogMessage('GAME 05: 救急かるた（50枚選出）が開始されました！');
+        app.playKarutaCurrentYomi();
       },
 
-      renderJackTable: () => {
-        const pContainer = document.getElementById('jack-players-container');
-        const myCardsContainer = document.getElementById('jack-my-cards-container');
-        const deckCountEl = document.getElementById('jack-deck-count');
-        const turnInfoEl = document.getElementById('jack-turn-info');
-        const myTotalEl = document.getElementById('jack-my-total-display');
-        const myStatusBadge = document.getElementById('jack-my-status-badge');
-        const btnHit = document.getElementById('btn-jack-hit');
-        const btnStay = document.getElementById('btn-jack-stay');
-        const deckCardEl = document.getElementById('jack-deck-card');
-        if(!pContainer || !myCardsContainer) return;
+      playKarutaCurrentYomi: () => {
+        if(state.timers.karutaTypewriter) clearInterval(state.timers.karutaTypewriter);
+        if(state.timers.karutaAiTouch) clearTimeout(state.timers.karutaAiTouch);
+        if('speechSynthesis' in window) window.speechSynthesis.cancel();
 
-        if(deckCountEl) deckCountEl.textContent = state.jackState.deck.length;
+        const yomi = state.karutaState.currentYomi;
+        if(!yomi) return;
 
-        const currentP = state.players[state.turnIdx];
-        const isMyTurn = (state.phase === 'jack_playing' && currentP && !currentP.isAI && currentP.id === state.me.id && !state.jackState.isProcessing);
-        if(turnInfoEl) turnInfoEl.textContent = `手番: ${currentP ? currentP.name : ''} ${isMyTurn ? '(あなた)' : ''}`;
+        state.karutaState.displayedText = '';
+        const fullText = yomi.desc || '';
+        const textEl = document.getElementById('karuta-yomifuda-text');
+        const cornerEl = document.getElementById('karuta-yomi-corner-kana');
+        const statusEl = document.getElementById('karuta-round-status');
+        const nextBtn = document.getElementById('btn-karuta-next');
 
-        const showTotal = state.config.jackShowTotal ?? true;
+        if(nextBtn) nextBtn.classList.add('hidden');
+        if(statusEl) statusEl.textContent = state.config.karutaReadAloud
+          ? '🔊 AIがゆっくり読み上げ中... 該当する疾患の取り札を最速でタッチ！'
+          : '📝 症候テキスト表示中... 該当する疾患の取り札を最速でタッチ！';
 
-        pContainer.innerHTML = '';
-        state.players.forEach((p, idx) => {
-          const isCur = (state.phase === 'jack_playing' && idx === state.turnIdx);
-          const pColor = p.color || '#38bdf8';
-          const statusHtml = p.isBusted
-            ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-700 font-bold">💀 CPA</span>'
-            : p.isStayed
-              ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-700 font-bold">🛡 ステイ</span>'
-              : isCur
-                ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-500 font-bold animate-pulse">▶ 手番</span>'
-                : '<span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">待機</span>';
-
-          const totalStr = showTotal ? utils.formatJackInternal(p.totalInternal) : '???';
-
-          pContainer.innerHTML += `
-            <div class="p-2.5 sm:p-3 rounded-2xl border transition-all ${isCur ? 'bg-teal-950/50 border-teal-400 ring-2 ring-teal-400/50 shadow-lg' : p.isBusted ? 'bg-rose-950/20 border-rose-900/60 opacity-75' : 'bg-slate-900/80 border-slate-800'} flex flex-col justify-between">
-              <div class="flex items-center justify-between gap-1 mb-1.5">
-                <div class="flex items-center gap-1.5 truncate">
-                  <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${pColor}"></span>
-                  <span class="text-xs font-bold text-white truncate">${utils.escapeHtml(p.name)}</span>
-                </div>
-                ${statusHtml}
-              </div>
-              <div class="flex items-center justify-between text-xs bg-slate-950/90 px-2.5 py-1 rounded-xl border border-slate-800/80">
-                <span class="text-slate-400 text-[10px]">手札 ${p.hand.length}/10</span>
-                <span class="font-mono font-black ${p.isBusted && showTotal ? 'text-rose-400' : 'text-teal-300'}">計: ${totalStr}</span>
-              </div>
-            </div>
-          `;
-        });
-
-        const myP = state.players.find(p => p.id === state.me.id);
-        const myDot = document.getElementById('jack-my-color-dot');
-        if(myDot && myP?.color) myDot.style.backgroundColor = myP.color;
-
-        if(myTotalEl && myP) {
-          myTotalEl.textContent = showTotal ? utils.formatJackInternal(myP.totalInternal) : '??? (暗算)';
-          myTotalEl.className = `text-base sm:text-lg font-mono font-black ${myP.isBusted && showTotal ? 'text-rose-500' : 'text-teal-400'}`;
+        const isRight = state.config.karutaCorner === 'right';
+        if(cornerEl) {
+          cornerEl.textContent = state.karutaState.roundLocked ? (yomi.kana || 'あ') : '？';
+          cornerEl.className = `absolute top-3 ${isRight ? 'right-3' : 'left-3'} w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-fuchsia-950/90 border-2 border-fuchsia-400 text-fuchsia-200 font-black text-xl sm:text-2xl flex items-center justify-center shadow-lg`;
+          const parentPad = cornerEl.nextElementSibling;
+          if(parentPad) parentPad.className = isRight ? 'pr-12 sm:pr-14 pl-2' : 'pl-12 sm:pl-14 pr-2';
         }
 
-        if(myStatusBadge && myP) {
-          if(myP.isBusted) {
-            myStatusBadge.textContent = '💀 99超過 (CPA)';
-            myStatusBadge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-600 font-bold';
-          } else if(myP.isStayed) {
-            myStatusBadge.textContent = '🛡 ステイ宣言済';
-            myStatusBadge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-600 font-bold';
+        let charIdx = 0;
+        if(textEl) textEl.textContent = '';
+        state.timers.karutaTypewriter = setInterval(() => {
+          if(charIdx < fullText.length) {
+            state.karutaState.displayedText += fullText[charIdx];
+            if(textEl) textEl.textContent = `「${state.karutaState.displayedText}」`;
+            charIdx++;
           } else {
-            myStatusBadge.textContent = isMyTurn ? '🎯 あなたの手番' : 'プレイ中';
-            myStatusBadge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-700 font-bold';
+            clearInterval(state.timers.karutaTypewriter);
           }
-        }
+        }, 140);
 
-        if(btnHit && btnStay && deckCardEl) {
-          if(isMyTurn && myP && !myP.isStayed && !myP.isBusted) {
-            btnHit.classList.remove('opacity-40', 'pointer-events-none');
-            btnStay.classList.remove('opacity-40', 'pointer-events-none');
-            deckCardEl.classList.remove('opacity-50', 'pointer-events-none');
-          } else {
-            btnHit.classList.add('opacity-40', 'pointer-events-none');
-            btnStay.classList.add('opacity-40', 'pointer-events-none');
-            deckCardEl.classList.add('opacity-50', 'pointer-events-none');
-          }
-        }
-
-        myCardsContainer.innerHTML = '';
-        if(!myP || myP.hand.length === 0) {
-          myCardsContainer.innerHTML = '<div class="w-full text-center py-8 text-slate-500 font-bold text-xs">まだ手札はありません（現在 0 スタート）</div>';
-        } else {
-          myP.hand.forEach(c => {
-            const bColorName = c.borderColor || c.title || '緑';
-            const borderCls = JACK_BORDER_STYLES[bColorName] || 'border-teal-500';
-            myCardsContainer.innerHTML += `
-              <div onclick="app.openCardDetail(${c.id})" class="flex-shrink-0 w-32 h-44 sm:w-36 sm:h-48 rounded-2xl border-4 ${borderCls} bg-slate-900 p-2.5 sm:p-3 flex flex-col justify-between cursor-pointer active:scale-95 transition shadow-xl select-none">
-                <div class="flex items-center justify-between border-b border-slate-800 pb-1">
-                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-200">${utils.escapeHtml(bColorName)}</span>
-                  <span class="text-sm sm:text-base font-mono font-black text-teal-300">+${c.num}</span>
-                </div>
-                <div class="my-auto py-1 text-center overflow-y-auto custom-scrollbar">
-                  <div class="text-[11px] font-bold text-slate-100 leading-snug">${utils.escapeHtml(c.desc)}</div>
-                </div>
-                <div class="text-[10px] font-mono text-right text-slate-400 pt-1 border-t border-slate-800/80">値: ${c.num}</div>
-              </div>
-            `;
-          });
-        }
-
-        if (window.lucide) lucide.createIcons();
-      },
-
-      processJackTurn: () => {
-        if(state.phase !== 'jack_playing') return;
-        if(app.checkJackGameEnd()) return;
-
-        const currentP = state.players[state.turnIdx];
-        if(!currentP || currentP.isStayed || currentP.isBusted) {
-          app.advanceJackTurn();
-          return;
-        }
-
-        app.renderJackTable();
-        const banner = document.getElementById('jack-announcement-banner');
-
-        if(currentP.id === state.me.id && !currentP.isAI) {
-          if(banner) banner.innerHTML = `あなたの手番です。「<strong class="text-teal-300">ドロー</strong>」か「<strong class="text-amber-300">ステイ宣言</strong>」を選択してください`;
-        } else {
-          if(banner) banner.innerHTML = `<strong class="text-teal-300">${utils.escapeHtml(currentP.name)}</strong> が思考中です...`;
-          if(currentP.isAI && (state.room.isHost || state.room.isSolo) && !state.jackState.isProcessing) {
-            state.jackState.isProcessing = true;
-            if(state.timers.aiDelay) clearTimeout(state.timers.aiDelay);
-            state.timers.aiDelay = setTimeout(() => {
-              app.executeAiJackTurn(currentP);
-            }, 1400);
-          }
-        }
-      },
-
-      jackDrawCard: () => {
-        if(state.phase !== 'jack_playing' || state.jackState.isProcessing) return;
-        const currentP = state.players[state.turnIdx];
-        if(!currentP || currentP.id !== state.me.id || currentP.isStayed || currentP.isBusted) return;
-
-        if(state.jackState.deck.length === 0) {
-          utils.showToast('山札がなくなりました！ゲームを終了します');
-          app.finishJackGame();
-          return;
-        }
-
-        state.jackState.isProcessing = true;
-        const drawn = state.jackState.deck.pop();
-        state.jackState.currentCard = drawn;
-        state.jackState.selectedOption = null;
-        state.jackState.quizAnswered = false;
-
-        app.openJackQuizModal(drawn);
-      },
-
-      openJackQuizModal: (card) => {
-        const modal = document.getElementById('modal-jack-quiz');
-        const badge = document.getElementById('jack-quiz-color-badge');
-        const timerEl = document.getElementById('jack-quiz-timer');
-        const qEl = document.getElementById('jack-quiz-question');
-        const optsEl = document.getElementById('jack-quiz-options');
-        const submitBtn = document.getElementById('btn-jack-submit-answer');
-        const resultArea = document.getElementById('jack-quiz-result-area');
-        const quizBox = document.getElementById('jack-quiz-box');
-
-        const bColorName = card.borderColor || card.title || '緑';
-        if(badge) badge.textContent = `ふち色: ${bColorName}`;
-        if(quizBox) {
-          quizBox.className = `w-full max-w-lg bg-slate-900 border-4 ${JACK_BORDER_STYLES[bColorName] || 'border-teal-500'} rounded-3xl p-4 sm:p-6 flex flex-col max-h-[92vh] overflow-y-auto custom-scrollbar`;
-        }
-        if(qEl) qEl.textContent = card.desc;
-
-        const options = [card.num, card.opt1, card.opt2];
-        for(let i = options.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [options[i], options[j]] = [options[j], options[i]];
-        }
-
-        if(optsEl) {
-          optsEl.innerHTML = '';
-          options.forEach((optVal, idx) => {
-            optsEl.innerHTML += `
-              <button id="jack-opt-btn-${idx}" onclick="app.selectJackQuizOption(${idx}, '${optVal}')" class="jack-opt-btn py-3.5 sm:py-4 px-2 rounded-2xl border-2 border-slate-700 bg-slate-800 hover:border-teal-400 text-white font-mono font-black text-base sm:text-lg transition shadow-md">
-                ${utils.escapeHtml(optVal)}
-              </button>
-            `;
-          });
-        }
-
-        if(submitBtn) {
-          submitBtn.classList.remove('hidden');
-          submitBtn.classList.add('opacity-50', 'pointer-events-none');
-        }
-        resultArea?.classList.add('hidden');
-        resultArea?.classList.remove('flex');
-        modal?.classList.remove('hidden');
-
-        state.jackState.timeLeft = 60;
-        if(timerEl) timerEl.textContent = `残り ${state.jackState.timeLeft} 秒`;
-        if(state.timers.jackQuiz) clearInterval(state.timers.jackQuiz);
-        if(state.timers.bustModal) clearTimeout(state.timers.bustModal);
-
-        state.timers.jackQuiz = setInterval(() => {
-          state.jackState.timeLeft--;
-          if(timerEl) timerEl.textContent = `残り ${state.jackState.timeLeft} 秒`;
-          if(state.jackState.timeLeft <= 0) {
-            clearInterval(state.timers.jackQuiz);
-            if(!state.jackState.quizAnswered) {
-              app.evaluateJackQuiz(false, true);
+        if(state.config.karutaReadAloud && ('speechSynthesis' in window)) {
+          setTimeout(() => {
+            if(state.phase !== 'karuta_playing' || state.karutaState.roundLocked) return;
+            const speechText = fullText.replace(/、/g, '、…… ');
+            const uttr = new SpeechSynthesisUtterance(speechText);
+            uttr.lang = 'ja-JP';
+            uttr.rate = 0.75;
+            uttr.pitch = 1.0;
+            const voices = window.speechSynthesis.getVoices();
+            if(voices.length > 0) {
+              const jpVoice = voices.find(v => v.lang.includes('ja'));
+              if(jpVoice) uttr.voice = jpVoice;
             }
-          }
-        }, 1000);
-      },
-
-      selectJackQuizOption: (idx, val) => {
-        if(state.jackState.quizAnswered) return;
-        state.jackState.selectedOption = val;
-        document.querySelectorAll('.jack-opt-btn').forEach((btn, i) => {
-          if(i === idx) {
-            btn.className = 'jack-opt-btn py-3.5 sm:py-4 px-2 rounded-2xl border-2 border-teal-400 bg-teal-900/70 text-teal-200 font-mono font-black text-base sm:text-lg transition shadow-[0_0_15px_rgba(20,184,166,0.5)] scale-105';
-          } else {
-            btn.className = 'jack-opt-btn py-3.5 sm:py-4 px-2 rounded-2xl border-2 border-slate-700 bg-slate-800 hover:border-teal-400 text-white font-mono font-black text-base sm:text-lg transition opacity-75';
-          }
-        });
-        const submitBtn = document.getElementById('btn-jack-submit-answer');
-        submitBtn?.classList.remove('opacity-50', 'pointer-events-none');
-      },
-
-      submitJackQuizAnswer: () => {
-        if(state.jackState.quizAnswered || state.jackState.selectedOption === null) return;
-        const card = state.jackState.currentCard;
-        const isCorrect = Number(state.jackState.selectedOption) === Number(card.num);
-        app.evaluateJackQuiz(isCorrect, false);
-      },
-
-      evaluateJackQuiz: (isCorrect, isTimeout) => {
-        state.jackState.quizAnswered = true;
-        if(state.timers.jackQuiz) clearInterval(state.timers.jackQuiz);
-        if(state.timers.bustModal) clearTimeout(state.timers.bustModal);
-
-        const card = state.jackState.currentCard;
-        const submitBtn = document.getElementById('btn-jack-submit-answer');
-        const resultArea = document.getElementById('jack-quiz-result-area');
-        const verdictBanner = document.getElementById('jack-quiz-verdict-banner');
-        const actionBtns = document.getElementById('jack-quiz-action-buttons');
-
-        submitBtn?.classList.add('hidden');
-        document.querySelectorAll('.jack-opt-btn').forEach(btn => btn.classList.add('pointer-events-none'));
-
-        if(resultArea) {
-          resultArea.classList.remove('hidden');
-          resultArea.classList.add('flex');
+            window.speechSynthesis.speak(uttr);
+          }, 100);
         }
 
-        if(verdictBanner) {
-          if(isCorrect) {
-            verdictBanner.className = 'p-3.5 rounded-2xl border-2 border-emerald-500 bg-emerald-950/70 text-center shadow-[0_0_25px_rgba(16,185,129,0.3)]';
-            verdictBanner.innerHTML = `
-              <div class="text-base sm:text-lg font-black text-emerald-300 mb-1">⭕ 正解！</div>
-              <div class="inline-block bg-slate-950 border border-emerald-500/50 px-3.5 py-1 rounded-xl text-xs sm:text-sm font-mono font-black text-emerald-400">正答（カードの数値）: ${card.num}</div>
-              <div class="text-[11px] text-emerald-200 mt-1.5 font-bold">正解特典：手札に加算するか、加算せず破棄するか選べます！</div>
-            `;
-          } else {
-            verdictBanner.className = 'p-3.5 rounded-2xl border-2 border-rose-500 bg-rose-950/70 text-center shadow-[0_0_25px_rgba(244,63,94,0.3)]';
-            verdictBanner.innerHTML = `
-              <div class="text-base sm:text-lg font-black text-rose-300 mb-1">${isTimeout ? '⏱ 時間切れ（不正解）！' : '❌ 不正解！'}</div>
-              <div class="inline-block bg-slate-950 border border-rose-500/50 px-3.5 py-1 rounded-xl text-xs sm:text-sm font-mono font-black text-rose-400">正答（カードの数値）: ${card.num}</div>
-              <div class="text-[11px] text-rose-200 mt-1.5 font-bold">ペナルティ：このカード（+${card.num}）は手札へ強制加算されます！</div>
-            `;
-          }
-        }
-
-        if(actionBtns) {
-          if(isCorrect) {
-            actionBtns.innerHTML = `
-              <button onclick="app.resolveJackCardChoice(true)" class="flex-1 bg-teal-600 hover:bg-teal-500 active:scale-95 text-white font-extrabold py-3.5 px-3 rounded-xl text-xs sm:text-sm transition shadow-lg">手札に加算する (+${card.num})</button>
-              <button onclick="app.resolveJackCardChoice(false)" class="flex-1 bg-slate-700 hover:bg-slate-600 active:scale-95 text-slate-200 font-extrabold py-3.5 px-3 rounded-xl text-xs sm:text-sm transition border border-slate-500">加算せず破棄（スルー）</button>
-            `;
-          } else {
-            actionBtns.innerHTML = `
-              <button onclick="app.resolveJackCardChoice(true)" class="w-full bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-extrabold py-3.5 px-4 rounded-xl text-xs sm:text-sm transition shadow-lg">手札へ強制加算する (+${card.num})</button>
-            `;
-          }
+        const hasAI = state.players.some(p => p.isAI);
+        if(hasAI && (state.room.isHost || state.room.isSolo) && !state.karutaState.roundLocked) {
+          const aiWaitMs = Math.max(4500, fullText.length * 145 + (1500 + Math.random() * 3000));
+          state.timers.karutaAiTouch = setTimeout(() => {
+            if(state.phase !== 'karuta_playing' || state.karutaState.roundLocked) return;
+            const aiPlayers = state.players.filter(p => p.isAI);
+            if(aiPlayers.length === 0) return;
+            const luckyAi = aiPlayers[Math.floor(Math.random() * aiPlayers.length)];
+            app.processKarutaCardTouch(yomi.id, luckyAi.id);
+          }, aiWaitMs);
         }
       },
 
-      resolveJackCardChoice: (addToHand) => {
-        document.getElementById('modal-jack-quiz')?.classList.add('hidden');
-        const currentP = state.players[state.turnIdx];
-        const card = state.jackState.currentCard;
-        if(!currentP || !card) return;
+      replayKarutaVoice: () => {
+        if(state.phase !== 'karuta_playing') return;
+        app.playKarutaCurrentYomi();
+      },
 
-        let bustedPlayerId = null;
+      handleKarutaCardTouch: (cardId) => {
+        if(state.phase !== 'karuta_playing' || state.karutaState.roundLocked) return;
+        app.processKarutaCardTouch(cardId, state.me.id);
+      },
 
-        if(addToHand) {
-          currentP.hand.push(card);
-          const addInternal = card.internalVal !== undefined ? Number(card.internalVal) : Math.round(Number(card.num) * 100);
-          currentP.totalInternal = (currentP.totalInternal || 0) + addInternal;
+      processKarutaCardTouch: (cardId, playerId) => {
+        if(state.karutaState.roundLocked) return;
+        const yomi = state.karutaState.currentYomi;
+        const touchedCard = state.karutaState.boardCards.find(c => c.id === cardId);
+        const actor = state.players.find(p => p.id === playerId);
+        if(!yomi || !touchedCard || touchedCard.isTaken || !actor) return;
 
-          if(currentP.totalInternal >= 9900) {
-            currentP.isBusted = true;
-            bustedPlayerId = currentP.id;
-            app.addLogMessage(`💀 ${currentP.name} が 99.00 を超過し急変（バースト）しました！`);
-            app.showJackBustModal(currentP);
-          } else if(currentP.hand.length >= 10) {
-            currentP.isStayed = true;
-            utils.showToast('🎴 手札上限（10枚）に達したため自動ステイとなります！');
-            app.addLogMessage(`🛡 ${currentP.name} が手札上限（10枚）に達しステイとなりました。`);
+        if(touchedCard.id === yomi.id) {
+          state.karutaState.roundLocked = true;
+          if(state.timers.karutaTypewriter) clearInterval(state.timers.karutaTypewriter);
+          if(state.timers.karutaAiTouch) clearTimeout(state.timers.karutaAiTouch);
+          if('speechSynthesis' in window) window.speechSynthesis.cancel();
+
+          touchedCard.isTaken = true;
+          touchedCard.takenBy = actor.name;
+          touchedCard.takenColor = actor.color || '#38bdf8';
+          actor.karutaScore = (actor.karutaScore || 0) + 1;
+          state.karutaState.lastWinnerId = actor.id;
+          state.karutaState.lastTouchedCardId = touchedCard.id;
+
+          const textEl = document.getElementById('karuta-yomifuda-text');
+          if(textEl) textEl.textContent = `「${yomi.desc}」 → 【正解：${yomi.title}】`;
+          const cornerEl = document.getElementById('karuta-yomi-corner-kana');
+          if(cornerEl) cornerEl.textContent = yomi.kana || 'あ';
+          const statusEl = document.getElementById('karuta-round-status');
+          if(statusEl) statusEl.textContent = `⚡ ${actor.name} が最速タッチで「${touchedCard.title}」を獲得！（+1枚）`;
+
+          utils.showToast(`🎴 ${actor.name} が「${touchedCard.title}」を獲得！`);
+          app.addLogMessage(`${actor.name} が取り札「[${touchedCard.kana}] ${touchedCard.title}」を獲得しました（計${actor.karutaScore}枚）`);
+
+          const remaining = state.karutaState.boardCards.filter(c => !c.isTaken).length;
+          const isEnd = (remaining === 0 || state.karutaState.currentIndex >= state.karutaState.readingQueue.length - 1);
+
+          if(isEnd) {
+            app.computeKarutaRanks();
+          }
+
+          socket.emit('game_action', {
+            roomCode: state.room.code,
+            type: 'karuta_touch',
+            mode: 'karuta',
+            players: state.players,
+            ranks: state.ranks,
+            karutaState: state.karutaState,
+            winnerName: actor.name,
+            cardTitle: touchedCard.title,
+            gameEnded: isEnd
+          });
+
+          app.renderKarutaTable();
+
+          if(isEnd) {
+            state.phase = 'ended';
+            setTimeout(() => app.showResults(), 1600);
           } else {
-            app.addLogMessage(`${currentP.name} がカードを手札に加算しました（${currentP.hand.length}/10枚）。`);
+            document.getElementById('btn-karuta-next')?.classList.remove('hidden');
           }
         } else {
-          state.discardPile.push(card);
-          app.addLogMessage(`${currentP.name} がカードを破棄しました。`);
+          if(playerId === state.me.id) {
+            utils.showToast(`❌ お手つき！「${touchedCard.title}」ではありません`);
+          }
         }
-
-        state.jackState.currentCard = null;
-        state.jackState.isProcessing = false;
-        app.advanceJackTurn(bustedPlayerId);
       },
 
-      jackDeclareStay: () => {
-        if(state.phase !== 'jack_playing' || state.jackState.isProcessing) return;
-        const currentP = state.players[state.turnIdx];
-        if(!currentP || currentP.id !== state.me.id || currentP.isStayed || currentP.isBusted) return;
-
-        currentP.isStayed = true;
-        utils.showToast('🛡 ステイアンドプレイを宣言しました！');
-        app.addLogMessage(`${currentP.name} がステイアンドプレイを宣言しました。`);
-        app.advanceJackTurn(null);
-      },
-
-      executeAiJackTurn: (aiPlayer) => {
-        if(state.phase !== 'jack_playing' || !aiPlayer) return;
-
-        if(aiPlayer.hand.length >= 10 || aiPlayer.totalInternal >= 8800 || (aiPlayer.totalInternal >= 7800 && Math.random() < 0.6) || state.jackState.deck.length === 0) {
-          aiPlayer.isStayed = true;
-          app.addLogMessage(`🛡 ${aiPlayer.name} がステイアンドプレイを宣言しました。`);
-          state.jackState.isProcessing = false;
-          app.advanceJackTurn(null);
+      startNextKarutaRound: () => {
+        if(state.phase !== 'karuta_playing') return;
+        state.karutaState.currentIndex++;
+        if(state.karutaState.currentIndex >= state.karutaState.readingQueue.length) {
+          app.computeKarutaRanks();
+          state.phase = 'ended';
+          app.showResults();
           return;
         }
-
-        const drawn = state.jackState.deck.pop();
-        const addInternal = (drawn.internalVal !== undefined) ? Number(drawn.internalVal) : Math.round(Number(drawn.num) * 100);
-        const aiCorrect = Math.random() < 0.72;
-
-        let bustedPlayerId = null;
-        if(aiCorrect) {
-          if(aiPlayer.totalInternal + addInternal <= 9899) {
-            aiPlayer.hand.push(drawn);
-            aiPlayer.totalInternal += addInternal;
-            if(!aiPlayer.isBusted && aiPlayer.hand.length >= 10) aiPlayer.isStayed = true;
-            app.addLogMessage(`${aiPlayer.name} がクイズに正解し、カードを加算しました。`);
-          } else {
-            state.discardPile.push(drawn);
-            app.addLogMessage(`${aiPlayer.name} がクイズに正解し、危険カードを破棄しました。`);
-          }
-        } else {
-          aiPlayer.hand.push(drawn);
-          aiPlayer.totalInternal += addInternal;
-          if(!aiPlayer.isBusted && aiPlayer.hand.length >= 10) aiPlayer.isStayed = true;
-          if(aiPlayer.totalInternal >= 9900) {
-            aiPlayer.isBusted = true;
-            bustedPlayerId = aiPlayer.id;
-            app.addLogMessage(`💀 ${aiPlayer.name} が不正解で強制加算され、99.00超過（バースト）しました！`);
-            app.showJackBustModal(aiPlayer);
-          } else {
-            app.addLogMessage(`${aiPlayer.name} がクイズに不正解となり、カードが強制加算されました。`);
-          }
-        }
-
-        state.jackState.isProcessing = false;
-        app.advanceJackTurn(bustedPlayerId);
-      },
-
-      showJackBustModal: (player) => {
-        const modal = document.getElementById('modal-jack-bust');
-        const nameEl = document.getElementById('jack-bust-player-name');
-        const showTotal = state.config.jackShowTotal ?? true;
-        const scoreTxt = showTotal ? `（合計: ${utils.formatJackInternal(player.totalInternal)}）` : '';
-        if(nameEl) nameEl.textContent = `${player.name} さん ${scoreTxt}`;
-        modal?.classList.remove('hidden');
-        if(window.lucide) lucide.createIcons();
-        if(state.timers.bustModal) clearTimeout(state.timers.bustModal);
-        state.timers.bustModal = setTimeout(() => {
-          app.closeJackBustModal();
-        }, 3000);
-      },
-
-      closeJackBustModal: () => {
-        document.getElementById('modal-jack-bust')?.classList.add('hidden');
-      },
-
-      checkJackGameEnd: () => {
-        const active = state.players.filter(p => !p.isStayed && !p.isBusted);
-        if(active.length === 0 || state.jackState.deck.length === 0) {
-          app.finishJackGame();
-          return true;
-        }
-        return false;
-      },
-
-      advanceJackTurn: (bustedPlayerId) => {
-        const active = state.players.filter(p => !p.isStayed && !p.isBusted);
-        const isEnd = (active.length === 0 || state.jackState.deck.length === 0);
-
-        if(isEnd) {
-          app.computeJackRanks();
-        } else {
-          for(let i = 1; i <= state.players.length; i++) {
-            const nxt = (state.turnIdx + i) % state.players.length;
-            if(!state.players[nxt].isStayed && !state.players[nxt].isBusted) {
-              state.turnIdx = nxt;
-              break;
-            }
-          }
-        }
+        state.karutaState.currentYomi = state.karutaState.readingQueue[state.karutaState.currentIndex];
+        state.karutaState.roundLocked = false;
+        state.karutaState.displayedText = '';
 
         socket.emit('game_action', {
           roomCode: state.room.code,
-          type: 'jack_sync',
-          mode: 'jack',
-          config: state.config,
+          type: 'karuta_next',
+          mode: 'karuta',
           players: state.players,
-          turnIdx: state.turnIdx,
-          jackDeck: state.jackState.deck,
-          ranks: state.ranks,
-          bustPlayerId: bustedPlayerId || null,
-          gameEnded: isEnd
+          karutaState: state.karutaState
         });
 
-        if(state.room.isSolo) {
-          app.renderJackTable();
-          if(isEnd) {
-            state.phase = 'ended';
-            setTimeout(() => app.showResults(), bustedPlayerId ? 2800 : 800);
-          } else {
-            app.processJackTurn();
-          }
-        }
+        app.renderKarutaTable();
+        app.playKarutaCurrentYomi();
       },
 
-      computeJackRanks: () => {
-        const safePlayers = state.players.filter(p => !p.isBusted).sort((a, b) => b.totalInternal - a.totalInternal);
-        const bustPlayers = state.players.filter(p => p.isBusted).sort((a, b) => a.totalInternal - b.totalInternal);
-        const ordered = [...safePlayers, ...bustPlayers];
-        state.ranks = ordered.map(p => p.id);
+      computeKarutaRanks: () => {
+        const sorted = [...state.players].sort((a, b) => (b.karutaScore || 0) - (a.karutaScore || 0));
+        state.ranks = sorted.map(p => p.id);
         state.players.forEach(p => {
           p.rank = state.ranks.indexOf(p.id) + 1;
         });
       },
 
-      finishJackGame: () => {
-        if(state.phase === 'ended') return;
-        state.phase = 'ended';
-        app.computeJackRanks();
-        setTimeout(() => app.showResults(), 1000);
+      renderKarutaTable: () => {
+        const pBar = document.getElementById('karuta-players-bar');
+        const grid = document.getElementById('karuta-board-grid');
+        const progBadge = document.getElementById('karuta-progress-badge');
+        if(!pBar || !grid) return;
+
+        const remaining = state.karutaState.boardCards.filter(c => !c.isTaken).length;
+        const total = state.karutaState.boardCards.length || 50;
+        if(progBadge) progBadge.textContent = `残り ${remaining} / ${total} 枚`;
+
+        pBar.innerHTML = '';
+        const sortedPlayers = [...state.players].sort((a, b) => (b.karutaScore || 0) - (a.karutaScore || 0));
+        state.players.forEach(p => {
+          const isTop = (p.karutaScore > 0 && p.id === sortedPlayers[0]?.id);
+          const pColor = p.color || '#38bdf8';
+          pBar.innerHTML += `
+            <div class="p-2.5 rounded-2xl border ${isTop ? 'bg-fuchsia-950/50 border-fuchsia-400 shadow-md' : 'bg-slate-900/90 border-slate-800'} flex items-center justify-between">
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${pColor}"></span>
+                <span class="text-xs font-bold text-white truncate">${utils.escapeHtml(p.name)}</span>
+              </div>
+              <span class="text-xs font-mono font-black px-2 py-0.5 rounded-lg bg-slate-950 text-fuchsia-300 border border-slate-800">${p.karutaScore || 0}枚</span>
+            </div>
+          `;
+        });
+
+        const isRight = state.config.karutaCorner === 'right';
+        const cornerPosCls = isRight ? 'top-1.5 right-1.5' : 'top-1.5 left-1.5';
+        const titlePadCls = isRight ? 'pr-9 pl-1' : 'pl-9 pr-1';
+
+        grid.innerHTML = '';
+        state.karutaState.boardCards.forEach(card => {
+          if(card.isTaken) {
+            grid.innerHTML += `
+              <div class="h-24 sm:h-28 rounded-2xl border-2 border-dashed border-slate-700/40 bg-slate-950/40 p-2 flex flex-col items-center justify-center opacity-45 select-none">
+                <span class="text-[10px] font-bold text-slate-400 mb-0.5">${utils.escapeHtml(card.title)}</span>
+                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full text-slate-950" style="background-color: ${card.takenColor || '#38bdf8'}">獲得: ${utils.escapeHtml(card.takenBy || '')}</span>
+              </div>
+            `;
+            return;
+          }
+
+          const hasImg = card.imgUrl && card.imgUrl.trim() !== '';
+          grid.innerHTML += `
+            <div onpointerdown="app.handleKarutaCardTouch(${card.id})" class="h-24 sm:h-28 rounded-2xl border-2 border-amber-200/90 hover:border-fuchsia-400 bg-gradient-to-b from-[#fffdf7] to-[#f4ebd9] text-slate-900 p-2 flex flex-col justify-between cursor-pointer active:scale-95 transition shadow-[0_6px_15px_rgba(0,0,0,0.6)] select-none relative overflow-hidden group">
+              <div class="absolute ${cornerPosCls} w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-rose-700 text-white font-black text-sm sm:text-base flex items-center justify-center shadow-md border border-rose-900 z-10">
+                ${utils.escapeHtml(card.kana || 'あ')}
+              </div>
+
+              ${hasImg ? `
+                <div class="w-full h-12 sm:h-14 rounded-lg overflow-hidden bg-slate-200 mt-1 flex items-center justify-center">
+                  <img src="${utils.escapeHtml(card.imgUrl)}" alt="${utils.escapeHtml(card.title)}" class="w-full h-full object-cover">
+                </div>
+                <div class="text-[11px] sm:text-xs font-black text-center text-slate-900 truncate leading-tight">${utils.escapeHtml(card.title)}</div>
+              ` : `
+                <div class="my-auto ${titlePadCls} text-center flex items-center justify-center h-full">
+                  <div class="text-xs sm:text-sm font-black text-slate-900 leading-snug break-words group-hover:text-rose-800 transition">${utils.escapeHtml(card.title)}</div>
+                </div>
+              `}
+            </div>
+          `;
+        });
+
+        if(window.lucide) lucide.createIcons();
+      },
+
+      handleKarutaImageUpload: (id, inputEl) => {
+        const file = inputEl?.files?.[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const urlInput = document.getElementById(`te-img-${id}`);
+          if(urlInput) urlInput.value = e.target.result;
+          utils.showToast('📷 画像を読み込みました。「保存」を押すと確定します');
+        };
+        reader.readAsDataURL(file);
       },
 
       // ==========================================
-      // GAME 02: 救急神経衰弱バトル ロジック（スマホ版常駐方向インジケーター・タップ消去対応）
+      // GAME 02: 救急神経衰弱バトル ロジック
       // ==========================================
       startMemoryGameSession: () => {
         app.clearAllTimers();
@@ -2530,8 +2700,7 @@
           }
         }, 1000);
       },
-// 🆕 スマホ版：相手がめくったカードの方向を計算して矢印を表示する関数
-      // 🆕 スマホ版専用：相手がめくったカードの方向を常時追跡＆自分の番や✕タップで消去する関数
+
       lastOpponentFlippedIdx: null,
       mobileArrowManuallyDismissed: false,
 
@@ -2539,102 +2708,46 @@
         if (e) e.stopPropagation();
         app.mobileArrowManuallyDismissed = true;
         document.getElementById('mobile-memory-dir-indicator')?.classList.add('hidden');
-        document.getElementById('mobile-edge-dir-indicator')?.classList.add('hidden');
-        document.getElementById('edge-arrow-up')?.classList.add('hidden');
-        document.getElementById('edge-arrow-down')?.classList.add('hidden');
-        document.getElementById('edge-arrow-left')?.classList.add('hidden');
-        document.getElementById('edge-arrow-right')?.classList.add('hidden');
       },
 
       updateMobileOpponentArrow: () => {
         const topBanner = document.getElementById('mobile-memory-dir-indicator');
-        const edgeContainer = document.getElementById('mobile-edge-dir-indicator');
-        const upEl = document.getElementById('edge-arrow-up');
-        const downEl = document.getElementById('edge-arrow-down');
-        const leftEl = document.getElementById('edge-arrow-left');
-        const rightEl = document.getElementById('edge-arrow-right');
-        const arrowEl = document.getElementById('mobile-memory-dir-arrow');
-        const textEl = document.getElementById('mobile-memory-dir-text');
-        const numUpEl = document.getElementById('edge-num-up');
-        const numDownEl = document.getElementById('edge-num-down');
-
-        if (!topBanner || !edgeContainer || !upEl || !downEl || !leftEl || !rightEl) return;
-
-        // スマホ画面（幅640px未満）以外、または神経衰弱プレイ中以外は非表示
+        if (!topBanner) return;
         if (window.innerWidth >= 640 || state.phase !== 'memory_playing') {
           topBanner.classList.add('hidden');
-          edgeContainer.classList.add('hidden');
           return;
         }
-
         const currentP = state.players[state.turnIdx];
         const isOpponentTurn = currentP && (currentP.isAI || currentP.id !== state.me.id);
-
         if (!isOpponentTurn || app.mobileArrowManuallyDismissed) {
           app.mobileArrowManuallyDismissed = false;
           topBanner.classList.add('hidden');
-          edgeContainer.classList.add('hidden');
           app.lastOpponentFlippedIdx = null;
           return;
         }
-
         const flippedIndices = state.memoryState.cards
           .map((c, i) => (c.isFlipped && !c.isMatched) ? i : null)
           .filter(i => i !== null);
 
         if (flippedIndices.length === 0) {
           topBanner.classList.add('hidden');
-          edgeContainer.classList.add('hidden');
           app.lastOpponentFlippedIdx = null;
           return;
         }
-
         const targetIdx = flippedIndices[flippedIndices.length - 1];
         app.lastOpponentFlippedIdx = targetIdx;
         const cardEl = document.getElementById(`memory-card-el-${targetIdx}`);
         if (!cardEl) {
           topBanner.classList.add('hidden');
-          edgeContainer.classList.add('hidden');
           return;
         }
-
-        // スマホ画面（ビューポート）内にあるかを判定
         const rect = cardEl.getBoundingClientRect();
-        const isAbove = rect.bottom < 60;
-        const isBelow = rect.top > window.innerHeight - 70;
-        const isLeft = rect.right < 40;
-        const isRight = rect.left > window.innerWidth - 40;
-
-        const isOffScreen = isAbove || isBelow || isLeft || isRight;
-
-        // 🎯 画角内（画面内）にカードが見えている時はインジケーターをすべて隠す
+        const isOffScreen = rect.bottom < 60 || rect.top > window.innerHeight - 70 || rect.right < 40 || rect.left > window.innerWidth - 40;
         if (!isOffScreen) {
           topBanner.classList.add('hidden');
-          edgeContainer.classList.add('hidden');
           return;
         }
-
-        // 🎯 画角外にあるカードの番号（1始まり）を反映
-        const displayCardNum = targetIdx + 1;
-        if (numUpEl) numUpEl.textContent = displayCardNum;
-        if (numDownEl) numDownEl.textContent = displayCardNum;
-
-        let arrow = '⬇️';
-        let dirLabel = '下方向';
-        if (isAbove) { arrow = '⬆️'; dirLabel = '上の画角外'; }
-        else if (isBelow) { arrow = '⬇️'; dirLabel = '下の画角外'; }
-        else if (isLeft) { arrow = '⬅️'; dirLabel = '左の画角外'; }
-        else if (isRight) { arrow = '➡️'; dirLabel = '右の画角外'; }
-
-        if (arrowEl) arrowEl.textContent = arrow;
-        if (textEl) textEl.textContent = `${currentP.name} が [No.${displayCardNum}] をめくりました`;
-
         topBanner.classList.remove('hidden');
-        edgeContainer.classList.remove('hidden');
-        upEl.classList.toggle('hidden', !isAbove);
-        downEl.classList.toggle('hidden', !isBelow);
-        leftEl.classList.toggle('hidden', !isLeft);
-        rightEl.classList.toggle('hidden', !isRight);
       },
 
       scrollToOpponentFlippedCard: () => {
@@ -3034,7 +3147,6 @@
         if(!modal) return;
         const isCurrentlyOpen = !modal.classList.contains('hidden');
         if (isCurrentlyOpen) {
-          // まだ獲得ストックが残っている状態で誤って閉じようとした場合は警告して閉じない（最後の1セット配置漏れ防止）
           if (state.memoryState.waitingForBoardPlacement && state.memoryState.matchedStock.length > 0) {
             utils.showToast('⚠️ 獲得したペアをボードの疾患枠にはめ込んでください！');
             return;
@@ -3137,7 +3249,6 @@
         const activePair = stocks[activeIdx];
         if(!activePair) return;
 
-        // ❌ 疾患あてはめミス時（ストックから消去し、場の元の位置へ裏向きで戻す）
         if(Number(slot.num) !== Number(activePair.num)) {
           stocks.splice(activeIdx, 1);
           state.memoryState.selectedStockIdx = 0;
@@ -3176,7 +3287,6 @@
           return;
         }
 
-        // ⭕ 正解時
         stocks.splice(activeIdx, 1);
         state.memoryState.selectedStockIdx = 0;
         const myP = state.players.find(p => p.id === state.me.id);
@@ -3206,7 +3316,6 @@
         app.renderFullMemoryBoardModal();
         app.renderMemoryGameTable();
 
-        // 最後の1セットが埋まった場合は即座にモーダルを閉じてリザルトへ遷移
         if(isGameComplete) {
           document.getElementById('modal-memory-board')?.classList.add('hidden');
           state.memoryState.waitingForBoardPlacement = false;
@@ -3258,8 +3367,8 @@
         });
 
         let deck = state.mode === 'babanuki'
-          ? currentCardDB.filter(c => c.id !== 54 && c.suit !== 'M' && c.suit !== 'J')
-          : currentCardDB.filter(c => c.suit !== 'M' && c.suit !== 'J');
+          ? currentCardDB.filter(c => c.id !== 54 && c.suit !== 'M' && c.suit !== 'J' && c.suit !== 'K')
+          : currentCardDB.filter(c => c.suit !== 'M' && c.suit !== 'J' && c.suit !== 'K');
         deck.sort(() => Math.random() - 0.5);
         if(state.mode === 'jinuki') state.hiddenCard = deck.pop();
         
@@ -3611,20 +3720,6 @@
         return app.getNextActiveIdx(currentIdx + 1);
       },
 
-      clearAllTimers: () => {
-        if(state.timers.turn) clearInterval(state.timers.turn);
-        if(state.timers.aiDelay) clearTimeout(state.timers.aiDelay);
-        if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
-        if(state.timers.popupTimer) clearTimeout(state.timers.popupTimer);
-        if(state.timers.matchTimer) clearTimeout(state.timers.matchTimer);
-        if(state.timers.quizTimer) clearInterval(state.timers.quizTimer);
-        if(state.timers.quizAutoClose) clearTimeout(state.timers.quizAutoClose);
-        if(state.timers.jackQuiz) clearInterval(state.timers.jackQuiz);
-        if(state.timers.bustModal) clearTimeout(state.timers.bustModal);
-        if(state.timers.openRoomBeacon) { clearInterval(state.timers.openRoomBeacon); state.timers.openRoomBeacon = null; }
-        if(state.room?.isHost && state.room?.code) app.broadcastRoomSignal('close');
-      },
-
       playDefibAnimation: () => {
         return new Promise(resolve => {
           const overlay = document.getElementById('defib-shock-overlay'), wrap = document.getElementById('main-content-wrapper'), flash = document.getElementById('defib-flash-bg');
@@ -3910,6 +4005,9 @@
         if(state.mode === 'jack' && state.ranks.length === 0) {
           app.computeJackRanks();
         }
+        if(state.mode === 'karuta' && state.ranks.length === 0) {
+          app.computeKarutaRanks();
+        }
         if(state.mode === 'memory' && state.ranks.length === 0) {
           const scores = state.players.map(p => {
             const b = state.memoryState.playerBoards[p.id] || {};
@@ -3936,11 +4034,11 @@
         if (myP?.rank === 1 && !(state.mode === 'jack' && myP?.isBusted)) {
           if(iconBox) { iconBox.className='w-16 h-16 sm:w-20 sm:h-20 rounded-3xl flex items-center justify-center mb-4 bg-amber-500/20 text-amber-300 border-2 border-amber-400 mx-auto'; iconBox.innerHTML='<i data-lucide="trophy" class="w-10 h-10 sm:w-12 sm:h-12"></i>'; }
           if(badge) { badge.className='text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block bg-amber-900/60 text-amber-300 border border-amber-600'; badge.textContent='1ST PLACE'; }
-          if(title) title.textContent = state.mode === 'jack' ? '99ジャック 制覇！' : state.mode === 'memory' ? '神経衰弱バトル 優勝！' : '最速クリア達成！'; 
+          if(title) title.textContent = state.mode === 'jack' ? '99ジャック 制覇！' : state.mode === 'memory' ? '神経衰弱バトル 優勝！' : state.mode === 'karuta' ? '救急かるた 優勝！' : '最速クリア達成！'; 
           if(window.confetti) confetti();
         } else if (state.mode === 'jack' ? myP?.isBusted : myP?.rank === state.players.length) {
           if(iconBox) { iconBox.className='w-16 h-16 sm:w-20 sm:h-20 rounded-3xl flex items-center justify-center mb-4 bg-rose-500/20 text-rose-400 border-2 border-rose-500 mx-auto'; iconBox.innerHTML='<i data-lucide="zap-off" class="w-10 h-10 sm:w-12 sm:h-12"></i>'; }
-          if(badge) { badge.className='text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block bg-rose-900/60 text-rose-300 border border-rose-600'; badge.textContent=state.mode==='babanuki'?'VF保持':state.mode==='jack'?'OVER 99.00 (CPA)':state.mode==='memory'?'FINISH':'孤立カード保持'; }
+          if(badge) { badge.className='text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block bg-rose-900/60 text-rose-300 border border-rose-600'; badge.textContent=state.mode==='babanuki'?'VF保持':state.mode==='jack'?'OVER 99.00 (CPA)':(state.mode==='memory'||state.mode==='karuta')?'FINISH':'孤立カード保持'; }
           if(title) title.textContent=state.mode==='babanuki'?'VFを回避できず！':state.mode==='jack'?'99超過…急変（バースト）':'作戦完了';
         } else {
           if(iconBox) { iconBox.className='w-16 h-16 sm:w-20 sm:h-20 rounded-3xl flex items-center justify-center mb-4 bg-cyan-500/20 text-cyan-300 border-2 border-cyan-400 mx-auto'; iconBox.innerHTML='<i data-lucide="award" class="w-10 h-10 sm:w-12 sm:h-12"></i>'; }
@@ -3951,7 +4049,7 @@
         const list = document.getElementById('result-ranking-list'); 
         if(list) {
           list.innerHTML = '';
-          list.innerHTML += `<div class="text-xs font-bold text-slate-400 mb-1 border-b border-slate-800 pb-1">🏆 ${state.mode === 'jack' ? '99ジャック 最終順位' : state.mode === 'memory' ? '神経衰弱 最終順位（完成疾患数順）' : 'あがり順位表彰'}</div>`;
+          list.innerHTML += `<div class="text-xs font-bold text-slate-400 mb-1 border-b border-slate-800 pb-1">🏆 ${state.mode === 'jack' ? '99ジャック 最終順位' : state.mode === 'memory' ? '神経衰弱 最終順位（完成疾患数順）' : state.mode === 'karuta' ? '救急かるた 最終順位（獲得枚数順）' : 'あがり順位表彰'}</div>`;
           state.ranks.forEach((pId, idx) => {
             const p = state.players.find(x=>x.id===pId); if(!p) return;
             let rightLabel = idx===0 ? 'WINNER' : 'CLEAR';
@@ -3971,6 +4069,9 @@
               const filledCnt = Object.keys(b).filter(k => b[k]?.filled).length;
               rightLabel = `完成: ${filledCnt} / ${state.memoryState.boardSlots.length} 枠`;
               rightColor = idx===0 ? 'text-amber-400' : 'text-blue-300';
+            } else if(state.mode === 'karuta') {
+              rightLabel = `獲得: ${p.karutaScore || 0} 枚`;
+              rightColor = idx===0 ? 'text-amber-400' : 'text-fuchsia-300';
             }
 
             list.innerHTML += `<div class="flex items-center justify-between p-2.5 rounded-xl border ${p.id===state.me.id?'bg-cyan-950/40 border-cyan-500/60':'bg-slate-900 border-slate-800'}"><div class="flex items-center gap-2"><span class="text-lg w-6 text-center">${['🥇','🥈','🥉','🏅','🏅','🏅','🏅','⚡'][idx]||`${idx+1}`}</span><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${p.color || '#38bdf8'}"></span><span class="text-xs font-bold text-white">${utils.escapeHtml(p.name)}${p.id===state.me.id?' (あなた)':''}</span></div><span class="text-[11px] font-mono font-bold ${rightColor}">${rightLabel}</span></div>`;
@@ -4081,6 +4182,7 @@
           const g2 = document.getElementById('toggle-game2'); if(g2) g2.checked = !!currentGameAccess.game2;
           const g3 = document.getElementById('toggle-game3'); if(g3) g3.checked = !!currentGameAccess.game3;
           const g4 = document.getElementById('toggle-game4'); if(g4) g4.checked = !!currentGameAccess.game4;
+          const g5 = document.getElementById('toggle-game5'); if(g5) g5.checked = !!currentGameAccess.game5;
           app.renderAdminCards(); utils.showToast('<i data-lucide="unlock" class="w-4 h-4 inline mr-1"></i>認証成功'); if(window.lucide) lucide.createIcons();
         } else {
           utils.showToast('<i data-lucide="alert-circle" class="w-4 h-4 inline mr-1 text-rose-400"></i>認証エラー'); 
@@ -4092,6 +4194,7 @@
         currentGameAccess.game2 = document.getElementById('toggle-game2')?.checked ?? true;
         currentGameAccess.game3 = document.getElementById('toggle-game3')?.checked ?? true;
         currentGameAccess.game4 = document.getElementById('toggle-game4')?.checked ?? true;
+        currentGameAccess.game5 = document.getElementById('toggle-game5')?.checked ?? true;
         saveAccess(currentGameAccess);
         socket.emit('admin_update_access', currentGameAccess);
         app.renderPortal(); 
@@ -4105,15 +4208,18 @@
         const selector = document.getElementById('admin-deck-selector');
         const f = selector ? selector.value : 'all';
         let d = currentCardDB;
-        if(f==='babanuki') d = currentCardDB.filter(c=>c.id!==54 && c.suit!=='M' && c.suit!=='J');
+        if(f==='babanuki') d = currentCardDB.filter(c=>c.id!==54 && c.suit!=='M' && c.suit!=='J' && c.suit!=='K');
         else if(f==='memory') d = currentCardDB.filter(c=>c.suit==='M');
-        else if(f==='jinuki') d = currentCardDB.filter(c=>c.suit!=='M' && c.suit!=='J');
+        else if(f==='jinuki') d = currentCardDB.filter(c=>c.suit!=='M' && c.suit!=='J' && c.suit!=='K');
         else if(f==='jack') d = currentCardDB.filter(c=>c.suit==='J');
+        else if(f==='karuta') d = currentCardDB.filter(c=>c.suit==='K');
         
         d.forEach(c => {
           const isJack = (c.suit === 'J');
-          const subInfoHtml = isJack
-            ? `<div id="tv-${c.id}" class="text-xs mb-1"><span class="px-2 py-0.5 rounded bg-slate-800 text-teal-300 font-bold mr-1.5">${utils.escapeHtml(c.borderColor || c.title || '緑')}</span><span class="text-slate-300 font-mono">他択選択肢: ${c.opt1} / ${c.opt2}</span></div>
+          const isKaruta = (c.suit === 'K');
+          let subInfoHtml = '';
+          if (isJack) {
+            subInfoHtml = `<div id="tv-${c.id}" class="text-xs mb-1"><span class="px-2 py-0.5 rounded bg-slate-800 text-teal-300 font-bold mr-1.5">${utils.escapeHtml(c.borderColor || c.title || '緑')}</span><span class="text-slate-300 font-mono">他択選択肢: ${c.opt1} / ${c.opt2}</span></div>
                <div id="te-${c.id}" class="hidden space-y-2 mt-1">
                  <div>
                    <label class="block text-[10px] text-slate-400 mb-0.5">ふち色 (緑, 赤, 青, 黄色, 紫, 黒など)</label>
@@ -4129,9 +4235,39 @@
                      <input id="te-o2-${c.id}" type="number" step="any" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-xs text-white" value="${c.opt2 ?? 2}">
                    </div>
                  </div>
-               </div>`
-            : `<div class="mb-1"><span id="tv-${c.id}" class="text-xs font-bold text-cyan-300">${utils.escapeHtml(c.title)}</span></div>
+               </div>`;
+          } else if (isKaruta) {
+            subInfoHtml = `<div id="tv-${c.id}" class="text-xs mb-1 flex items-center gap-2 flex-wrap">
+                 <span class="px-2 py-0.5 rounded-lg bg-fuchsia-950 text-fuchsia-300 border border-fuchsia-700 font-black">头文字: ${utils.escapeHtml(c.kana || 'あ')}</span>
+                 <span class="font-bold text-cyan-300">置き札(疾患): ${utils.escapeHtml(c.title)}</span>
+                 ${c.imgUrl ? `<span class="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-700">📷 画像設定済</span>` : ''}
+               </div>
+               <div id="te-${c.id}" class="hidden space-y-2 mt-1">
+                 <div class="grid grid-cols-3 gap-2">
+                   <div>
+                     <label class="block text-[10px] text-slate-400 mb-0.5">ひらがな(1文字)</label>
+                     <input id="te-kana-${c.id}" maxlength="2" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-xs text-white font-bold text-center" value="${utils.escapeHtml(c.kana || 'あ')}">
+                   </div>
+                   <div class="col-span-2">
+                     <label class="block text-[10px] text-slate-400 mb-0.5">置き札（疾患名）</label>
+                     <input id="te-title-${c.id}" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-xs text-white font-bold" value="${utils.escapeHtml(c.title)}">
+                   </div>
+                 </div>
+                 <div>
+                   <label class="block text-[10px] text-slate-400 mb-0.5">取り札の画像（URL入力 または 画像ファイル選択）</label>
+                   <div class="flex gap-2 items-center">
+                     <input id="te-img-${c.id}" placeholder="https://... または右から画像選択" class="flex-1 bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-white" value="${utils.escapeHtml(c.imgUrl || '')}">
+                     <label class="bg-slate-800 hover:bg-slate-700 text-fuchsia-300 border border-fuchsia-700/60 px-3 py-2 rounded-xl text-xs font-bold cursor-pointer flex-shrink-0">
+                       📷 ファイル選択
+                       <input type="file" accept="image/*" class="hidden" onchange="app.handleKarutaImageUpload(${c.id}, this)">
+                     </label>
+                   </div>
+                 </div>
+               </div>`;
+          } else {
+            subInfoHtml = `<div class="mb-1"><span id="tv-${c.id}" class="text-xs font-bold text-cyan-300">${utils.escapeHtml(c.title)}</span></div>
                <input id="te-${c.id}" class="hidden w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-xs text-white focus:border-cyan-500 focus:outline-none mt-1" value="${utils.escapeHtml(c.title)}">`;
+          }
 
           tb.innerHTML += `
             <div class="p-3 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col gap-2 shadow-sm">
@@ -4152,6 +4288,7 @@
                       <option value="D" ${c.suit==='D'?'selected':''}>♦(D)</option>
                       <option value="M" ${c.suit==='M'?'selected':''}>🧠(M)</option>
                       <option value="J" ${c.suit==='J'?'selected':''}>🎯(99J)</option>
+                      <option value="K" ${c.suit==='K'?'selected':''}>🎴(かるた)</option>
                       <option value="JOKER" ${c.suit==='JOKER'?'selected':''}>⚡(JOKER)</option>
                     </select>
                   </div>
@@ -4200,6 +4337,10 @@
             c.opt1 = isNaN(o1) ? 1 : o1;
             c.opt2 = isNaN(o2) ? 2 : o2;
             c.internalVal = Math.round(Number(c.num) * 100);
+          } else if(sVal === 'K') {
+            c.kana = document.getElementById(`te-kana-${id}`)?.value.trim() || c.kana || 'あ';
+            c.title = document.getElementById(`te-title-${id}`)?.value.trim() || c.title;
+            c.imgUrl = document.getElementById(`te-img-${id}`)?.value.trim() || '';
           } else {
             const t = document.getElementById(`te-${id}`)?.value || '';
             c.title = t;
@@ -4213,11 +4354,13 @@
       addNewCardPrompt: () => {
         const selector = document.getElementById('admin-deck-selector');
         const f = selector ? selector.value : 'all';
-        const defaultSuit = (f === 'babanuki' || f === 'jinuki') ? 'C' : (f === 'jack' ? 'J' : 'M');
+        const defaultSuit = (f === 'babanuki' || f === 'jinuki') ? 'C' : (f === 'jack' ? 'J' : (f === 'karuta' ? 'K' : 'M'));
         const newId = currentCardDB.length > 0 ? Math.max(...currentCardDB.map(c => c.id)) + 1 : 1;
         const newCard = defaultSuit === 'J'
           ? { id: newId, suit: "J", num: 1, internalVal: 100, title: "緑", borderColor: "緑", opt1: 2, opt2: 3, desc: "ここに99ジャックの問題文を入力してください" }
-          : { id: newId, suit: defaultSuit, num: 1, title: "新規項目", desc: "ここに問題文を入力してください" };
+          : defaultSuit === 'K'
+            ? { id: newId, suit: "K", num: 1, kana: "あ", title: "新規疾患名（置き札）", desc: "症候1、症候2、治療法1、治療法2（読み札）", imgUrl: "" }
+            : { id: newId, suit: defaultSuit, num: 1, title: "新規項目", desc: "ここに問題文を入力してください" };
         currentCardDB.push(newCard);
         saveDB(currentCardDB);
         socket.emit('admin_update_cards', currentCardDB);
@@ -4248,7 +4391,7 @@
       else if(app.adminClicks>=3) { clearTimeout(app.adminTimer); app.adminClicks=0; app.openAdmin(); }
     });
 
-window.addEventListener('scroll', () => { if (state.phase === 'memory_playing') app.updateMobileOpponentArrow(); }, { passive: true });
+    window.addEventListener('scroll', () => { if (state.phase === 'memory_playing') app.updateMobileOpponentArrow(); }, { passive: true });
     window.onload = app.init;
   </script>
 </body>
