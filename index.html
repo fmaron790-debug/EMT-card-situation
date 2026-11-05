@@ -1131,7 +1131,7 @@
               <i data-lucide="volume-2" class="w-3.5 h-3.5"></i><span>もう一度読む</span>
             </button>
             <!-- onclick を app.readyNextKarutaRound() に変更 -->
-<button id="btn-karuta-next" onclick="app.readyNextKarutaRound()" class="hidden bg-emerald-600 hover:bg-emerald-500 ...">
+<button id="btn-karuta-next" onclick="app.readyNextKarutaRound()" class="hidden bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-extrabold px-4 py-1.5 rounded-xl transition shadow-[0_0_15px_rgba(16,185,129,0.5)]">
   次のラウンドへ進む準備完了 (0/4) ▶
 </button>
           </div>
@@ -1709,10 +1709,14 @@
         app.renderKarutaTable();
         if(actionData.winnerName && actionData.cardTitle) {
           const stEl = document.getElementById('karuta-round-status');
-          if(stEl) stEl.textContent = `⚡ ${actionData.winnerName} が「${actionData.cardTitle}」を獲得！`;
+          if(stEl) stEl.textContent = `⚡ ${actor.name} が「${touchedCard.title}」を獲得！`; // または元のコードのままでOK
         }
-
-} else if(actionData.type === 'karuta_ready_next') {
+        if(actionData.gameEnded) {
+          state.phase = 'ended';
+          if('speechSynthesis' in window) window.speechSynthesis.cancel();
+          setTimeout(() => app.showResults(), 1500);
+        }
+      } else if(actionData.type === 'karuta_ready_next') {
       state.karutaState = { ...state.karutaState, ...actionData.karutaState };
       app.renderKarutaTable();
 
