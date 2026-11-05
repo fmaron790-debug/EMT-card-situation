@@ -1123,15 +1123,18 @@
             <span class="text-xs px-2.5 py-1 rounded-full bg-fuchsia-950 text-fuchsia-300 border border-fuchsia-600 font-bold">🎴 救急かるた</span>
             <span id="karuta-progress-badge" class="text-xs font-mono font-bold text-white bg-slate-950 px-2.5 py-1 rounded-xl border border-slate-800">残り 50 / 50 枚</span>
           </div>
-          <div class="flex items-center gap-2">
-            <button id="btn-karuta-replay-voice" onclick="app.replayKarutaVoice()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-fuchsia-300 border border-fuchsia-700/60 text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1">
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="btn-karuta-toggle-mode" onclick="app.toggleKarutaReadModeInGame()" class="bg-fuchsia-950/90 hover:bg-fuchsia-900 active:scale-95 text-fuchsia-200 border border-fuchsia-500/60 text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow">
+              <span id="karuta-mode-btn-label">🔊 AI読み上げ: ON</span>
+            </button>
+            <button id="btn-karuta-replay-voice" onclick="app.replayKarutaVoice()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-cyan-300 border border-cyan-700/60 text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1">
               <i data-lucide="volume-2" class="w-3.5 h-3.5"></i><span>もう一度読む</span>
             </button>
-            <button id="btn-karuta-next" onclick="app.startNextKarutaRound()" class="hidden bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-extrabold px-4 py-1.5 rounded-xl transition shadow-[0_0_15px_rgba(16,185,129,0.5)]">
-              次の読み札へ ▶
-            </button>
+            <!-- onclick を app.readyNextKarutaRound() に変更 -->
+<button id="btn-karuta-next" onclick="app.readyNextKarutaRound()" class="hidden bg-emerald-600 hover:bg-emerald-500 ...">
+  次のラウンドへ進む準備完了 (0/4) ▶
+</button>
           </div>
-        </div>
 
         <div id="karuta-players-bar" class="w-full max-w-5xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 mb-2.5"></div>
 
@@ -1550,7 +1553,8 @@
         displayedText: '',
         roundLocked: false,
         lastWinnerId: null,
-        lastTouchedCardId: null
+        lastTouchedCardId: null,
+        readyNextPlayers: [] // 👈 【追加】次のラウンドへの準備完了をしたプレイヤーのIDリスト
       }
     };
 
@@ -1707,6 +1711,22 @@
           const stEl = document.getElementById('karuta-round-status');
           if(stEl) stEl.textContent = `⚡ ${actionData.winnerName} が「${actionData.cardTitle}」を獲得！`;
         }
+
+} else if(actionData.type === 'karuta_ready_next') {
+      state.karutaState = { ...state.karutaState, ...actionData.karutaState };
+      app.renderKarutaTable();
+
+      const totalPlayers = state.players.length;
+      const readyCount = state.karutaState.readyNextPlayers.length;
+
+      const nextBtn = document.getElementById('btn-karuta-next');
+      if(nextBtn && !nextBtn.classList.contains('hidden')) {
+        nextBtn.textContent = `次のラウンドへ進む準備完了 (${readyCount}/${totalPlayers}) ▶`;
+      }
+
+      if(readyCount >= totalPlayers && (state.room.isHost || state.room.isSolo)) {
+        app.executeStartNextKarutaRound();
+      }
         if(actionData.gameEnded) {
           state.phase = 'ended';
           if('speechSynthesis' in window) window.speechSynthesis.cancel();
@@ -2361,17 +2381,33 @@ const app = {
 
       startGame: () => {
         if (state.mode === 'jack') {
+          // 99ジャックのソロプレイ（AI対戦）の場合、自動でAI隊員を1名対戦相手として追加
           if (state.room.isSolo) {
+            state.config.maxPlayers = 2;
+            state.config.autoFillAI = true;
             while(state.players.length < 2) {
               const botColor = pickUnusedColor(state.players);
-              state.players.push({ id: `ai_${Date.now()}_0`, name: '救急隊員AI', isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: 2, color: botColor, totalInternal: 0, isStayed: false, isBusted: false, karutaScore: 0 });
+              state.players.push({ 
+                id: `ai_${Date.now()}_0`, 
+                name: '救急隊員AI', 
+                isAI: true, 
+                hand: [], 
+                isCleared: false, 
+                isReady: true, 
+                rank: 0, 
+                team: 2, 
+                color: botColor, 
+                totalInternal: 0, 
+                isStayed: false, 
+                isBusted: false 
+              });
             }
           }
         } else if(state.room.isHost && state.config.autoFillAI) {
           while(state.players.length < state.config.maxPlayers) {
             const bIdx = state.players.filter(p=>p.isAI).length;
             const botColor = pickUnusedColor(state.players);
-            state.players.push({ id: `ai_${Date.now()}_${bIdx}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: botColor, totalInternal: 0, isStayed: false, isBusted: false, karutaScore: 0 });
+            state.players.push({ id: `ai_${Date.now()}_${bIdx}`, name: BOT_NAME_POOL[bIdx % BOT_NAME_POOL.length], isAI: true, hand: [], isCleared: false, isReady: true, rank: 0, team: (state.players.length % 3) + 1, color: botColor, totalInternal: 0, isStayed: false, isBusted: false });
           }
         }
         if(state.players.length < 2) return utils.showToast('最低2名必要です');
@@ -2388,10 +2424,116 @@ const app = {
         else app.startStandardCardGameSession();
       },
 // ==========================================
-      // GAME 05: 救急かるた 専用ロジック
+      // GAME 05: 救急かるた 専用ロジック（音声エンジン完全対応版）
       // ==========================================
+      currentUtterance: null,
+      voicesLoaded: false,
+
+      // ブラウザの音声合成ロックを解除＆日本語音声を事前ロードする関数
+      unlockSpeechEngine: () => {
+  if (!('speechSynthesis' in window)) return;
+  try {
+    window.speechSynthesis.getVoices();
+    const silentUttr = new SpeechSynthesisUtterance('');
+    silentUttr.volume = 0;
+    silentUttr.lang = 'ja-JP';
+    window.speechSynthesis.speak(silentUttr);
+  } catch (e) {}
+},
+
+      // 日本語テキストを確実にゆっくり読み上げる専用関数
+      speakKarutaText: (rawText) => {
+        if (!state.config.karutaReadAloud) return;
+        if (!('speechSynthesis' in window)) {
+          utils.showToast('⚠️ お使いのブラウザは音声読み上げに対応していません');
+          return;
+        }
+
+        try {
+          window.speechSynthesis.cancel();
+          if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+
+          // 医療略語や読点を聞き取りやすい自然な日本語の間（ポーズ）に変換
+          let speechText = String(rawText || '')
+            .replace(/、/g, '。 ')
+            .replace(/・/g, '、 ')
+            .replace(/PPI/gi, 'ピーピーアイ')
+            .replace(/NSAIDs/gi, 'エヌセイズ')
+            .replace(/ARDS/gi, 'エーアールディーエス')
+            .replace(/ALS/gi, 'エーエルエス')
+            .replace(/SSPE/gi, 'エスエスピーイー')
+            .replace(/AIDS/gi, 'エイズ')
+            .replace(/HIV/gi, 'エイチアイブイ')
+            .replace(/ICD/gi, 'アイシーディー')
+            .replace(/PCI/gi, 'ピーシーアイ')
+            .replace(/CPAP/gi, 'シーパップ')
+            .replace(/ICU/gi, 'アイシーユー')
+            .replace(/HUS/gi, 'エイチユーエス')
+            .replace(/FAST/gi, 'ファスト')
+            .replace(/ATP/gi, 'エーティーピー')
+            .replace(/PAM/gi, 'パム')
+            .replace(/CPR/gi, 'シーピーアール')
+            .replace(/AED/gi, 'エーイーディー')
+            .replace(/BPPV/gi, 'ビーピーピーブイ')
+            .replace(/SLE/gi, 'エスエルイー')
+            .replace(/DIC/gi, 'ディーアイシー')
+            .replace(/TURP/gi, 'ティーユーアールピー')
+            .replace(/WPW/gi, 'ダブリューピーダブリュー')
+            .replace(/PEEP/gi, 'ピープ')
+            .replace(/SSS/gi, 'エスエスエス')
+            .replace(/SSSS/gi, 'エスエスエスエス')
+            .replace(/N95/gi, 'エヌきゅうじゅうご');
+
+          const uttr = new SpeechSynthesisUtterance(speechText);
+          uttr.lang = 'ja-JP';
+          uttr.rate = 0.78; // 聞き取りやすいかなりゆっくりめの固定スピード
+          uttr.pitch = 1.0;
+          uttr.volume = 1.0;
+
+          const voices = window.speechSynthesis.getVoices();
+          if (voices && voices.length > 0) {
+            // Google日本語やKyoko、Otoya、Microsoft Haruka/Ichiroなど日本語音声を優先選択
+            const jpVoice = voices.find(v => v.lang === 'ja-JP' && (v.name.includes('Google') || v.name.includes('Kyoko') || v.name.includes('Microsoft')))
+                         || voices.find(v => v.lang && v.lang.toLowerCase().startsWith('ja'));
+            if (jpVoice) uttr.voice = jpVoice;
+          }
+
+          // ガベージコレクション（途中消滅）を防ぐため app 直下に保持
+          app.currentUtterance = uttr;
+          window.speechSynthesis.speak(uttr);
+        } catch (err) {
+          console.error('Speech error:', err);
+        }
+      },
+
+      // プレイ画面内で「AI音声読み上げ / テキストのみ」を切り替えるボタン
+      toggleKarutaReadModeInGame: () => {
+        state.config.karutaReadAloud = !state.config.karutaReadAloud;
+        const lobbyToggle = document.getElementById('config-karuta-read-mode');
+        if (lobbyToggle) lobbyToggle.checked = state.config.karutaReadAloud;
+
+        const btnLabel = document.getElementById('karuta-mode-btn-label');
+        if (btnLabel) {
+          btnLabel.textContent = state.config.karutaReadAloud ? '🔊 AI読み上げ: ON' : '📝 テキストのみ (消音)';
+        }
+
+        if (state.config.karutaReadAloud) {
+          app.unlockSpeechEngine();
+          utils.showToast('🔊 AI音声読み上げを【ON】にしました');
+          if (state.karutaState.currentYomi && !state.karutaState.roundLocked) {
+            app.speakKarutaText(state.karutaState.currentYomi.desc);
+          }
+        } else {
+          if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+          utils.showToast('📝 【テキスト表示のみ】に切り替えました');
+        }
+      },
+
       startKarutaGameSession: () => {
         app.clearAllTimers();
+        // ゲーム開始ボタンが押された瞬間にブラウザの音声エンジンをアンロック
+        app.unlockSpeechEngine();
+
         state.phase = 'karuta_playing';
         state.ranks = [];
 
@@ -2471,7 +2613,11 @@ const app = {
         const cornerEl = document.getElementById('karuta-yomi-corner-kana');
         const statusEl = document.getElementById('karuta-round-status');
         const nextBtn = document.getElementById('btn-karuta-next');
+        const btnLabel = document.getElementById('karuta-mode-btn-label');
 
+        if(btnLabel) {
+          btnLabel.textContent = state.config.karutaReadAloud ? '🔊 AI読み上げ: ON' : '📝 テキストのみ (消音)';
+        }
         if(nextBtn) nextBtn.classList.add('hidden');
         if(statusEl) statusEl.textContent = state.config.karutaReadAloud
           ? '🔊 AIがゆっくり読み上げ中... 該当する疾患の取り札を最速でタッチ！'
@@ -2485,6 +2631,7 @@ const app = {
           if(parentPad) parentPad.className = isRight ? 'pr-12 sm:pr-14 pl-2' : 'pl-12 sm:pl-14 pr-2';
         }
 
+        // 文頭から1文字ずつゆっくり表示（140ms/文字）
         let charIdx = 0;
         if(textEl) textEl.textContent = '';
         state.timers.karutaTypewriter = setInterval(() => {
@@ -2497,26 +2644,14 @@ const app = {
           }
         }, 140);
 
-        if(state.config.karutaReadAloud && ('speechSynthesis' in window)) {
-          setTimeout(() => {
-            if(state.phase !== 'karuta_playing' || state.karutaState.roundLocked) return;
-            const speechText = fullText.replace(/、/g, '、…… ');
-            const uttr = new SpeechSynthesisUtterance(speechText);
-            uttr.lang = 'ja-JP';
-            uttr.rate = 0.75;
-            uttr.pitch = 1.0;
-            const voices = window.speechSynthesis.getVoices();
-            if(voices.length > 0) {
-              const jpVoice = voices.find(v => v.lang.includes('ja'));
-              if(jpVoice) uttr.voice = jpVoice;
-            }
-            window.speechSynthesis.speak(uttr);
-          }, 100);
+        // AI音声読み上げを即座に実行（setTimeoutを挟まないことでブラウザの自動再生ブロックを回避）
+        if(state.config.karutaReadAloud) {
+          app.speakKarutaText(fullText);
         }
 
         const hasAI = state.players.some(p => p.isAI);
         if(hasAI && (state.room.isHost || state.room.isSolo) && !state.karutaState.roundLocked) {
-          const aiWaitMs = Math.max(4500, fullText.length * 145 + (1500 + Math.random() * 3000));
+          const aiWaitMs = Math.max(5500, fullText.length * 160 + (2000 + Math.random() * 3500));
           state.timers.karutaAiTouch = setTimeout(() => {
             if(state.phase !== 'karuta_playing' || state.karutaState.roundLocked) return;
             const aiPlayers = state.players.filter(p => p.isAI);
@@ -2527,8 +2662,59 @@ const app = {
         }
       },
 
+// プレイヤーが「次のラウンドへ」の準備ボタンを押したとき
+    readyNextKarutaRound: () => {
+      if(state.phase !== 'karuta_playing') return;
+
+      if(!state.karutaState.readyNextPlayers.includes(state.me.id)) {
+        state.karutaState.readyNextPlayers.push(state.me.id);
+      }
+
+      socket.emit('game_action', {
+        roomCode: state.room.code,
+        type: 'karuta_ready_next',
+        mode: 'karuta',
+        playerId: state.me.id,
+        karutaState: state.karutaState
+      });
+
+      const nextBtn = document.getElementById('btn-karuta-next');
+      if(nextBtn) {
+        nextBtn.disabled = true;
+        nextBtn.textContent = '⏳ 全員の準備を待っています...';
+        nextBtn.className = 'bg-slate-700 text-slate-400 text-xs font-bold px-4 py-1.5 rounded-xl cursor-not-allowed';
+      }
+    },
+
+    executeStartNextKarutaRound: () => {
+      if(state.phase !== 'karuta_playing') return;
+      state.karutaState.currentIndex++;
+      if(state.karutaState.currentIndex >= state.karutaState.readingQueue.length) {
+        app.computeKarutaRanks();
+        state.phase = 'ended';
+        app.showResults();
+        return;
+      }
+      state.karutaState.currentYomi = state.karutaState.readingQueue[state.karutaState.currentIndex];
+      state.karutaState.roundLocked = false;
+      state.karutaState.displayedText = '';
+      state.karutaState.readyNextPlayers = [];
+
+      socket.emit('game_action', {
+        roomCode: state.room.code,
+        type: 'karuta_next',
+        mode: 'karuta',
+        players: state.players,
+        karutaState: state.karutaState
+      });
+
+      app.renderKarutaTable();
+      app.playKarutaCurrentYomi();
+    },
+
       replayKarutaVoice: () => {
         if(state.phase !== 'karuta_playing') return;
+        app.unlockSpeechEngine();
         app.playKarutaCurrentYomi();
       },
 
@@ -2546,6 +2732,8 @@ const app = {
 
         if(touchedCard.id === yomi.id) {
           state.karutaState.roundLocked = true;
+          state.karutaState.readyNextPlayers = []; // 👈 【追加】リセット
+          // ... (中略：タイマー停止やスコア加算処理)
           if(state.timers.karutaTypewriter) clearInterval(state.timers.karutaTypewriter);
           if(state.timers.karutaAiTouch) clearTimeout(state.timers.karutaAiTouch);
           if('speechSynthesis' in window) window.speechSynthesis.cancel();
@@ -4583,6 +4771,7 @@ const app = {
     });
 
     window.addEventListener('scroll', () => { if (state.phase === 'memory_playing') app.updateMobileOpponentArrow(); }, { passive: true });
+if ('speechSynthesis' in window) { window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); }; }
     window.onload = app.init;
   </script>
 </body>
