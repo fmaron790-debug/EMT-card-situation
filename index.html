@@ -1438,48 +1438,49 @@
           </div>
         </div>
         
-        <div class="w-full flex-1 flex flex-col min-h-[340px] mt-2">
-          <div class="flex flex-col gap-2.5 mb-3 border-b border-slate-700 pb-3">
-            <div class="flex items-center justify-between">
-              <h4 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2"><i data-lucide="database" class="w-4 h-4"></i>問題カード データベース管理</h4>
+        <div class="w-full flex-1 flex flex-col min-h-[420px] mt-2">
+          <div class="flex flex-col gap-2.5 mb-2.5 border-b border-slate-700 pb-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h4 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+                <i data-lucide="database" class="w-4 h-4 text-cyan-400"></i>
+                <span>問題カード データベース管理</span>
+                <span id="admin-card-count-badge" class="text-[11px] font-mono bg-slate-800 text-cyan-300 px-2 py-0.5 rounded-full border border-slate-700">0件</span>
+              </h4>
               <div class="flex items-center gap-2">
                 <button onclick="app.addNewCardPrompt()" class="text-xs bg-cyan-700 hover:bg-cyan-600 active:scale-95 text-white px-3.5 py-2 rounded-xl transition font-bold shadow">＋カード追加</button>
                 <button onclick="app.resetDB()" class="text-xs bg-rose-900/60 hover:bg-rose-800 active:scale-95 text-rose-300 border border-rose-800 px-3 py-2 rounded-xl transition">初期化</button>
               </div>
             </div>
-            <div>
-              <label class="block text-[11px] font-bold text-cyan-300 mb-1">📂 表示・編集するデッキを選択（一覧表示）：</label>
-              <select id="admin-deck-selector" size="6" onchange="app.renderAdminCards()" class="w-full bg-slate-950 border-2 border-slate-700 rounded-xl p-2 text-xs sm:text-sm text-white focus:outline-none focus:border-cyan-500 custom-scrollbar leading-relaxed">
-                <option value="all" selected class="py-1.5 px-2 rounded">📋 マスターデータ (全カード一覧)</option>
-                <option value="babanuki" class="py-1.5 px-2 rounded">🃏 GAME 01: ババ抜き用カード</option>
-                <option value="memory" class="py-1.5 px-2 rounded">🧠 GAME 02: 神経衰弱用 (全40グループ)</option>
-                <option value="jinuki" class="py-1.5 px-2 rounded">🔍 GAME 03: ジジ抜き用カード</option>
-                <option value="jack" class="py-1.5 px-2 rounded">🎯 GAME 04: 99ジャック用 (全228問)</option>
-                <option value="karuta" class="py-1.5 px-2 rounded">🎴 GAME 05: 救急かるた用 (全225枚・画像対応)</option>
-              </select>
+
+            <!-- 1行でスッキリ収まるデッキ選択＆キーワード検索＆ページ送り -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
+              <div class="md:col-span-5">
+                <select id="admin-deck-selector" onchange="app.adminPage=1; app.editingCardId=null; app.renderAdminCards()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white font-bold focus:outline-none focus:border-cyan-500">
+                  <option value="babanuki">🃏 GAME 01: ババ抜き用カード</option>
+                  <option value="memory">🧠 GAME 02: 神経衰弱用 (全40グループ)</option>
+                  <option value="jinuki">🔍 GAME 03: ジジ抜き用カード</option>
+                  <option value="jack">🎯 GAME 04: 99ジャック用 (全228問)</option>
+                  <option value="karuta" selected>🎴 GAME 05: 救急かるた用 (全225枚)</option>
+                  <option value="all">📋 マスターデータ (全カード一覧)</option>
+                </select>
+              </div>
+              <div class="md:col-span-4">
+                <input id="admin-search-input" type="text" oninput="app.adminPage=1; app.renderAdminCards()" placeholder="🔍 疾患名・問題文・ひらがなで検索..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+              </div>
+              <div class="md:col-span-3 flex items-center justify-end gap-1.5">
+                <button onclick="app.changeAdminPage(-1)" id="btn-admin-prev" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 disabled:opacity-40">◀ 前</button>
+                <span id="admin-page-info" class="text-xs font-mono text-slate-300 px-1">1 / 1</span>
+                <button onclick="app.changeAdminPage(1)" id="btn-admin-next" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 disabled:opacity-40">次 ▶</button>
+              </div>
             </div>
           </div>
-          <!-- ▼▼ 修正コード：PCではテーブル、スマホではボックス表示に切り替わるように変更 ▼▼ -->
-<div class="flex-1 bg-slate-950 rounded-2xl border border-slate-800 overflow-y-auto custom-scrollbar p-2.5">
-  <!-- PC表示用テーブル（デスクトップサイズで表示） -->
-  <div class="hidden md:block overflow-x-auto">
-    <table class="w-full text-left text-xs text-slate-200 border-collapse">
-      <thead>
-        <tr class="border-b border-slate-800 bg-slate-900/80 text-slate-400">
-          <th class="p-2.5">ID / 種別</th>
-          <th class="p-2.5">値 / 頭文字</th>
-          <th class="p-2.5">置き札・タイトル</th>
-          <th class="p-2.5">読み札・詳細内容</th>
-          <th class="p-2.5 text-right">操作</th>
-        </tr>
-      </thead>
-      <tbody id="admin-card-table-body-pc"></tbody>
-    </table>
-  </div>
 
-  <!-- スマホ・タブレット表示用カードリスト（モバイルサイズで表示） -->
-  <div id="admin-card-table-body" class="md:hidden space-y-3"></div>
-</div>
+          <!-- PCでもスマホでも広く使える高速リストコンテナ -->
+          <div id="admin-card-table-body" class="flex-1 bg-slate-950 rounded-2xl border border-slate-800 overflow-y-auto custom-scrollbar p-2 sm:p-3 space-y-2 min-h-[280px]"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div id="toast-box" class="fixed bottom-20 z-50 transform -translate-y-2 opacity-0 pointer-events-none transition-all duration-300 bg-slate-800 border border-slate-700 text-white text-xs px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2"><span id="toast-text"></span></div>
 <script>
@@ -2704,7 +2705,7 @@ const app = {
         if(!file) return;
         const reader = new FileReader();
         reader.onload = (e) => {
-          const urlInput = document.getElementById(`te-img-${id}`);
+          const urlInput = document.getElementById('edit-img-' + id);
           if(urlInput) urlInput.value = e.target.result;
           utils.showToast('📷 画像を読み込みました。「保存」を押すと確定します');
         };
@@ -4303,188 +4304,240 @@ const app = {
         utils.showToast('<i data-lucide="save" class="w-4 h-4 inline mr-1"></i>設定を全端末のゲーム＆管理室に即時反映しました'); 
         if(window.lucide) lucide.createIcons();
       },
+      adminPage: 1,
+      adminPageSize: 50,
+      editingCardId: null,
+
+      changeAdminPage: (delta) => {
+        app.adminPage += delta;
+        app.editingCardId = null;
+        app.renderAdminCards();
+        const tb = document.getElementById('admin-card-table-body');
+        if (tb) tb.scrollTop = 0;
+      },
+
       renderAdminCards: () => {
-        const tb = document.getElementById('admin-card-table-body'); 
-        const tbPc = document.getElementById('admin-card-table-body-pc');
-        if(!tb || !tbPc) return;
-        
-        tb.innerHTML = '';
-        tbPc.innerHTML = '';
+        const tb = document.getElementById('admin-card-table-body');
+        if (!tb) return;
 
         const selector = document.getElementById('admin-deck-selector');
-        const f = selector ? selector.value : 'all';
+        const searchInput = document.getElementById('admin-search-input');
+        const countBadge = document.getElementById('admin-card-count-badge');
+        const pageInfo = document.getElementById('admin-page-info');
+        const btnPrev = document.getElementById('btn-admin-prev');
+        const btnNext = document.getElementById('btn-admin-next');
+
+        const f = selector ? selector.value : 'karuta';
+        const q = (searchInput ? searchInput.value.trim().toLowerCase() : '');
+
         let d = currentCardDB;
-        if(f==='babanuki') d = currentCardDB.filter(c=>c.id!==54 && c.suit!=='M' && c.suit!=='J' && c.suit!=='K');
-        else if(f==='memory') d = currentCardDB.filter(c=>c.suit==='M');
-        else if(f==='jinuki') d = currentCardDB.filter(c=>c.suit!=='M' && c.suit!=='J' && c.suit!=='K');
-        else if(f==='jack') d = currentCardDB.filter(c=>c.suit==='J');
-        else if(f==='karuta') d = currentCardDB.filter(c=>c.suit==='K');
-        
-        d.forEach(c => {
+        if (f === 'babanuki') d = currentCardDB.filter(c => c.id !== 54 && c.suit !== 'M' && c.suit !== 'J' && c.suit !== 'K');
+        else if (f === 'memory') d = currentCardDB.filter(c => c.suit === 'M');
+        else if (f === 'jinuki') d = currentCardDB.filter(c => c.suit !== 'M' && c.suit !== 'J' && c.suit !== 'K');
+        else if (f === 'jack') d = currentCardDB.filter(c => c.suit === 'J');
+        else if (f === 'karuta') d = currentCardDB.filter(c => c.suit === 'K');
+
+        if (q) {
+          d = d.filter(c =>
+            String(c.id).includes(q) ||
+            String(c.title || '').toLowerCase().includes(q) ||
+            String(c.desc || '').toLowerCase().includes(q) ||
+            String(c.kana || '').toLowerCase().includes(q) ||
+            String(c.num || '').toLowerCase().includes(q)
+          );
+        }
+
+        const totalItems = d.length;
+        const totalPages = Math.max(1, Math.ceil(totalItems / app.adminPageSize));
+        if (app.adminPage > totalPages) app.adminPage = totalPages;
+        if (app.adminPage < 1) app.adminPage = 1;
+
+        if (countBadge) countBadge.textContent = `${totalItems}件`;
+        if (pageInfo) pageInfo.textContent = `${app.adminPage} / ${totalPages}`;
+        if (btnPrev) btnPrev.disabled = (app.adminPage <= 1);
+        if (btnNext) btnNext.disabled = (app.adminPage >= totalPages);
+
+        const startIdx = (app.adminPage - 1) * app.adminPageSize;
+        const pageItems = d.slice(startIdx, startIdx + app.adminPageSize);
+
+        if (pageItems.length === 0) {
+          tb.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs font-bold">該当するカードがありません</div>`;
+          return;
+        }
+
+        const rowsHtml = [];
+        for (let i = 0; i < pageItems.length; i++) {
+          const c = pageItems[i];
+          const isEditing = (app.editingCardId === c.id);
           const isJack = (c.suit === 'J');
           const isKaruta = (c.suit === 'K');
-          let subInfoHtml = '';
-          let pcSubInfoHtml = '';
 
-          if (isJack) {
-            subInfoHtml = `<div id="tv-${c.id}" class="text-xs mb-1"><span class="px-2 py-0.5 rounded bg-slate-800 text-teal-300 font-bold mr-1.5">${utils.escapeHtml(c.borderColor || c.title || '緑')}</span><span class="text-slate-300 font-mono">他択選択肢: ${c.opt1} / ${c.opt2}</span></div>
-               <div id="te-${c.id}" class="hidden space-y-2 mt-1">
-                 <div>
-                   <label class="block text-[10px] text-slate-400 mb-0.5">ふち色 (緑, 赤, 青, 黄色, 紫, 黒など)</label>
-                   <input id="te-color-${c.id}" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-xs text-white" value="${utils.escapeHtml(c.borderColor || c.title || '緑')}">
-                 </div>
-                 <div class="grid grid-cols-2 gap-2">
-                   <div>
-                     <label class="block text-[10px] text-slate-400 mb-0.5">ダミー選択肢1</label>
-                     <input id="te-o1-${c.id}" type="number" step="any" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-xs text-white" value="${c.opt1 ?? 1}">
-                   </div>
-                   <div>
-                     <label class="block text-[10px] text-slate-400 mb-0.5">ダミー選択肢2</label>
-                     <input id="te-o2-${c.id}" type="number" step="any" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-xs text-white" value="${c.opt2 ?? 2}">
-                   </div>
-                 </div>
-               </div>`;
-            pcSubInfoHtml = subInfoHtml;
-          } else if (isKaruta) {
-            subInfoHtml = `<div id="tv-${c.id}" class="text-xs mb-1 flex items-center gap-2 flex-wrap">
-                 <span class="px-2 py-0.5 rounded-lg bg-fuchsia-950 text-fuchsia-300 border border-fuchsia-700 font-black">頭文字: ${utils.escapeHtml(c.kana || 'あ')}</span>
-                 <span class="font-bold text-cyan-300">置き札(疾患): ${utils.escapeHtml(c.title)}</span>
-               </div>
-               <div id="te-${c.id}" class="hidden space-y-2 mt-1">
-                 <div class="grid grid-cols-3 gap-2">
-                   <div>
-                     <label class="block text-[10px] text-slate-400 mb-0.5">ひらがな</label>
-                     <input id="te-kana-${c.id}" maxlength="2" class="w-full bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-white font-bold text-center" value="${utils.escapeHtml(c.kana || 'あ')}">
-                   </div>
-                   <div class="col-span-2">
-                     <label class="block text-[10px] text-slate-400 mb-0.5">置き札（疾患名）</label>
-                     <input id="te-title-${c.id}" class="w-full bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-white font-bold" value="${utils.escapeHtml(c.title)}">
-                   </div>
-                 </div>
-                 <div>
-                   <label class="block text-[10px] text-slate-400 mb-0.5">画像設定</label>
-                   <input id="te-img-${c.id}" placeholder="https://..." class="w-full bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-white" value="${utils.escapeHtml(c.imgUrl || '')}">
-                 </div>
-               </div>`;
-            pcSubInfoHtml = `<input id="te-title-${c.id}" class="w-full bg-slate-900 border border-slate-700 p-1.5 rounded text-xs text-white font-bold mb-1" value="${utils.escapeHtml(c.title)}"><input id="te-img-${c.id}" placeholder="画像URL" class="w-full bg-slate-900 border border-slate-700 p-1 rounded text-[10px] text-slate-300" value="${utils.escapeHtml(c.imgUrl || '')}">`;
-          } else {
-            subInfoHtml = `<div class="mb-1"><span id="tv-${c.id}" class="text-xs font-bold text-cyan-300">${utils.escapeHtml(c.title)}</span></div>
-               <input id="te-${c.id}" class="hidden w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-xs text-white focus:border-cyan-500 focus:outline-none mt-1" value="${utils.escapeHtml(c.title)}">`;
-            pcSubInfoHtml = `<input id="te-${c.id}" class="w-full bg-slate-900 border border-slate-700 p-1.5 rounded text-xs text-white font-bold" value="${utils.escapeHtml(c.title)}">`;
-          }
+          if (!isEditing) {
+            // 【表示モード】余計なinputタグを作らないため超高速＆PCでは横並びで見やすい
+            let metaBadge = '';
+            if (isKaruta) {
+              metaBadge = `<span class="px-2 py-0.5 rounded-md bg-fuchsia-950 text-fuchsia-300 border border-fuchsia-700 font-black text-xs mr-1.5">[${utils.escapeHtml(c.kana || 'あ')}]</span>`;
+            } else if (isJack) {
+              metaBadge = `<span class="px-2 py-0.5 rounded-md bg-teal-950 text-teal-300 border border-teal-700 font-bold text-[11px] mr-1.5">ふち:${utils.escapeHtml(c.borderColor || c.title || '緑')} / 他択:${c.opt1}, ${c.opt2}</span>`;
+            } else {
+              metaBadge = `<span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-mono text-[11px] mr-1.5">Gr.${c.num === 0 && c.suit === 'JOKER' ? '⚡' : c.num}</span>`;
+            }
 
-          // 1. スマホ用カード型HTML
-          tb.innerHTML += `
-            <div class="p-3 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col gap-2 shadow-sm">
-              <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
-                <div class="flex items-center gap-2">
-                  <span class="font-mono font-bold text-xs px-2 py-1 rounded-lg bg-slate-950 text-slate-400 border border-slate-800">ID:${c.id}</span>
-                  <div class="flex items-center gap-1 text-xs font-mono">
-                    <span class="text-slate-400">値/Gr:</span>
-                    <span id="nv-${c.id}" class="font-bold text-white">${c.num===0 && c.suit==='JOKER'?'⚡':c.num}</span>
-                    <input id="ne-${c.id}" type="number" step="any" class="hidden w-20 bg-slate-950 border border-slate-700 p-1.5 rounded-xl text-xs text-center text-white" value="${c.num}">
+            rowsHtml.push(`
+              <div class="p-2.5 sm:p-3 bg-slate-900/90 hover:bg-slate-900 border border-slate-800 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-2.5 transition">
+                <div class="flex-1 min-w-0 space-y-1">
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="font-mono text-[11px] px-1.5 py-0.5 rounded bg-slate-950 text-slate-400 border border-slate-800">ID:${c.id}</span>
+                    <span class="font-bold text-xs ${SUIT_COLORS[c.suit] || ''}">${SUIT_ICONS[c.suit] || c.suit}</span>
+                    ${metaBadge}
+                    <span class="text-xs sm:text-sm font-extrabold text-cyan-300 break-all">${utils.escapeHtml(c.title)}</span>
+                    ${isJack ? `<span class="font-mono font-black text-xs text-amber-300 ml-1">(値:${c.num})</span>` : ''}
+                    ${c.imgUrl ? `<span class="text-[10px] bg-emerald-950 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-700">📷画像有</span>` : ''}
                   </div>
-                  <div class="font-bold text-xs ${SUIT_COLORS[c.suit]||''}">
-                    <span id="sv-${c.id}">${SUIT_ICONS[c.suit]||c.suit}</span>
-                    <select id="se-${c.id}" class="hidden bg-slate-950 border border-slate-700 p-1.5 rounded-xl text-xs text-white">
+                  <div class="text-xs text-slate-200 leading-relaxed break-words bg-slate-950/70 px-2.5 py-1.5 rounded-lg border border-slate-800/60">${utils.escapeHtml(c.desc)}</div>
+                </div>
+                <div class="flex items-center justify-end gap-1.5 flex-shrink-0">
+                  <button onclick="app.startEditCard(${c.id})" class="text-xs bg-slate-800 border border-slate-600 hover:bg-slate-700 active:scale-95 text-cyan-400 px-3.5 py-1.5 rounded-xl font-bold transition">編集</button>
+                  <button onclick="app.deleteCard(${c.id})" class="text-xs bg-rose-950/80 border border-rose-800 text-rose-300 px-3 py-1.5 rounded-xl font-bold transition hover:bg-rose-900 active:scale-95">削除</button>
+                </div>
+              </div>
+            `);
+          } else {
+            // 【編集モード】クリックした1枚だけにinput/textareaを生成するためID重複ゼロで快適
+            let extraFieldsHtml = '';
+            if (isJack) {
+              extraFieldsHtml = `
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-0.5">ふち色 (緑,赤,青,黄色,紫,黒等)</label>
+                    <input id="edit-color-${c.id}" class="w-full bg-slate-950 border border-slate-700 p-2 rounded-xl text-xs text-white font-bold" value="${utils.escapeHtml(c.borderColor || c.title || '緑')}">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-0.5">ダミー選択肢1</label>
+                    <input id="edit-o1-${c.id}" type="number" step="any" class="w-full bg-slate-950 border border-slate-700 p-2 rounded-xl text-xs text-white font-mono" value="${c.opt1 ?? 1}">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] text-slate-400 mb-0.5">ダミー選択肢2</label>
+                    <input id="edit-o2-${c.id}" type="number" step="any" class="w-full bg-slate-950 border border-slate-700 p-2 rounded-xl text-xs text-white font-mono" value="${c.opt2 ?? 2}">
+                  </div>
+                </div>
+              `;
+            } else if (isKaruta) {
+              extraFieldsHtml = `
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                  <div>
+                    <label class="block text-[10px] text-fuchsia-300 font-bold mb-0.5">頭文字（ひらがな1文字）</label>
+                    <input id="edit-kana-${c.id}" maxlength="2" class="w-full bg-slate-950 border border-fuchsia-600/60 p-2 rounded-xl text-sm text-white font-black text-center" value="${utils.escapeHtml(c.kana || 'あ')}">
+                  </div>
+                  <div class="sm:col-span-3">
+                    <label class="block text-[10px] text-cyan-300 font-bold mb-0.5">置き札（疾患名）</label>
+                    <input id="edit-title-${c.id}" class="w-full bg-slate-950 border border-cyan-600/60 p-2 rounded-xl text-sm text-white font-bold" value="${utils.escapeHtml(c.title)}">
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-[10px] text-slate-400 mb-0.5">取り札の画像（URL入力 または 画像ファイル選択）</label>
+                  <div class="flex gap-2 items-center">
+                    <input id="edit-img-${c.id}" placeholder="https://... または右のボタンから画像を選択" class="flex-1 bg-slate-950 border border-slate-700 p-2 rounded-xl text-xs text-white" value="${utils.escapeHtml(c.imgUrl || '')}">
+                    <label class="bg-slate-800 hover:bg-slate-700 text-fuchsia-300 border border-fuchsia-700/60 px-3 py-2 rounded-xl text-xs font-bold cursor-pointer flex-shrink-0">
+                      📷 画像選択
+                      <input type="file" accept="image/*" class="hidden" onchange="app.handleKarutaImageUpload(${c.id}, this)">
+                    </label>
+                  </div>
+                </div>
+              `;
+            } else {
+              extraFieldsHtml = `
+                <div>
+                  <label class="block text-[10px] text-cyan-300 font-bold mb-0.5">タイトル / 疾患名</label>
+                  <input id="edit-title-${c.id}" class="w-full bg-slate-950 border border-cyan-600/60 p-2 rounded-xl text-sm text-white font-bold" value="${utils.escapeHtml(c.title)}">
+                </div>
+              `;
+            }
+
+            rowsHtml.push(`
+              <div class="p-3.5 bg-slate-900 border-2 border-cyan-500 rounded-2xl flex flex-col gap-3 shadow-xl">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
+                  <div class="flex items-center gap-2">
+                    <span class="font-mono font-bold text-xs px-2 py-1 rounded bg-cyan-950 text-cyan-300 border border-cyan-700">編集中 ID:${c.id}</span>
+                    <label class="text-xs text-slate-400 font-mono">値/Gr:</label>
+                    <input id="edit-num-${c.id}" type="number" step="any" class="w-20 bg-slate-950 border border-slate-700 p-1.5 rounded-xl text-xs text-center text-white font-mono font-bold" value="${c.num}">
+                    <select id="edit-suit-${c.id}" class="bg-slate-950 border border-slate-700 p-1.5 rounded-xl text-xs text-white font-bold">
                       <option value="C" ${c.suit==='C'?'selected':''}>♣(C)</option>
                       <option value="S" ${c.suit==='S'?'selected':''}>♠(S)</option>
                       <option value="H" ${c.suit==='H'?'selected':''}>♥(H)</option>
                       <option value="D" ${c.suit==='D'?'selected':''}>♦(D)</option>
-                      <option value="M" ${c.suit==='M'?'selected':''}>🧠(M)</option>
-                      <option value="J" ${c.suit==='J'?'selected':''}>🎯(99J)</option>
-                      <option value="K" ${c.suit==='K'?'selected':''}>🎴(かるた)</option>
+                      <option value="M" ${c.suit==='M'?'selected':''}>🧠(神経衰弱)</option>
+                      <option value="J" ${c.suit==='J'?'selected':''}>🎯(99ジャック)</option>
+                      <option value="K" ${c.suit==='K'?'selected':''}>🎴(救急かるた)</option>
                       <option value="JOKER" ${c.suit==='JOKER'?'selected':''}>⚡(JOKER)</option>
                     </select>
                   </div>
+                  <div class="flex items-center gap-2">
+                    <button onclick="app.saveCard(${c.id})" class="text-xs bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white px-4 py-1.5 rounded-xl font-extrabold transition shadow-md">💾 保存する</button>
+                    <button onclick="app.cancelEditCard()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-xl font-bold border border-slate-700 transition">キャンセル</button>
+                  </div>
                 </div>
-                <div class="flex items-center gap-1.5">
-                  <button id="be-${c.id}" onclick="app.editCard(${c.id})" class="text-xs bg-slate-800 border border-slate-600 hover:bg-slate-700 active:scale-95 text-cyan-400 px-3 py-1.5 rounded-xl font-bold transition">編集</button>
-                  <button id="bs-${c.id}" onclick="app.saveCard(${c.id})" class="hidden text-xs bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white px-3.5 py-1.5 rounded-xl font-bold transition shadow-md">保存</button>
-                  <button onclick="app.deleteCard(${c.id})" class="text-xs bg-rose-950/80 border border-rose-800 text-rose-300 px-3 py-1.5 rounded-xl font-bold transition hover:bg-rose-900 active:scale-95">削除</button>
+                ${extraFieldsHtml}
+                <div>
+                  <label class="block text-[10px] text-amber-300 font-bold mb-0.5">${isKaruta ? '読み札（症候・治療法など）' : '問題文・説明テキスト'}</label>
+                  <textarea id="edit-desc-${c.id}" rows="3" class="w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl text-xs sm:text-sm text-white leading-relaxed focus:border-cyan-500 focus:outline-none">${utils.escapeHtml(c.desc)}</textarea>
                 </div>
               </div>
-              <div>${subInfoHtml}</div>
-              <div>
-                <div id="dv-${c.id}" class="text-xs text-slate-200 bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 leading-relaxed">${utils.escapeHtml(c.desc)}</div>
-                <textarea id="de-${c.id}" rows="4" class="hidden w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl text-xs text-white leading-relaxed focus:border-cyan-500 focus:outline-none custom-scrollbar mt-1">${utils.escapeHtml(c.desc)}</textarea>
-              </div>
-            </div>`;
+            `);
+          }
+        }
 
-          // 2. パソコン用テーブル行HTML
-          tbPc.innerHTML += `
-            <tr class="border-b border-slate-900 hover:bg-slate-900/50 transition">
-              <td class="p-2.5 font-mono">
-                <span class="text-slate-400">ID:${c.id}</span><br>
-                <span class="${SUIT_COLORS[c.suit]||''} font-bold">${SUIT_ICONS[c.suit]||c.suit}</span>
-              </td>
-              <td class="p-2.5 font-mono">
-                <span id="nv-pc-${c.id}">${c.num}</span>
-                <input id="ne-${c.id}" type="number" step="any" class="hidden w-16 bg-slate-950 border border-slate-700 p-1 rounded text-xs text-white" value="${c.num}">
-              </td>
-              <td class="p-2.5 max-w-[200px]">
-                <div id="tv-pc-${c.id}">${isKaruta ? `<span class="text-fuchsia-400 font-bold">[${utils.escapeHtml(c.kana)}]</span> ` : ''}${utils.escapeHtml(c.title)}</div>
-                <div id="te-pc-wrap-${c.id}" class="hidden">${pcSubInfoHtml}</div>
-              </td>
-              <td class="p-2.5 max-w-[320px]">
-                <div id="dv-pc-${c.id}" class="truncate text-slate-300" title="${utils.escapeHtml(c.desc)}">${utils.escapeHtml(c.desc)}</div>
-                <textarea id="de-${c.id}" rows="2" class="hidden w-full bg-slate-950 border border-slate-700 p-1 rounded text-xs text-white">${utils.escapeHtml(c.desc)}</textarea>
-              </td>
-              <td class="p-2.5 text-right whitespace-nowrap">
-                <button id="be-pc-${c.id}" onclick="app.editCardPc(${c.id})" class="text-xs bg-slate-800 text-cyan-400 hover:bg-slate-700 px-2.5 py-1 rounded font-bold mr-1">編集</button>
-                <button id="bs-pc-${c.id}" onclick="app.saveCard(${c.id})" class="hidden text-xs bg-emerald-600 text-white hover:bg-emerald-500 px-2.5 py-1 rounded font-bold mr-1">保存</button>
-                <button onclick="app.deleteCard(${c.id})" class="text-xs bg-rose-950/80 text-rose-300 hover:bg-rose-900 px-2.5 py-1 rounded font-bold">削除</button>
-              </td>
-            </tr>
-          `;
-        });
+        tb.innerHTML = rowsHtml.join('');
       },
 
-      editCardPc: (id) => {
-        document.getElementById(`nv-pc-${id}`)?.classList.add('hidden');
-        document.getElementById(`ne-${id}`)?.classList.remove('hidden');
-        document.getElementById(`tv-pc-${id}`)?.classList.add('hidden');
-        document.getElementById(`te-pc-wrap-${id}`)?.classList.remove('hidden');
-        document.getElementById(`dv-pc-${id}`)?.classList.add('hidden');
-        document.getElementById(`de-${id}`)?.classList.remove('hidden');
-        document.getElementById(`be-pc-${id}`)?.classList.add('hidden');
-        document.getElementById(`bs-pc-${id}`)?.classList.remove('hidden');
+      startEditCard: (id) => {
+        app.editingCardId = id;
+        app.renderAdminCards();
       },
+
+      cancelEditCard: () => {
+        app.editingCardId = null;
+        app.renderAdminCards();
+      },
+
       saveCard: (id) => {
-        const nVal = parseFloat(document.getElementById(`ne-${id}`)?.value ?? 1);
-        const sVal = document.getElementById(`se-${id}`)?.value || 'C';
-        const d = document.getElementById(`de-${id}`)?.value || '';
-        const c = currentCardDB.find(x=>x.id===id);
-        if(c){
+        const nVal = parseFloat(document.getElementById(`edit-num-${id}`)?.value ?? 1);
+        const sVal = document.getElementById(`edit-suit-${id}`)?.value || 'C';
+        const d = document.getElementById(`edit-desc-${id}`)?.value || '';
+        const c = currentCardDB.find(x => x.id === id);
+        if (c) {
           c.num = isNaN(nVal) ? c.num : nVal;
           c.suit = sVal;
           c.desc = d;
-          if(sVal === 'J') {
-            const colStr = document.getElementById(`te-color-${id}`)?.value.trim() || '緑';
-            const o1 = parseFloat(document.getElementById(`te-o1-${id}`)?.value ?? 1);
-            const o2 = parseFloat(document.getElementById(`te-o2-${id}`)?.value ?? 2);
+          if (sVal === 'J') {
+            const colStr = document.getElementById(`edit-color-${id}`)?.value.trim() || '緑';
+            const o1 = parseFloat(document.getElementById(`edit-o1-${id}`)?.value ?? 1);
+            const o2 = parseFloat(document.getElementById(`edit-o2-${id}`)?.value ?? 2);
             c.borderColor = colStr;
             c.title = colStr;
             c.opt1 = isNaN(o1) ? 1 : o1;
             c.opt2 = isNaN(o2) ? 2 : o2;
             c.internalVal = Math.round(Number(c.num) * 100);
-          } else if(sVal === 'K') {
-            c.kana = document.getElementById(`te-kana-${id}`)?.value.trim() || c.kana || 'あ';
-            c.title = document.getElementById(`te-title-${id}`)?.value.trim() || c.title;
-            c.imgUrl = document.getElementById(`te-img-${id}`)?.value.trim() || '';
+          } else if (sVal === 'K') {
+            c.kana = document.getElementById(`edit-kana-${id}`)?.value.trim() || c.kana || 'あ';
+            c.title = document.getElementById(`edit-title-${id}`)?.value.trim() || c.title;
+            c.imgUrl = document.getElementById(`edit-img-${id}`)?.value.trim() || '';
           } else {
-            const t = document.getElementById(`te-${id}`)?.value || '';
+            const t = document.getElementById(`edit-title-${id}`)?.value || '';
             c.title = t;
           }
-        } 
-        saveDB(currentCardDB); 
+        }
+        app.editingCardId = null;
+        saveDB(currentCardDB);
         socket.emit('admin_update_cards', currentCardDB);
-        app.renderAdminCards(); 
-        utils.showToast('<i data-lucide="check" class="w-4 h-4 inline mr-1"></i>保存し全端末に同期しました'); if(window.lucide) lucide.createIcons();
+        app.renderAdminCards();
+        utils.showToast('💾 保存し全端末に同期しました');
+        if (window.lucide) lucide.createIcons();
       },
+
       addNewCardPrompt: () => {
         const selector = document.getElementById('admin-deck-selector');
-        const f = selector ? selector.value : 'all';
+        const f = selector ? selector.value : 'karuta';
         const defaultSuit = (f === 'babanuki' || f === 'jinuki') ? 'C' : (f === 'jack' ? 'J' : (f === 'karuta' ? 'K' : 'M'));
         const newId = currentCardDB.length > 0 ? Math.max(...currentCardDB.map(c => c.id)) + 1 : 1;
         const newCard = defaultSuit === 'J'
@@ -4492,27 +4545,34 @@ const app = {
           : defaultSuit === 'K'
             ? { id: newId, suit: "K", num: 1, kana: "あ", title: "新規疾患名（置き札）", desc: "症候1、症候2、治療法1、治療法2（読み札）", imgUrl: "" }
             : { id: newId, suit: defaultSuit, num: 1, title: "新規項目", desc: "ここに問題文を入力してください" };
-        currentCardDB.push(newCard);
+        currentCardDB.unshift(newCard);
+        app.adminPage = 1;
+        app.editingCardId = newId;
         saveDB(currentCardDB);
         socket.emit('admin_update_cards', currentCardDB);
         app.renderAdminCards();
-        utils.showToast('新規カードを追加し全端末に同期しました');
+        utils.showToast('＋ 新規カードを先頭に追加しました');
       },
+
       deleteCard: (id) => {
-        if(currentCardDB.length <= 10) return utils.showToast('これ以上削除できません');
+        if (currentCardDB.length <= 10) return utils.showToast('これ以上削除できません');
         currentCardDB = currentCardDB.filter(c => c.id !== id);
+        if (app.editingCardId === id) app.editingCardId = null;
         saveDB(currentCardDB);
         socket.emit('admin_update_cards', currentCardDB);
         app.renderAdminCards();
         utils.showToast('カードを削除し全端末に同期しました');
       },
-      resetDB: () => { 
-        currentCardDB = JSON.parse(JSON.stringify(DEFAULT_EMS_CARDS)); 
-        saveDB(currentCardDB); 
+
+      resetDB: () => {
+        currentCardDB = JSON.parse(JSON.stringify(DEFAULT_EMS_CARDS));
+        app.editingCardId = null;
+        app.adminPage = 1;
+        saveDB(currentCardDB);
         socket.emit('admin_update_cards', currentCardDB);
-        app.renderAdminCards(); 
-        utils.showToast('<i data-lucide="rotate-ccw" class="w-4 h-4 inline mr-1"></i>初期化し全端末に同期しました'); 
-        if(window.lucide) lucide.createIcons(); 
+        app.renderAdminCards();
+        utils.showToast('初期化し全端末に同期しました');
+        if (window.lucide) lucide.createIcons();
       }
     };
 
