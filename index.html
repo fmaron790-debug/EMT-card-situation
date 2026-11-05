@@ -219,7 +219,7 @@
       { id: 179, suit: "M", num: 40, title: "統合失調症", desc: "治療薬の過量内服で悪性症候群の発症リスク" },
       { id: 180, suit: "M", num: 40, title: "統合失調症", desc: "妄想、異常行動、無関心、注意散漫、幻覚" }
     ];
-// GAME 04（99ジャック用：全228問エクセル完全準拠データ [表示値, 内部値, 問題文, 選択肢1, 選択肢2, ふち色]）
+
     const RAW_JACK_CARDS = [
       [0.9, 90, "生理食塩水の濃度（％）", 1, 0.09, "緑"],
       [11.4, 1140, "2023年の人口統計において、総人口のうち年少人口が占める割合", 12.5, 19, "緑"],
@@ -464,29 +464,7 @@
         borderColor: r[5]
       });
     });
-[1, 100, "凍傷分類で、損傷部が表皮までであり、灼熱感・発赤・腫脹を呈するのは何度であるか", 2, 3, "黒"],
-      [2, 200, "凍傷分類で、損傷部が真皮までであり、充血、疼痛、水泡形成を呈するのは何度であるか", 3, 4, "黒"],
-      [3, 300, "凍傷分類で、損傷部が皮下組織までで、暗赤褐色・壊死・潰瘍を呈するのは何度であるか", 4, 2, "黒"],
-      [4, 400, "凍傷分類で、損傷部が骨・筋組織までで、筋・骨・軟骨の壊死を呈するのは何度であるか", 3, 2, "黒"]
-    ];
 
-    RAW_JACK_CARDS.forEach((r, idx) => {
-      DEFAULT_EMS_CARDS.push({
-        id: 201 + idx,
-        suit: "J",
-        num: r[0],
-        internalVal: r[1],
-        title: r[5],
-        desc: r[2],
-        opt1: r[3],
-        opt2: r[4],
-        borderColor: r[5]
-      });
-    });
-
-    // ==========================================
-    // GAME 05（救急かるた用：全225枚 修正反映済みデータ [ひらがな, 置き札(疾患名), 読み札(症候・治療法)]）
-    // ==========================================
     const RAW_KARUTA_CARDS = [
       ["あ", "アニサキス症", "激しい上腹部痛、悪心・嘔吐、生魚の喫食歴、内視鏡的虫体摘除"],
       ["あ", "RSウイルス感染症", "発熱・鼻汁、喘鳴、乳幼児の細気管支炎、呼吸管理"],
@@ -750,6 +728,9 @@
       return pool[Math.floor(Math.random() * pool.length)];
     }
 
+    function saveDB(data) { localStorage.setItem('ems_db', JSON.stringify(data)); }
+    function saveAccess(data) { localStorage.setItem('ems_acc', JSON.stringify(data)); }
+
     function loadDB() { 
       try { 
         const s = localStorage.getItem('ems_db'); 
@@ -762,9 +743,8 @@
       saveDB(defaultFull);
       return defaultFull;
     }
-    function saveDB(data) { localStorage.setItem('ems_db', JSON.stringify(data)); }
+    
     function loadAccess() { try { const s = localStorage.getItem('ems_acc'); if(s) return JSON.parse(s); } catch(e){} return { game1: true, game2: true, game3: true, game4: true, game5: true }; }
-    function saveAccess(data) { localStorage.setItem('ems_acc', JSON.stringify(data)); }
 
     let currentCardDB = loadDB();
     let currentGameAccess = loadAccess();
