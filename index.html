@@ -1459,11 +1459,27 @@
               </select>
             </div>
           </div>
-          <div id="admin-card-table-body" class="flex-1 bg-slate-950 rounded-2xl border border-slate-800 overflow-y-auto custom-scrollbar p-2.5 space-y-3"></div>
-        </div>
-      </div>
-    </div>
+          <!-- ▼▼ 修正コード：PCではテーブル、スマホではボックス表示に切り替わるように変更 ▼▼ -->
+<div class="flex-1 bg-slate-950 rounded-2xl border border-slate-800 overflow-y-auto custom-scrollbar p-2.5">
+  <!-- PC表示用テーブル（デスクトップサイズで表示） -->
+  <div class="hidden md:block overflow-x-auto">
+    <table class="w-full text-left text-xs text-slate-200 border-collapse">
+      <thead>
+        <tr class="border-b border-slate-800 bg-slate-900/80 text-slate-400">
+          <th class="p-2.5">ID / 種別</th>
+          <th class="p-2.5">値 / 頭文字</th>
+          <th class="p-2.5">置き札・タイトル</th>
+          <th class="p-2.5">読み札・詳細内容</th>
+          <th class="p-2.5 text-right">操作</th>
+        </tr>
+      </thead>
+      <tbody id="admin-card-table-body-pc"></tbody>
+    </table>
   </div>
+
+  <!-- スマホ・タブレット表示用カードリスト（モバイルサイズで表示） -->
+  <div id="admin-card-table-body" class="md:hidden space-y-3"></div>
+</div>
 
   <div id="toast-box" class="fixed bottom-20 z-50 transform -translate-y-2 opacity-0 pointer-events-none transition-all duration-300 bg-slate-800 border border-slate-700 text-white text-xs px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-2"><span id="toast-text"></span></div>
 <script>
@@ -1748,7 +1764,6 @@
       }
     });
 
-    const app = {
 const app = {
       // 共通タイマー・通信クリーンアップメソッド
       clearAllTimers: () => {
@@ -4290,8 +4305,12 @@ const app = {
       },
       renderAdminCards: () => {
         const tb = document.getElementById('admin-card-table-body'); 
-        if(!tb) return;
+        const tbPc = document.getElementById('admin-card-table-body-pc');
+        if(!tb || !tbPc) return;
+        
         tb.innerHTML = '';
+        tbPc.innerHTML = '';
+
         const selector = document.getElementById('admin-deck-selector');
         const f = selector ? selector.value : 'all';
         let d = currentCardDB;
@@ -4305,6 +4324,8 @@ const app = {
           const isJack = (c.suit === 'J');
           const isKaruta = (c.suit === 'K');
           let subInfoHtml = '';
+          let pcSubInfoHtml = '';
+
           if (isJack) {
             subInfoHtml = `<div id="tv-${c.id}" class="text-xs mb-1"><span class="px-2 py-0.5 rounded bg-slate-800 text-teal-300 font-bold mr-1.5">${utils.escapeHtml(c.borderColor || c.title || '緑')}</span><span class="text-slate-300 font-mono">他択選択肢: ${c.opt1} / ${c.opt2}</span></div>
                <div id="te-${c.id}" class="hidden space-y-2 mt-1">
@@ -4323,39 +4344,36 @@ const app = {
                    </div>
                  </div>
                </div>`;
+            pcSubInfoHtml = subInfoHtml;
           } else if (isKaruta) {
             subInfoHtml = `<div id="tv-${c.id}" class="text-xs mb-1 flex items-center gap-2 flex-wrap">
-                 <span class="px-2 py-0.5 rounded-lg bg-fuchsia-950 text-fuchsia-300 border border-fuchsia-700 font-black">头文字: ${utils.escapeHtml(c.kana || 'あ')}</span>
+                 <span class="px-2 py-0.5 rounded-lg bg-fuchsia-950 text-fuchsia-300 border border-fuchsia-700 font-black">頭文字: ${utils.escapeHtml(c.kana || 'あ')}</span>
                  <span class="font-bold text-cyan-300">置き札(疾患): ${utils.escapeHtml(c.title)}</span>
-                 ${c.imgUrl ? `<span class="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-700">📷 画像設定済</span>` : ''}
                </div>
                <div id="te-${c.id}" class="hidden space-y-2 mt-1">
                  <div class="grid grid-cols-3 gap-2">
                    <div>
-                     <label class="block text-[10px] text-slate-400 mb-0.5">ひらがな(1文字)</label>
-                     <input id="te-kana-${c.id}" maxlength="2" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-xs text-white font-bold text-center" value="${utils.escapeHtml(c.kana || 'あ')}">
+                     <label class="block text-[10px] text-slate-400 mb-0.5">ひらがな</label>
+                     <input id="te-kana-${c.id}" maxlength="2" class="w-full bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-white font-bold text-center" value="${utils.escapeHtml(c.kana || 'あ')}">
                    </div>
                    <div class="col-span-2">
                      <label class="block text-[10px] text-slate-400 mb-0.5">置き札（疾患名）</label>
-                     <input id="te-title-${c.id}" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-xs text-white font-bold" value="${utils.escapeHtml(c.title)}">
+                     <input id="te-title-${c.id}" class="w-full bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-white font-bold" value="${utils.escapeHtml(c.title)}">
                    </div>
                  </div>
                  <div>
-                   <label class="block text-[10px] text-slate-400 mb-0.5">取り札の画像（URL入力 または 画像ファイル選択）</label>
-                   <div class="flex gap-2 items-center">
-                     <input id="te-img-${c.id}" placeholder="https://... または右から画像選択" class="flex-1 bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-white" value="${utils.escapeHtml(c.imgUrl || '')}">
-                     <label class="bg-slate-800 hover:bg-slate-700 text-fuchsia-300 border border-fuchsia-700/60 px-3 py-2 rounded-xl text-xs font-bold cursor-pointer flex-shrink-0">
-                       📷 ファイル選択
-                       <input type="file" accept="image/*" class="hidden" onchange="app.handleKarutaImageUpload(${c.id}, this)">
-                     </label>
-                   </div>
+                   <label class="block text-[10px] text-slate-400 mb-0.5">画像設定</label>
+                   <input id="te-img-${c.id}" placeholder="https://..." class="w-full bg-slate-900 border border-slate-700 p-2 rounded-xl text-xs text-white" value="${utils.escapeHtml(c.imgUrl || '')}">
                  </div>
                </div>`;
+            pcSubInfoHtml = `<input id="te-title-${c.id}" class="w-full bg-slate-900 border border-slate-700 p-1.5 rounded text-xs text-white font-bold mb-1" value="${utils.escapeHtml(c.title)}"><input id="te-img-${c.id}" placeholder="画像URL" class="w-full bg-slate-900 border border-slate-700 p-1 rounded text-[10px] text-slate-300" value="${utils.escapeHtml(c.imgUrl || '')}">`;
           } else {
             subInfoHtml = `<div class="mb-1"><span id="tv-${c.id}" class="text-xs font-bold text-cyan-300">${utils.escapeHtml(c.title)}</span></div>
                <input id="te-${c.id}" class="hidden w-full bg-slate-900 border border-slate-700 p-2.5 rounded-xl text-xs text-white focus:border-cyan-500 focus:outline-none mt-1" value="${utils.escapeHtml(c.title)}">`;
+            pcSubInfoHtml = `<input id="te-${c.id}" class="w-full bg-slate-900 border border-slate-700 p-1.5 rounded text-xs text-white font-bold" value="${utils.escapeHtml(c.title)}">`;
           }
 
+          // 1. スマホ用カード型HTML
           tb.innerHTML += `
             <div class="p-3 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col gap-2 shadow-sm">
               <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
@@ -4389,22 +4407,48 @@ const app = {
               <div>${subInfoHtml}</div>
               <div>
                 <div id="dv-${c.id}" class="text-xs text-slate-200 bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 leading-relaxed">${utils.escapeHtml(c.desc)}</div>
-                <textarea id="de-${c.id}" rows="5" class="hidden w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl text-xs text-white leading-relaxed focus:border-cyan-500 focus:outline-none custom-scrollbar mt-1">${utils.escapeHtml(c.desc)}</textarea>
+                <textarea id="de-${c.id}" rows="4" class="hidden w-full bg-slate-950 border border-slate-700 p-2.5 rounded-xl text-xs text-white leading-relaxed focus:border-cyan-500 focus:outline-none custom-scrollbar mt-1">${utils.escapeHtml(c.desc)}</textarea>
               </div>
             </div>`;
+
+          // 2. パソコン用テーブル行HTML
+          tbPc.innerHTML += `
+            <tr class="border-b border-slate-900 hover:bg-slate-900/50 transition">
+              <td class="p-2.5 font-mono">
+                <span class="text-slate-400">ID:${c.id}</span><br>
+                <span class="${SUIT_COLORS[c.suit]||''} font-bold">${SUIT_ICONS[c.suit]||c.suit}</span>
+              </td>
+              <td class="p-2.5 font-mono">
+                <span id="nv-pc-${c.id}">${c.num}</span>
+                <input id="ne-${c.id}" type="number" step="any" class="hidden w-16 bg-slate-950 border border-slate-700 p-1 rounded text-xs text-white" value="${c.num}">
+              </td>
+              <td class="p-2.5 max-w-[200px]">
+                <div id="tv-pc-${c.id}">${isKaruta ? `<span class="text-fuchsia-400 font-bold">[${utils.escapeHtml(c.kana)}]</span> ` : ''}${utils.escapeHtml(c.title)}</div>
+                <div id="te-pc-wrap-${c.id}" class="hidden">${pcSubInfoHtml}</div>
+              </td>
+              <td class="p-2.5 max-w-[320px]">
+                <div id="dv-pc-${c.id}" class="truncate text-slate-300" title="${utils.escapeHtml(c.desc)}">${utils.escapeHtml(c.desc)}</div>
+                <textarea id="de-${c.id}" rows="2" class="hidden w-full bg-slate-950 border border-slate-700 p-1 rounded text-xs text-white">${utils.escapeHtml(c.desc)}</textarea>
+              </td>
+              <td class="p-2.5 text-right whitespace-nowrap">
+                <button id="be-pc-${c.id}" onclick="app.editCardPc(${c.id})" class="text-xs bg-slate-800 text-cyan-400 hover:bg-slate-700 px-2.5 py-1 rounded font-bold mr-1">編集</button>
+                <button id="bs-pc-${c.id}" onclick="app.saveCard(${c.id})" class="hidden text-xs bg-emerald-600 text-white hover:bg-emerald-500 px-2.5 py-1 rounded font-bold mr-1">保存</button>
+                <button onclick="app.deleteCard(${c.id})" class="text-xs bg-rose-950/80 text-rose-300 hover:bg-rose-900 px-2.5 py-1 rounded font-bold">削除</button>
+              </td>
+            </tr>
+          `;
         });
       },
-      editCard: (id) => { 
-        document.getElementById(`nv-${id}`)?.classList.add('hidden'); 
-        document.getElementById(`ne-${id}`)?.classList.remove('hidden'); 
-        document.getElementById(`sv-${id}`)?.classList.add('hidden'); 
-        document.getElementById(`se-${id}`)?.classList.remove('hidden'); 
-        document.getElementById(`tv-${id}`)?.classList.add('hidden'); 
-        document.getElementById(`te-${id}`)?.classList.remove('hidden'); 
-        document.getElementById(`dv-${id}`)?.classList.add('hidden'); 
-        document.getElementById(`de-${id}`)?.classList.remove('hidden'); 
-        document.getElementById(`be-${id}`)?.classList.add('hidden'); 
-        document.getElementById(`bs-${id}`)?.classList.remove('hidden'); 
+
+      editCardPc: (id) => {
+        document.getElementById(`nv-pc-${id}`)?.classList.add('hidden');
+        document.getElementById(`ne-${id}`)?.classList.remove('hidden');
+        document.getElementById(`tv-pc-${id}`)?.classList.add('hidden');
+        document.getElementById(`te-pc-wrap-${id}`)?.classList.remove('hidden');
+        document.getElementById(`dv-pc-${id}`)?.classList.add('hidden');
+        document.getElementById(`de-${id}`)?.classList.remove('hidden');
+        document.getElementById(`be-pc-${id}`)?.classList.add('hidden');
+        document.getElementById(`bs-pc-${id}`)?.classList.remove('hidden');
       },
       saveCard: (id) => {
         const nVal = parseFloat(document.getElementById(`ne-${id}`)?.value ?? 1);
