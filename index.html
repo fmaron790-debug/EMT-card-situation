@@ -883,7 +883,26 @@
                   <option value="right">右上隅に大きく表示</option>
                 </select>
               </div>
-            </div>
+<div id="karuta-only-config" class="hidden pt-3 border-t border-slate-800/60 space-y-3">
+      <div class="flex items-center justify-between">
+        ...（中略：AI音声読み上げの設定）...
+      </div>
+      <div class="flex items-center justify-between pt-2 border-t border-slate-800/40">
+        ...（中略：ひらがな配置の設定）...
+      </div>
+
+      <!-- ▼▼ ここ（最後の閉じるdivの直前）に追加する ▼▼ -->
+      <div class="flex items-center justify-between pt-2 border-t border-slate-800/40">
+        <span class="text-xs font-bold text-fuchsia-300">🤖 救急AI対戦の難易度（思考速度）</span>
+        <select id="config-karuta-ai-diff" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-bold text-white">
+          <option value="60">弱い (思考 60秒)</option>
+          <option value="30" selected>中等 (思考 30秒)</option>
+          <option value="10">高度 (思考 10秒)</option>
+        </select>
+      </div>
+      <!-- ▲ここまで ▲▼ -->
+
+    </div> <!-- ← この div の直前 -->
 
             <div id="ai-autofill-config-row" class="flex items-center justify-between pt-2 border-t border-slate-800/60">
               <span class="text-xs font-bold text-slate-200">不足枠の救急AI自動補充</span>
@@ -1510,7 +1529,7 @@
       activeCommTab: 'chat',
       room: { code: '', isHost: false, isSolo: false, isOpen: false },
       openRooms: {},
-      config: { mode: 'babanuki', maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true, jackShowTotal: true, karutaReadAloud: true, karutaCorner: 'left', isOpenRoom: false },
+      config: { mode: 'babanuki', maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true, jackShowTotal: true, karutaReadAloud: true, karutaCorner: 'left', karutaAiDiff: 30, isOpenRoom: false }, // 👈 カンマを追加
       me: { id: 'p_' + Math.random().toString(36).substring(2, 9), name: '救急隊員' },
       players: [],
       turnIdx: 0,
@@ -2239,7 +2258,12 @@ const app = {
         state.config.jackShowTotal = document.getElementById('config-jack-show-total')?.checked ?? true;
         state.config.karutaReadAloud = document.getElementById('config-karuta-read-mode')?.checked ?? true;
         state.config.karutaCorner = document.getElementById('config-karuta-corner')?.value || 'left';
-        state.config.isOpenRoom = document.getElementById('config-is-open-room')?.checked ?? false;
+      
+      // ▼▼ ここに追加 ▼▼
+      state.config.karutaAiDiff = parseInt(document.getElementById('config-karuta-ai-diff')?.value || 30, 10);
+      // ▲▲▲▲▲▲▲▲▲▲
+
+      state.config.isOpenRoom = document.getElementById('config-is-open-room')?.checked ?? false;
         state.me.name = document.getElementById('input-player-name')?.value.trim() || '救急隊員';
         try { localStorage.setItem('ems_player_name', state.me.name); } catch(e){}
       },
@@ -2535,8 +2559,30 @@ const app = {
 
       startKarutaGameSession: () => {
         app.clearAllTimers();
-        // ゲーム開始ボタンが押された瞬間にブラウザの音声エンジンをアンロック
         app.unlockSpeechEngine();
+
+        // 👈 【追加】かるたのAI対戦時は、AIが1台（自分＋AI1名＝計2名）になるように調整
+        if (state.room.isSolo || state.players.length < 2) {
+          state.config.maxPlayers = 2;
+          // AIがまだいなければ1台追加
+          if (!state.players.some(p => p.isAI)) {
+            const botColor = pickUnusedColor(state.players);
+            state.players.push({
+              id: `ai_${Date.now()}`,
+              name: '救急AI隊員',
+              isAI: true,
+              hand: [],
+              isCleared: false,
+              isReady: true,
+              rank: 0,
+              team: 2,
+              color: botColor,
+              karutaScore: 0
+            });
+          }
+        }
+        
+        // ... (以降、既存のカード選出処理へ続く)
 
         state.phase = 'karuta_playing';
         state.ranks = [];
@@ -2655,7 +2701,9 @@ const app = {
 
         const hasAI = state.players.some(p => p.isAI);
         if(hasAI && (state.room.isHost || state.room.isSolo) && !state.karutaState.roundLocked) {
-          const aiWaitMs = Math.max(5500, fullText.length * 160 + (2000 + Math.random() * 3500));
+          // 👈 ロビーで選ばれた秒数（60秒 / 30秒 / 10秒）をミリ秒に変換して適用
+const diffSec = state.config.karutaAiDiff || 30;
+const aiWaitMs = diffSec * 1000;
           state.timers.karutaAiTouch = setTimeout(() => {
             if(state.phase !== 'karuta_playing' || state.karutaState.roundLocked) return;
             const aiPlayers = state.players.filter(p => p.isAI);
