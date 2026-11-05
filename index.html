@@ -1736,20 +1736,23 @@
           setTimeout(() => app.showResults(), 1500);
         }
       } else if(actionData.type === 'karuta_ready_next') {
-      state.karutaState = { ...state.karutaState, ...actionData.karutaState };
-      app.renderKarutaTable();
+        state.karutaState = { ...state.karutaState, ...actionData.karutaState };
+        app.renderKarutaTable();
 
-      const totalPlayers = state.players.length;
-      const readyCount = state.karutaState.readyNextPlayers.length;
+        // 💡 修正：固定値ではなく、現在の実際のプレイヤー数（AI含む）を取得
+        const totalPlayers = state.players.length;
+        const readyCount = state.karutaState.readyNextPlayers.length;
 
-      const nextBtn = document.getElementById('btn-karuta-next');
-      if(nextBtn && !nextBtn.classList.contains('hidden')) {
-        nextBtn.textContent = `次のラウンドへ進む準備完了 (${readyCount}/${totalPlayers}) ▶`;
-      }
+        const nextBtn = document.getElementById('btn-karuta-next');
+        if(nextBtn && !nextBtn.classList.contains('hidden')) {
+          // 💡 ボタンの表示も実際の人数（例: 1/2名など）に動的連動させます
+          nextBtn.textContent = `次のラウンドへ進む準備完了 (${readyCount}/${totalPlayers}) ▶`;
+        }
 
-      if(readyCount >= totalPlayers && (state.room.isHost || state.room.isSolo)) {
-        app.executeStartNextKarutaRound();
-      }
+        // 💡 実際の人数全員が揃ったら次のラウンドへ進む
+        if(readyCount >= totalPlayers && (state.room.isHost || state.room.isSolo)) {
+          app.executeStartNextKarutaRound();
+        }
         if(actionData.gameEnded) {
           state.phase = 'ended';
           if('speechSynthesis' in window) window.speechSynthesis.cancel();
