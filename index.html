@@ -77,6 +77,19 @@
       transform: translateX(-50%);
       z-index: 999;
     }
+
+    /* ▼▼ ここにそのまま追加する ▼▼ */
+    /* 神経衰弱のスクロールエリアをスマホ画面に最適化 */
+    #view-memory-game {
+      height: calc(100vh - 80px);
+      overflow: hidden;
+    }
+    #memory-scroll-area {
+      flex: 1;
+      overflow-y: auto;
+      max-height: calc(100vh - 240px);
+    }
+    /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
   </style>
 </head>
 <body class="min-h-screen bg-slate-950 flex flex-col items-center justify-start text-slate-100 overflow-x-hidden pb-28">
@@ -919,7 +932,7 @@
                 <span class="text-[10px] text-slate-400">※OFF時は6桁コードを知っている人のみ参加できるクローズドルームになります</span>
               </div>
               <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
-                <input id="config-is-open-room" type="checkbox" class="sr-only peer">
+                <input id="config-is-open-room" type="checkbox" checked class="sr-only peer">
                 <div class="w-10 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
               </label>
             </div>
@@ -1028,29 +1041,38 @@
       </section>
 <!-- VIEW 4-2: MEMORY GAME TABLE -->
       <section id="view-memory-game" class="w-full flex-1 flex flex-col items-center justify-start hidden animate-fade-in">
-        <div class="w-full max-w-5xl bg-slate-900/95 border border-blue-500/50 rounded-2xl p-2.5 sm:p-3 mb-2.5 flex flex-wrap items-center justify-between gap-2 shadow-lg">
-          <div class="flex items-center gap-2">
-            <span class="text-[11px] sm:text-xs px-2.5 py-1 rounded-full bg-blue-950 text-blue-300 border border-blue-600 font-bold">神経衰弱バトル</span>
-            <span id="memory-turn-info" class="text-xs text-white font-bold">手番: プレイヤー</span>
+        
+        <!-- 【上部固定エリア：ヘッダー、ミニボードプレビュー、他プレイヤー状況】 -->
+        <div class="w-full max-w-5xl flex flex-col items-center flex-shrink-0 z-20 bg-slate-950/90 pb-2">
+          <div class="w-full bg-slate-900/95 border border-blue-500/50 rounded-2xl p-2.5 sm:p-3 mb-2 flex flex-wrap items-center justify-between gap-2 shadow-lg">
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] sm:text-xs px-2.5 py-1 rounded-full bg-blue-950 text-blue-300 border border-blue-600 font-bold">神経衰弱バトル</span>
+              <span id="memory-turn-info" class="text-xs text-white font-bold">手番: プレイヤー</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="app.toggleMemoryBoardModal()" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow">自陣ボードを確認</button>
+              <span id="memory-timer-display" class="text-xs font-mono font-bold text-amber-400 bg-slate-950 px-3 py-2 rounded-xl border border-slate-800">手番制限 無制限</span>
+            </div>
           </div>
-          <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-            <button onclick="app.toggleMemoryBoardModal()" class="bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-[0_0_15px_rgba(37,99,235,0.4)] flex items-center gap-1.5">
-              <i data-lucide="layout-grid" class="w-4 h-4"></i><span>自陣ボードを確認</span>
-            </button>
-            <span id="memory-timer-display" class="text-xs font-mono font-bold text-amber-400 bg-slate-950 px-3 py-2 rounded-xl border border-slate-800">手番制限 無制限</span>
+
+          <div onclick="app.toggleMemoryBoardModal()" class="w-full bg-slate-950/80 border border-slate-800 hover:border-blue-500/60 rounded-2xl p-2 mb-2 cursor-pointer transition flex items-center justify-between group shadow-inner">
+            <div class="flex items-center gap-2">
+              <div class="w-3 h-3 rounded-full animate-ping flex-shrink-0" id="mini-board-color-dot" style="background-color: #38bdf8;"></div>
+              <span class="text-[11px] font-bold text-slate-300 group-hover:text-white">自陣ボード状況 (タップで拡大)</span>
+            </div>
+            <div id="mini-board-preview-grid" class="grid grid-cols-8 sm:grid-cols-10 gap-1 opacity-80 mx-2"></div>
+            <span class="text-[11px] text-cyan-400 font-bold flex-shrink-0">開く ↗</span>
           </div>
+
+          <div id="table-players-ring" class="w-full flex flex-wrap items-center justify-center gap-1.5 px-1"></div>
         </div>
 
-        <div onclick="app.toggleMemoryBoardModal()" class="w-full max-w-5xl bg-slate-950/80 border border-slate-800 hover:border-blue-500/60 rounded-2xl p-2.5 mb-2.5 cursor-pointer transition flex items-center justify-between group shadow-inner">
-          <div class="flex items-center gap-2">
-            <div class="w-3 h-3 rounded-full animate-ping flex-shrink-0" id="mini-board-color-dot" style="background-color: #38bdf8;"></div>
-            <span class="text-[11px] sm:text-xs font-bold text-slate-300 group-hover:text-white">自陣ボード状況 (タップで拡大・疾患あてはめ)</span>
-          </div>
-          <div id="mini-board-preview-grid" class="grid grid-cols-8 sm:grid-cols-10 gap-1 opacity-80 mx-2"></div>
-          <span class="text-[11px] text-cyan-400 font-bold flex-shrink-0">開く ↗</span>
+        <!-- 【下部スクロールエリア：カード置き場のみ】 -->
+        <div id="memory-scroll-area" class="w-full max-w-5xl flex-1 bg-gradient-to-br from-[#5c3a21] via-[#432514] to-[#2a160b] border-2 sm:border-4 border-[#1a0d06] rounded-3xl p-2.5 sm:p-5 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] relative overflow-y-auto custom-scrollbar">
+          <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
+          <div id="memory-cards-grid" class="w-full max-w-5xl grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 gap-2 p-1 z-10"></div>
         </div>
-
-        <div id="table-players-ring" class="w-full max-w-5xl flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-2.5 px-1"></div>
+      </section>
 
         <!-- スマホ版専用：相手がめくったカードの常時方向矢印バナー -->
         <div id="mobile-memory-dir-indicator" class="fixed top-20 left-1/2 -translate-x-1/2 z-40 hidden sm:hidden pointer-events-auto w-[92%] max-w-xs">
@@ -1529,7 +1551,7 @@
       activeCommTab: 'chat',
       room: { code: '', isHost: false, isSolo: false, isOpen: false },
       openRooms: {},
-      config: { mode: 'babanuki', maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true, jackShowTotal: true, karutaReadAloud: true, karutaCorner: 'left', karutaAiDiff: 30, isOpenRoom: false }, // 👈 カンマを追加
+      config: { mode: 'babanuki', maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true, jackShowTotal: true, karutaReadAloud: true, karutaCorner: 'left', karutaAiDiff: 30, isOpenRoom: true }, // 👈 カンマを追加
       me: { id: 'p_' + Math.random().toString(36).substring(2, 9), name: '救急隊員' },
       players: [],
       turnIdx: 0,
@@ -1739,20 +1761,18 @@
         state.karutaState = { ...state.karutaState, ...actionData.karutaState };
         app.renderKarutaTable();
 
-        // 💡 修正：固定値ではなく、現在の実際のプレイヤー数（AI含む）を取得
         const totalPlayers = state.players.length;
         const readyCount = state.karutaState.readyNextPlayers.length;
 
         const nextBtn = document.getElementById('btn-karuta-next');
         if(nextBtn && !nextBtn.classList.contains('hidden')) {
-          // 💡 ボタンの表示も実際の人数（例: 1/2名など）に動的連動させます
           nextBtn.textContent = `次のラウンドへ進む準備完了 (${readyCount}/${totalPlayers}) ▶`;
         }
 
-        // 💡 実際の人数全員が揃ったら次のラウンドへ進む
         if(readyCount >= totalPlayers && (state.room.isHost || state.room.isSolo)) {
           app.executeStartNextKarutaRound();
         }
+        
         if(actionData.gameEnded) {
           state.phase = 'ended';
           if('speechSynthesis' in window) window.speechSynthesis.cancel();
@@ -2564,10 +2584,9 @@ const app = {
         app.clearAllTimers();
         app.unlockSpeechEngine();
 
-        // 👈 【追加】かるたのAI対戦時は、AIが1台（自分＋AI1名＝計2名）になるように調整
+        // ▼▼ ここから修正・追加 ▼▼
         if (state.room.isSolo || state.players.length < 2) {
           state.config.maxPlayers = 2;
-          // AIがまだいなければ1台追加
           if (!state.players.some(p => p.isAI)) {
             const botColor = pickUnusedColor(state.players);
             state.players.push({
@@ -2584,8 +2603,8 @@ const app = {
             });
           }
         }
-        
-        // ... (以降、既存のカード選出処理へ続く)
+        state.config.maxPlayers = state.players.length; // 実際の参加人数（2人など）に必ず合わせる
+        // ▲▲ ここまで ▲▲
 
         state.phase = 'karuta_playing';
         state.ranks = [];
@@ -2634,7 +2653,8 @@ const app = {
           displayedText: '',
           roundLocked: false,
           lastWinnerId: null,
-          lastTouchedCardId: null
+          lastTouchedCardId: null,
+          readyNextPlayers: [] // 👈 ここも必ず空配列で初期化
         };
 
         socket.emit('game_action', {
