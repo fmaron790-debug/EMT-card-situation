@@ -1749,6 +1749,113 @@
     });
 
     const app = {
+const app = {
+      // 共通タイマー・通信クリーンアップメソッド
+      clearAllTimers: () => {
+        if(state.timers.turn) clearInterval(state.timers.turn);
+        if(state.timers.aiDelay) clearTimeout(state.timers.aiDelay);
+        if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
+        if(state.timers.popupTimer) clearTimeout(state.timers.popupTimer);
+        if(state.timers.matchTimer) clearTimeout(state.timers.matchTimer);
+        if(state.timers.quizTimer) clearTimeout(state.timers.quizTimer);
+        if(state.timers.quizAutoClose) clearTimeout(state.timers.quizAutoClose);
+        if(state.timers.jackQuiz) clearInterval(state.timers.jackQuiz);
+        if(state.timers.bustModal) clearTimeout(state.timers.bustModal);
+        if(state.timers.karutaTypewriter) clearInterval(state.timers.karutaTypewriter);
+        if(state.timers.karutaAiTouch) clearTimeout(state.timers.karutaAiTouch);
+        if(state.timers.karutaNextRound) clearTimeout(state.timers.karutaNextRound);
+        if('speechSynthesis' in window) window.speechSynthesis.cancel();
+        if(state.timers.openRoomBeacon) { clearInterval(state.timers.openRoomBeacon); state.timers.openRoomBeacon = null; }
+        if(state.room?.isHost && state.room?.code) app.broadcastRoomSignal('close');
+      },
+
+      openManualModal: () => {
+        const modal = document.getElementById('modal-manual');
+        const titleEl = document.getElementById('manual-modal-title');
+        const bodyEl = document.getElementById('manual-modal-body');
+        if(!modal || !bodyEl) return;
+
+        let titleTxt = '救急トランプ総合演習 ガイド';
+        let htmlTxt = '';
+
+        if (state.mode === 'babanuki') {
+          titleTxt = 'GAME 01: 致死性不整脈を回避せよ！（救急ババ抜き）';
+          htmlTxt = `
+            <div class="p-3 bg-rose-950/30 border border-rose-900/50 rounded-2xl mb-3"><strong class="text-rose-300">【ゲームの目的】</strong><br>除細動が直ちに必要な「心室細動（VF）」のカードを最後まで手元に抱え持たないようにするゲームです。</div>
+            <ul class="list-disc list-inside space-y-2 text-slate-200">
+              <li>自分の番になったら、隣のプレイヤーの手札から1枚カードを引きます。</li>
+              <li>同じグループの数字・疾患ペアが手札に揃ったら、「ペアを破棄」ボタンで場に捨てることができます。</li>
+              <li>最後までVFカードを持っていたプレイヤーが敗北（最下位）となります。</li>
+            </ul>
+          `;
+        } else if (state.mode === 'memory') {
+          titleTxt = 'GAME 02: 救急神経衰弱バトル';
+          htmlTxt = `
+            <div class="p-3 bg-blue-950/30 border border-blue-900/50 rounded-2xl mb-3"><strong class="text-blue-300">【ゲームの目的】</strong><br>全40疾患グループの問題文カードからペアをいち早く見つけ出し、自分の救急疾患ボードを完成させるゲームです。</div>
+            <ul class="list-disc list-inside space-y-2 text-slate-200">
+              <li>自分の番に裏向きのカードを2枚めくり、同じ疾患グループであればペア獲得となります。</li>
+              <li>獲得したペアを自陣ボードの正しい疾患スロットにはめていきます（回答権は1回のみ）。</li>
+              <li>すべての疾患が埋まるか場のカードがなくなると終了し、完成させた疾患数が多いプレイヤーが勝利します。</li>
+            </ul>
+          `;
+        } else if (state.mode === 'jinuki') {
+          titleTxt = 'GAME 03: 救急 隠れたものを当てろ（ジジ抜き）';
+          htmlTxt = `
+            <div class="p-3 bg-amber-950/30 border border-amber-900/50 rounded-2xl mb-3"><strong class="text-amber-300">【ゲームの目的】</strong><br>全54枚から1枚がランダムに事前封印された状態で進行するジジ抜きです。</div>
+            <ul class="list-disc list-inside space-y-2 text-slate-200">
+              <li>「推理シート」を活用して、どのカードが封印されているかを予測します。</li>
+              <li>ゲーム終了後には、封印されたカードの本来のペアを当てるクイズ（制限60秒）が発生します。</li>
+            </ul>
+          `;
+        } else if (state.mode === 'jack') {
+          titleTxt = 'GAME 04: 99ジャック';
+          htmlTxt = `
+            <div class="p-3 bg-teal-950/30 border border-teal-900/50 rounded-2xl mb-3"><strong class="text-teal-300">【ゲームの目的】</strong><br>合計点が上限の <strong class="text-teal-300">98.99</strong> を超えない範囲で、より99に近づける救急版ブラックジャックです。</div>
+            <ul class="list-disc list-inside space-y-2 text-slate-200">
+              <li>山札からカードを引くと、小数第2位までの疾患3択クイズ（制限60秒）が出題されます。</li>
+              <li>手札上限は最大10枚です。10枚に達すると自動ステイとなります。</li>
+              <li><strong class="text-emerald-400">正解</strong>すると「手札に加算するか、破棄するか」を選べます。<br><strong class="text-rose-400">不正解や時間切れ</strong>になると、手札へ強制加算されます。</li>
+              <li>手札の合計値が <strong class="text-rose-400">99.00以上</strong> になると急変（バースト：瞳孔散大・心拍呼吸停止）で敗北となります。</li>
+            </ul>
+          `;
+        } else if (state.mode === 'karuta') {
+          titleTxt = 'GAME 05: 救急かるた（疾患×症候）';
+          htmlTxt = `
+            <div class="p-3 bg-fuchsia-950/30 border border-fuchsia-900/50 rounded-2xl mb-3"><strong class="text-fuchsia-300">【ゲームの目的】</strong><br>全225枚のカードプールから各ひらがな1枚ずつ計50枚が選出！AI読み手が読み上げる「症候・治療法」から該当する「疾患名（置き札）」を最速でタッチする早押しカルタです。</div>
+            <ul class="list-disc list-inside space-y-2 text-slate-200">
+              <li>待機画面で「AI音声読み上げ（ゆっくり）」と「テキストのみゆっくり表示」を切り替えられます。</li>
+              <li>最大6人まで参加でき、一番最初に正しい置き札に触れたプレイヤーの得点（1枚獲得）になります。</li>
+              <li>50枚すべてが取られた時点で最も多くカードを保有していたプレイヤーが勝利となり、保有枚数が多い順に順位が決まります。</li>
+            </ul>
+          `;
+        }
+
+        if(titleEl) titleEl.textContent = titleTxt;
+        if(bodyEl) bodyEl.innerHTML = htmlTxt;
+        modal.classList.remove('hidden');
+        if(window.lucide) lucide.createIcons();
+      },
+
+      closeManualModal: () => {
+        document.getElementById('modal-manual')?.classList.add('hidden');
+      },
+
+      init: () => {
+        try {
+          const savedName = localStorage.getItem('ems_player_name');
+          if (savedName) {
+            state.me.name = savedName;
+            const lobbyInput = document.getElementById('input-player-name');
+            const joinInput = document.getElementById('input-join-player-name');
+            if (lobbyInput) lobbyInput.value = savedName;
+            if (joinInput) joinInput.value = savedName;
+          }
+          app.renderPortal(); 
+          app.showScreen('view-portal');
+          if (window.lucide) lucide.createIcons();
+        } catch (err) { console.error("Init error:", err); }
+      },
+      // ...（以降に既存の他のメソッドが続きます）
       openManualModal: () => {
         const modal = document.getElementById('modal-manual');
         const titleEl = document.getElementById('manual-modal-title');
