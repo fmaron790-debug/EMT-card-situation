@@ -14,9 +14,10 @@ app.get('/', (req, res) => {
 });
 
 const rooms = {};
-const socketRoomMap = {}; // 🆕 どのソケットがどのルームにいるかを記録するマップ
+const socketRoomMap = {}; // どのソケットがどのルームにいるかを記録するマップ
 
-let globalAccessState = { game1: true, game2: true, game3: true, game4: true };
+// 🎴 GAME 05（救急かるた）を含めた全5ゲームのアクセス権初期値
+let globalAccessState = { game1: true, game2: true, game3: true, game4: true, game5: true };
 let globalCardDB = null;
 let globalAnnouncements = [];
 
@@ -47,7 +48,7 @@ io.on('connection', (socket) => {
   socket.on('join_room', (data) => {
     const { roomCode, playerName, config } = data;
     socket.join(roomCode);
-    socketRoomMap[socket.id] = roomCode; // 🆕 参加したルームを記録
+    socketRoomMap[socket.id] = roomCode;
 
     if (!rooms[roomCode]) {
       rooms[roomCode] = {
@@ -55,7 +56,8 @@ io.on('connection', (socket) => {
         discardPile: [],
         turnIdx: 0,
         hasDrawnThisTurn: false,
-        config: config || {}
+        config: config || {},
+        karutaState: null // 🎴 かるたの状態管理用
       };
     }
 
@@ -78,7 +80,8 @@ io.on('connection', (socket) => {
         color: randomColor,
         totalInternal: 0,
         isStayed: false,
-        isBusted: false
+        isBusted: false,
+        karutaScore: 0 // 🎴 かるた獲得枚数
       };
       rooms[roomCode].players.push(player);
     } else if (playerName) {
@@ -93,7 +96,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('game_action', (data) => {
-    const { roomCode, type, players, discardPile, turnIdx, hasDrawnThisTurn } = data;
+    const { roomCode, type, players, discardPile, turnIdx, hasDrawnThisTurn, karutaState } = data;
     const room = rooms[roomCode];
     
     if (room) {
@@ -109,6 +112,7 @@ io.on('connection', (socket) => {
       if (players) room.players = players;
       if (discardPile) room.discardPile = discardPile;
       if (turnIdx !== undefined) room.turnIdx = turnIdx;
+      if (karutaState) room.karutaState = karutaState; // 🎴 かるたの状態をサーバー側で保持・更新
     }
 
     io.to(roomCode).emit('game_action', data);
@@ -146,7 +150,7 @@ io.on('connection', (socket) => {
     io.emit('receive_chat', { name, message });
   });
 
-  // 🆕 退出処理を確実に行う
+  // 退出処理を確実に行う
   socket.on('leave_room', (data) => {
     const roomCode = data?.roomCode || socketRoomMap[socket.id];
     if (roomCode && rooms[roomCode]) {
@@ -166,7 +170,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  // 🆕 切断時も同様に紐づいたルームから即座に削除
+  // 切断時も同様に紐づいたルームから即座に削除
   socket.on('disconnect', () => {
     console.log(`ユーザーが切断しました: ${socket.id}`);
     broadcastActiveUsers();

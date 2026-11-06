@@ -761,7 +761,23 @@
       return defaultFull;
     }
     
-    function loadAccess() { try { const s = localStorage.getItem('ems_acc'); if(s) return JSON.parse(s); } catch(e){} return { game1: true, game2: true, game3: true, game4: true, game5: true }; }
+    function loadAccess() {
+      const defaults = { game1: true, game2: true, game3: true, game4: true, game5: true };
+      try {
+        const s = localStorage.getItem('ems_acc');
+        if (s) {
+          const parsed = JSON.parse(s);
+          return {
+            game1: parsed.game1 ?? true,
+            game2: parsed.game2 ?? true,
+            game3: parsed.game3 ?? true,
+            game4: parsed.game4 ?? true,
+            game5: parsed.game5 ?? true
+          };
+        }
+      } catch (e) {}
+      return defaults;
+    }
 
     let currentCardDB = loadDB();
     let currentGameAccess = loadAccess();
@@ -1623,7 +1639,13 @@
     
     socket.on('update_access', (data) => {
       if(data) {
-        currentGameAccess = data;
+        currentGameAccess = {
+          game1: data.game1 ?? true,
+          game2: data.game2 ?? true,
+          game3: data.game3 ?? true,
+          game4: data.game4 ?? true,
+          game5: data.game5 ?? true
+        };
         saveAccess(currentGameAccess);
         app.renderPortal();
         const g1 = document.getElementById('toggle-game1'); if(g1) g1.checked = !!currentGameAccess.game1;
