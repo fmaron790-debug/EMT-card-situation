@@ -78,16 +78,20 @@
       z-index: 999;
     }
 
-    /* ▼▼ ここにそのまま追加する ▼▼ */
-    /* 神経衰弱のスクロールエリアをスマホ画面に最適化 */
+    /* 神経衰弱：スマホ・PC共通で上部UI固定＆カードエリアのみ独立スクロール */
     #view-memory-game {
-      height: calc(100vh - 80px);
+      height: calc(100dvh - 80px);
+      max-height: calc(100dvh - 80px);
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
+      padding-bottom: 70px;
     }
     #memory-scroll-area {
-      flex: 1;
+      flex: 1 1 0%;
+      min-height: 0;
       overflow-y: auto;
-      max-height: calc(100vh - 240px);
+      -webkit-overflow-scrolling: touch;
     }
     /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
   </style>
@@ -1074,21 +1078,8 @@
           <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
           <div id="memory-cards-grid" class="w-full grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 gap-2 p-1 relative z-10"></div>
         </div>
-      </section>
 
-        <!-- スマホ版専用：相手がめくったカードの常時方向矢印バナー -->
-        <div id="mobile-memory-dir-indicator" class="fixed top-20 left-1/2 -translate-x-1/2 z-40 hidden sm:hidden pointer-events-auto w-[92%] max-w-xs">
-          <div class="bg-slate-950/95 border-2 border-amber-400 text-amber-300 px-3.5 py-2 rounded-2xl shadow-[0_0_25px_rgba(251,191,36,0.85)] flex items-center justify-between gap-2">
-            <div onclick="app.scrollToOpponentFlippedCard()" class="flex items-center gap-2.5 flex-1 cursor-pointer active:scale-95">
-              <span id="mobile-memory-dir-arrow" class="text-2xl font-black leading-none animate-bounce">⬇️</span>
-              <div class="text-left leading-tight">
-                <div id="mobile-memory-dir-text" class="text-[11px] font-extrabold text-white">相手が下方向をめくりました</div>
-                <div class="text-[9px] text-amber-300 font-mono mt-0.5">タップでそのカードへ移動</div>
-              </div>
-            </div>
-            <button onclick="app.mobileArrowManuallyDismissed=true; document.getElementById('mobile-memory-dir-indicator').classList.add('hidden');" class="px-2.5 py-1.5 rounded-xl bg-slate-800 text-slate-200 border border-slate-600 text-[10px] font-bold">✕</button>
-          </div>
-        </div>
+      </section>
 
         <div id="memory-scroll-area" class="w-full max-w-5xl flex-1 bg-gradient-to-br from-[#5c3a21] via-[#432514] to-[#2a160b] border-2 sm:border-4 border-[#1a0d06] rounded-3xl p-2.5 sm:p-5 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] relative min-h-[420px] flex items-start justify-center overflow-y-auto">
           <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
