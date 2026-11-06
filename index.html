@@ -2919,6 +2919,7 @@ const aiWaitMs = diffSec * 1000;
             utils.showToast(`❌ お手つき！「${touchedCard.title}」ではありません`);
           }
         }
+      }, // ← ① ここで processKarutaCardTouch 関数が閉じる
 
       startNextKarutaRound: () => {
         if(state.phase !== 'karuta_playing') return;
@@ -2943,9 +2944,10 @@ const aiWaitMs = diffSec * 1000;
 
         app.renderKarutaTable();
         app.playKarutaCurrentYomi();
-      },
+      }, // ← ② ここで startNextKarutaRound 関数が閉じる
 
       computeKarutaRanks: () => {
+        // ... (以下略)
         const sorted = [...state.players].sort((a, b) => (b.karutaScore || 0) - (a.karutaScore || 0));
         state.ranks = sorted.map(p => p.id);
         state.players.forEach(p => {
