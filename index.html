@@ -2593,9 +2593,10 @@ const app = {
         app.clearAllTimers();
         app.unlockSpeechEngine();
 
-        // ▼▼ 修正：ソロまたは2人未満の場合、不足分だけAIを1名追加して実際の人数に合わせる ▼▼
+        // ▼▼ 修正：ソロまたは2人未満の場合、AIを必ず1体だけ追加する ▼▼
         if (state.room.isSolo || state.players.length < 2) {
-          state.config.maxPlayers = Math.max(2, state.players.length);
+          state.config.maxPlayers = 2;
+          // 既存のAIがいなければ1体だけ追加
           if (!state.players.some(p => p.isAI)) {
             const botColor = pickUnusedColor(state.players);
             state.players.push({
@@ -2610,9 +2611,13 @@ const app = {
               color: botColor,
               karutaScore: 0
             });
+          } else {
+            // すでにAIがいる場合は1体だけ残して余分をカット
+            const human = state.players.find(p => !p.isAI) || state.players[0];
+            const ai = state.players.find(p => p.isAI);
+            state.players = [human, ai];
           }
         }
-        // ホストの場合、現在の参加人数を正確なマックス人数に同期
         state.config.maxPlayers = state.players.length;
         // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
@@ -2829,6 +2834,12 @@ const aiWaitMs = diffSec * 1000;
           actor.karutaScore = (actor.karutaScore || 0) + 1;
           state.karutaState.lastWinnerId = actor.id;
           state.karutaState.lastTouchedCardId = touchedCard.id;
+// ▼▼ 追加：AI対戦の場合、正解が決まったらAIも即座に次のラウンドの準備完了とする ▼▼
+          const aiPlayer = state.players.find(p => p.isAI);
+          if (aiPlayer && !state.karutaState.readyNextPlayers.includes(aiPlayer.id)) {
+            state.karutaState.readyNextPlayers.push(aiPlayer.id);
+          }
+          // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
           const textEl = document.getElementById('karuta-yomifuda-text');
           if(textEl) textEl.textContent = `「${yomi.desc}」 → 【正解：${yomi.title}】`;
