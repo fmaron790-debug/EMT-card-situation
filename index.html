@@ -78,16 +78,20 @@
       z-index: 999;
     }
 
-    /* ▼▼ ここにそのまま追加する ▼▼ */
-    /* 神経衰弱のスクロールエリアをスマホ画面に最適化 */
+    /* 神経衰弱：スマホ・PC共通で上部UI固定＆カードエリアのみ独立スクロール */
     #view-memory-game {
-      height: calc(100vh - 80px);
+      height: calc(100dvh - 80px);
+      max-height: calc(100dvh - 80px);
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
+      padding-bottom: 70px; /* 下部通信ドックとの重なり防止 */
     }
     #memory-scroll-area {
-      flex: 1;
+      flex: 1 1 0%;
+      min-height: 0;
       overflow-y: auto;
-      max-height: calc(100vh - 240px);
+      -webkit-overflow-scrolling: touch;
     }
     /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
   </style>
@@ -1040,10 +1044,10 @@
         </div>
       </section>
 <!-- VIEW 4-2: MEMORY GAME TABLE -->
-      <section id="view-memory-game" class="w-full flex-1 flex flex-col items-center justify-start hidden animate-fade-in">
+      <section id="view-memory-game" class="w-full max-w-5xl flex-1 flex flex-col items-center justify-start hidden animate-fade-in">
         
-        <!-- 【上部固定エリア：ヘッダー、ミニボードプレビュー、他プレイヤー状況】 -->
-        <div class="w-full max-w-5xl flex flex-col items-center flex-shrink-0 z-20 bg-slate-950/90 pb-2">
+        <!-- 【上部固定エリア：ヘッダー、ミニボード、手番プレイヤー一覧】 -->
+        <div class="w-full flex flex-col items-center flex-shrink-0 z-20 bg-slate-950/95 pb-2">
           <div class="w-full bg-slate-900/95 border border-blue-500/50 rounded-2xl p-2.5 sm:p-3 mb-2 flex flex-wrap items-center justify-between gap-2 shadow-lg">
             <div class="flex items-center gap-2">
               <span class="text-[11px] sm:text-xs px-2.5 py-1 rounded-full bg-blue-950 text-blue-300 border border-blue-600 font-bold">神経衰弱バトル</span>
@@ -1067,7 +1071,7 @@
           <div id="table-players-ring" class="w-full flex flex-wrap items-center justify-center gap-1.5 px-1"></div>
         </div>
 
-        <!-- スマホ版専用：相手がめくったカードの常時方向矢印バナー -->
+        <!-- スマホ版専用：相手がめくったカードの方向矢印バナー -->
         <div id="mobile-memory-dir-indicator" class="fixed top-20 left-1/2 -translate-x-1/2 z-40 hidden sm:hidden pointer-events-auto w-[92%] max-w-xs">
           <div class="bg-slate-950/95 border-2 border-amber-400 text-amber-300 px-3.5 py-2 rounded-2xl shadow-[0_0_25px_rgba(251,191,36,0.85)] flex items-center justify-between gap-2">
             <div onclick="app.scrollToOpponentFlippedCard()" class="flex items-center gap-2.5 flex-1 cursor-pointer active:scale-95">
@@ -1081,11 +1085,12 @@
           </div>
         </div>
 
-        <!-- 【下部スクロールエリア：カード置き場のみ】 -->
-        <div id="memory-scroll-area" class="w-full max-w-5xl flex-1 bg-gradient-to-br from-[#5c3a21] via-[#432514] to-[#2a160b] border-2 sm:border-4 border-[#1a0d06] rounded-3xl p-2.5 sm:p-5 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] relative overflow-y-auto custom-scrollbar">
+        <!-- 【下部独立スクロールエリア：カード置き場のみスクロール】 -->
+        <div id="memory-scroll-area" class="w-full flex-1 bg-gradient-to-br from-[#5c3a21] via-[#432514] to-[#2a160b] border-2 sm:border-4 border-[#1a0d06] rounded-3xl p-2.5 sm:p-5 shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] relative custom-scrollbar">
           <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none"></div>
-          <div id="memory-cards-grid" class="w-full max-w-5xl grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 gap-2 p-1 z-10"></div>
+          <div id="memory-cards-grid" class="w-full grid grid-cols-3 sm:grid-cols-5 md:grid-cols-8 gap-2 p-1 relative z-10"></div>
         </div>
+
       </section>
 
         <!-- スマホ版専用：相手がめくったカードの常時方向矢印バナー -->
@@ -1775,7 +1780,7 @@
         state.karutaState = { ...state.karutaState, ...actionData.karutaState };
         app.renderKarutaTable();
 
-        const totalPlayers = state.players.length;
+        const totalPlayers = state.players.length; // 実際の参加人数
         const readyCount = state.karutaState.readyNextPlayers.length;
 
         const nextBtn = document.getElementById('btn-karuta-next');
@@ -1783,6 +1788,7 @@
           nextBtn.textContent = `次のラウンドへ進む準備完了 (${readyCount}/${totalPlayers}) ▶`;
         }
 
+        // 全員の準備が揃ったら次のラウンドへ進む
         if(readyCount >= totalPlayers && (state.room.isHost || state.room.isSolo)) {
           app.executeStartNextKarutaRound();
         }
@@ -1792,6 +1798,7 @@
           if('speechSynthesis' in window) window.speechSynthesis.cancel();
           setTimeout(() => app.showResults(), 1500);
         }
+      
       } else if(actionData.type === 'karuta_next') {
         app.renderKarutaTable();
         app.playKarutaCurrentYomi();
