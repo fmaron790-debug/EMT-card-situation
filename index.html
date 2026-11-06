@@ -1174,10 +1174,12 @@
             <button id="btn-karuta-replay-voice" onclick="app.replayKarutaVoice()" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-cyan-300 border border-cyan-700/60 text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1">
               <i data-lucide="volume-2" class="w-3.5 h-3.5"></i><span>もう一度読む</span>
             </button>
-            <!-- onclick を app.readyNextKarutaRound() に変更 -->
-<button id="btn-karuta-next" onclick="app.readyNextKarutaRound()" class="hidden bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-extrabold px-4 py-1.5 rounded-xl transition shadow-[0_0_15px_rgba(16,185,129,0.5)]">
-  次のラウンドへ進む準備完了 (0/4) ▶
-</button>
+
+<!-- ▼▼【ここを削除し、代わりに以下のカウントダウンバッジを挿入します】▼▼ -->
+            <div id="karuta-countdown-badge" class="hidden bg-slate-800 border border-fuchsia-500/60 text-fuchsia-200 text-xs font-bold px-3 py-1.5 rounded-xl shadow">
+              次の札まで <span id="karuta-countdown-num" class="font-mono font-black text-amber-400">10</span> 秒
+            </div>
+            <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
           </div>
 
         <div id="karuta-players-bar" class="w-full max-w-5xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 mb-2.5"></div>
@@ -2593,13 +2595,14 @@ const app = {
         app.clearAllTimers();
         app.unlockSpeechEngine();
 
-        // ▼▼ 修正：ソロまたは2人未満の場合、AIを必ず1体だけ追加する ▼▼
+        // ソロまたは2人未満の場合、AIを必ず1体だけ追加する
         if (state.room.isSolo || state.players.length < 2) {
           state.config.maxPlayers = 2;
-          // 既存のAIがいなければ1体だけ追加
-          if (!state.players.some(p => p.isAI)) {
-            const botColor = pickUnusedColor(state.players);
-            state.players.push({
+          const human = state.players.find(p => !p.isAI) || state.players[0];
+          const existingAi = state.players.find(p => p.isAI);
+          if (!existingAi) {
+            const botColor = pickUnusedColor([human]);
+            state.players = [human, {
               id: `ai_${Date.now()}`,
               name: '救急AI隊員',
               isAI: true,
@@ -2610,16 +2613,12 @@ const app = {
               team: 2,
               color: botColor,
               karutaScore: 0
-            });
+            }];
           } else {
-            // すでにAIがいる場合は1体だけ残して余分をカット
-            const human = state.players.find(p => !p.isAI) || state.players[0];
-            const ai = state.players.find(p => p.isAI);
-            state.players = [human, ai];
+            state.players = [human, existingAi];
           }
         }
         state.config.maxPlayers = state.players.length;
-        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         state.phase = 'karuta_playing';
         state.ranks = [];
@@ -2778,6 +2777,20 @@ const aiWaitMs = diffSec * 1000;
 
     executeStartNextKarutaRound: () => {
       if(state.phase !== 'karuta_playing') return;
+      
+      if(state.timers.karutaAutoNext) {
+        clearTimeout(state.timers.karutaAutoNext);
+        state.timers.karutaAutoNext = null;
+      }
+      if(state.timers.karutaCountdownInterval) {
+        clearInterval(state.timers.karutaCountdownInterval);
+        state.timers.karutaCountdownInterval = null;
+      }
+
+      // カウントダウンバッジを非表示にする
+      const badgeEl = document.getElementById('karuta-countdown-badge');
+      if(badgeEl) badgeEl.classList.add('hidden');
+
       state.karutaState.currentIndex++;
       if(state.karutaState.currentIndex >= state.karutaState.readingQueue.length) {
         app.computeKarutaRanks();
@@ -2822,8 +2835,8 @@ const aiWaitMs = diffSec * 1000;
 
         if(touchedCard.id === yomi.id) {
           state.karutaState.roundLocked = true;
-          state.karutaState.readyNextPlayers = []; // 👈 【追加】リセット
-          // ... (中略：タイマー停止やスコア加算処理)
+          state.karutaState.readyNextPlayers = [];
+          
           if(state.timers.karutaTypewriter) clearInterval(state.timers.karutaTypewriter);
           if(state.timers.karutaAiTouch) clearTimeout(state.timers.karutaAiTouch);
           if('speechSynthesis' in window) window.speechSynthesis.cancel();
@@ -2834,19 +2847,19 @@ const aiWaitMs = diffSec * 1000;
           actor.karutaScore = (actor.karutaScore || 0) + 1;
           state.karutaState.lastWinnerId = actor.id;
           state.karutaState.lastTouchedCardId = touchedCard.id;
-// ▼▼ 追加：AI対戦の場合、正解が決まったらAIも即座に次のラウンドの準備完了とする ▼▼
+
+          // AI対戦の場合、AIも即座に次のラウンドの準備完了とする
           const aiPlayer = state.players.find(p => p.isAI);
           if (aiPlayer && !state.karutaState.readyNextPlayers.includes(aiPlayer.id)) {
             state.karutaState.readyNextPlayers.push(aiPlayer.id);
           }
-          // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
           const textEl = document.getElementById('karuta-yomifuda-text');
           if(textEl) textEl.textContent = `「${yomi.desc}」 → 【正解：${yomi.title}】`;
           const cornerEl = document.getElementById('karuta-yomi-corner-kana');
           if(cornerEl) cornerEl.textContent = yomi.kana || 'あ';
           const statusEl = document.getElementById('karuta-round-status');
-          if(statusEl) statusEl.textContent = `⚡ ${actor.name} が最速タッチで「${touchedCard.title}」を獲得！（+1枚）`;
+          if(statusEl) statusEl.textContent = `⚡ ${actor.name} が獲得！ (10秒後に次の札へ)`;
 
           utils.showToast(`🎴 ${actor.name} が「${touchedCard.title}」を獲得！`);
           app.addLogMessage(`${actor.name} が取り札「[${touchedCard.kana}] ${touchedCard.title}」を獲得しました（計${actor.karutaScore}枚）`);
@@ -2876,14 +2889,36 @@ const aiWaitMs = diffSec * 1000;
             state.phase = 'ended';
             setTimeout(() => app.showResults(), 1600);
           } else {
-            document.getElementById('btn-karuta-next')?.classList.remove('hidden');
+            // 右上のカウントダウンバッジを表示して10秒タイマー起動
+            const badgeEl = document.getElementById('karuta-countdown-badge');
+            const numEl = document.getElementById('karuta-countdown-num');
+            if(badgeEl) badgeEl.classList.remove('hidden');
+
+            let timeLeft = 10;
+            if(numEl) numEl.textContent = timeLeft;
+
+            if(state.timers.karutaAutoNext) clearTimeout(state.timers.karutaAutoNext);
+            if(state.timers.karutaCountdownInterval) clearInterval(state.timers.karutaCountdownInterval);
+
+            state.timers.karutaCountdownInterval = setInterval(() => {
+              timeLeft--;
+              if(numEl) numEl.textContent = timeLeft;
+              if(timeLeft <= 0) {
+                clearInterval(state.timers.karutaCountdownInterval);
+              }
+            }, 1000);
+
+            state.timers.karutaAutoNext = setTimeout(() => {
+              if(state.phase === 'karuta_playing' && (state.room.isHost || state.room.isSolo)) {
+                app.executeStartNextKarutaRound();
+              }
+            }, 10000);
           }
         } else {
           if(playerId === state.me.id) {
             utils.showToast(`❌ お手つき！「${touchedCard.title}」ではありません`);
           }
         }
-      },
 
       startNextKarutaRound: () => {
         if(state.phase !== 'karuta_playing') return;
