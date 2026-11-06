@@ -2593,9 +2593,9 @@ const app = {
         app.clearAllTimers();
         app.unlockSpeechEngine();
 
-        // ▼▼ ここから修正・追加 ▼▼
+        // ▼▼ 修正：ソロまたは2人未満の場合、不足分だけAIを1名追加して実際の人数に合わせる ▼▼
         if (state.room.isSolo || state.players.length < 2) {
-          state.config.maxPlayers = 2;
+          state.config.maxPlayers = Math.max(2, state.players.length);
           if (!state.players.some(p => p.isAI)) {
             const botColor = pickUnusedColor(state.players);
             state.players.push({
@@ -2612,8 +2612,9 @@ const app = {
             });
           }
         }
-        state.config.maxPlayers = state.players.length; // 実際の参加人数（2人など）に必ず合わせる
-        // ▲▲ ここまで ▲▲
+        // ホストの場合、現在の参加人数を正確なマックス人数に同期
+        state.config.maxPlayers = state.players.length;
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
         state.phase = 'karuta_playing';
         state.ranks = [];
@@ -2663,7 +2664,7 @@ const app = {
           roundLocked: false,
           lastWinnerId: null,
           lastTouchedCardId: null,
-          readyNextPlayers: [] // 👈 ここも必ず空配列で初期化
+          readyNextPlayers: []
         };
 
         socket.emit('game_action', {
