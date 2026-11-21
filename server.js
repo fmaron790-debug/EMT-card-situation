@@ -20,6 +20,8 @@ const socketRoomMap = {}; // どのソケットがどのルームにいるかを
 let globalAccessState = { game1: true, game2: true, game3: true, game4: true, game5: true };
 let globalCardDB = null;
 let globalAnnouncements = [];
+let globalResearchLogs = []; // 研究用個人プレイログ蓄積
+
 
 const PLAYER_COLORS = [
   '#38bdf8', '#f43f5e', '#10b981', '#f59e0b', '#a855f7',
@@ -38,11 +40,35 @@ io.on('connection', (socket) => {
   if (globalCardDB) socket.emit('update_cards', globalCardDB);
   socket.emit('init_announcements', globalAnnouncements);
 
-  socket.on('request_admin_state', () => {
+ // クライアントからの研究用プレイログ記録
+  socket.on('record_research_log', (entry) => {
+    if (!entry || !entry.researchId) return;
+    globalResearchLogs.push({
+      timestamp: new Date().toISOString(),
+      dateStr: new Date().toLocaleDateString('ja-JP'),
+      timeStr: new Date().toLocaleTimeString('ja-JP'),
+      researchId: String(entry.researchId),
+      playerName: String(entry.playerName || ''),
+      mode: String(entry.mode || ''),
+      eventType: String(entry.eventType || ''), // 'game_start' | 'game_end'
+      isSolo: !!entry.isSolo,
+      rank: entry.rank || '',
+      score: entry.score !== undefined ? entry.score : ''
+    });
+    if (globalResearchLogs.length > 10000) globalResearchLogs.shift();
+  });
+
+socket.on('request_admin_state', () => {
     socket.emit('update_access', globalAccessState);
     if (globalCardDB) socket.emit('update_cards', globalCardDB);
     socket.emit('update_active_users', io.engine.clientsCount);
     socket.emit('init_announcements', globalAnnouncements);
+    socket.emit('receive_research_logs', globalResearchLogs);
+  });
+
+  // CMSからの研究ログ一括取得リクエスト
+  socket.on('request_research_logs', () => {
+    socket.emit('receive_research_logs', globalResearchLogs);
   });
 
   socket.on('join_room', (data) => {
@@ -100,6 +126,13 @@ io.on('connection', (socket) => {
     const room = rooms[roomCode];
     
     if (room) {
+      if (type === 'karuta_touch') {
+        if (room.karutaRoundLocked) return;
+        room.karutaRoundLocked = true;
+      } else if (type === 'karuta_next' || type === 'start') {
+        room.karutaRoundLocked = false;
+      }
+
       if (type === 'draw') {
         if (room.hasDrawnThisTurn) return;
         room.hasDrawnThisTurn = true;

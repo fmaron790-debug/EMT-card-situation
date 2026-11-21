@@ -809,6 +809,14 @@
         <div class="text-center mb-6 sm:mb-8 max-w-2xl px-2">
           <h2 class="text-2xl md:text-4xl font-extrabold text-white tracking-tight mb-2">訓練ミッションを選択</h2>
           <p class="text-xs sm:text-base text-slate-400">救急救命士国家試験・現場活動に必要な知識をトランプゲームで体得せよ！</p>
+<!-- 研究用個人識別ID表示バー（Teams Forms転記用） -->
+        <div class="w-full max-w-4xl mb-5 bg-slate-900/90 border border-cyan-500/40 rounded-2xl p-3 sm:px-5 flex flex-wrap items-center justify-between gap-2 shadow-lg">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-cyan-300">🆔 あなたの研究ID（Forms回答時にそのまま入力）:</span>
+            <span id="my-research-id-display" class="font-mono-num text-sm sm:text-base font-black text-amber-300 bg-slate-950 px-3 py-1 rounded-xl border border-slate-700 select-all">--------</span>
+          </div>
+          <button onclick="app.copyResearchId()" class="text-xs bg-cyan-700 hover:bg-cyan-600 active:scale-95 text-white font-bold px-3.5 py-2 rounded-xl transition">IDをコピー</button>
+        </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 w-full max-w-4xl" id="portal-games-container"></div>
       </section>
@@ -1176,11 +1184,12 @@
             </button>
 
 <!-- ▼▼【ここを削除し、代わりに以下のカウントダウンバッジを挿入します】▼▼ -->
-            <div id="karuta-countdown-badge" class="hidden bg-slate-800 border border-fuchsia-500/60 text-fuchsia-200 text-xs font-bold px-3 py-1.5 rounded-xl shadow">
+           <div id="karuta-countdown-badge" class="hidden bg-slate-800 border border-fuchsia-500/60 text-fuchsia-200 text-xs font-bold px-3 py-1.5 rounded-xl shadow">
               次の札まで <span id="karuta-countdown-num" class="font-mono font-black text-amber-400">10</span> 秒
             </div>
             <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
           </div>
+        </div>
 
         <div id="karuta-players-bar" class="w-full max-w-5xl grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 mb-2.5"></div>
 
@@ -1438,6 +1447,16 @@
           </div>
         </div>
 
+<div class="w-full bg-slate-800/40 border border-cyan-500/40 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h4 class="text-sm font-bold text-cyan-300 flex items-center gap-2"><i data-lucide="file-spreadsheet" class="w-4 h-4"></i>研究用 個人別プレイログ出力 (CSV)</h4>
+            <p class="text-[11px] text-slate-400 mt-0.5">蓄積ログ数: <strong id="admin-research-log-count" class="text-white font-mono">0</strong> 件（サーバー記録＋端末ローカル記録）</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="app.downloadResearchLogsCSV()" class="bg-cyan-600 hover:bg-cyan-500 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-md">📥 CSVダウンロード</button>
+          </div>
+        </div>
+
         <div class="w-full bg-slate-800/40 border border-amber-500/40 rounded-2xl p-4">
           <h4 class="text-sm font-bold text-amber-300 mb-2 flex items-center gap-2"><i data-lucide="megaphone" class="w-4 h-4"></i>全体お知らせ配信</h4>
           <div class="flex gap-2">
@@ -1557,7 +1576,7 @@
       room: { code: '', isHost: false, isSolo: false, isOpen: false },
       openRooms: {},
       config: { mode: 'babanuki', maxPlayers: 4, turnTimeLimit: 20, autoFillAI: true, memoryPairs: 40, teamMode: 'solo', showMemoryDisease: true, showGroupNum: true, jackShowTotal: true, karutaReadAloud: true, karutaCorner: 'left', karutaAiDiff: 30, isOpenRoom: true }, // 👈 カンマを追加
-      me: { id: 'p_' + Math.random().toString(36).substring(2, 9), name: '救急隊員' },
+     me: { id: 'p_' + Math.random().toString(36).substring(2, 9), name: '救急隊員', researchId: '' },
       players: [],
       turnIdx: 0,
       discardPile: [],
@@ -1612,6 +1631,14 @@
     socket.on('update_active_users', (count) => {
       const el = document.getElementById('admin-active-users');
       if (el && count !== undefined) el.textContent = count;
+    });
+
+socket.on('receive_research_logs', (logs) => {
+      if (Array.isArray(logs)) {
+        app.serverResearchLogs = logs;
+        const cntEl = document.getElementById('admin-research-log-count');
+        if (cntEl) cntEl.textContent = logs.length;
+      }
     });
 
     socket.on('init_announcements', (list) => {
@@ -1725,6 +1752,7 @@
       }
       
       if(actionData.type === 'start') {
+        if(!state.room.isHost) app.logResearchEvent('game_start');
         if(state.mode === 'memory') {
           state.phase = 'memory_playing';
           state.memoryState.selectedCardIndices = [];
@@ -1758,15 +1786,24 @@
           app.renderTable();
         }
       } else if(actionData.type === 'karuta_touch') {
+        if(state.timers.karutaTypewriter) clearInterval(state.timers.karutaTypewriter);
+        if(state.timers.karutaAiTouch) clearTimeout(state.timers.karutaAiTouch);
+        if(state.timers.karutaNextRound) clearTimeout(state.timers.karutaNextRound);
+        if(state.timers.karutaAutoNext) clearTimeout(state.timers.karutaAutoNext);
+        if(state.timers.karutaCountdownInterval) clearInterval(state.timers.karutaCountdownInterval);
+        if('speechSynthesis' in window) window.speechSynthesis.cancel();
         app.renderKarutaTable();
         if(actionData.winnerName && actionData.cardTitle) {
           const stEl = document.getElementById('karuta-round-status');
-          if(stEl) stEl.textContent = `⚡ ${actor.name} が「${touchedCard.title}」を獲得！`; // または元のコードのままでOK
+          if(stEl) stEl.textContent = `⚡ ${actionData.winnerName} が「${actionData.cardTitle}」を獲得！ (10秒後に次の札へ)`;
         }
         if(actionData.gameEnded) {
-          state.phase = 'ended';
-          if('speechSynthesis' in window) window.speechSynthesis.cancel();
-          setTimeout(() => app.showResults(), 1500);
+          if(state.phase !== 'ended') {
+            state.phase = 'ended';
+            setTimeout(() => app.showResults(), 1500);
+          }
+        } else {
+          app.startKarutaNextCountdown();
         }
       } else if(actionData.type === 'karuta_ready_next') {
         state.karutaState = { ...state.karutaState, ...actionData.karutaState };
@@ -1797,11 +1834,12 @@
           state.phase = 'memory_playing';
           app.showScreen('view-memory-game');
         }
-        state.memoryState.isProcessingTurn = false;
+        const curP = state.players[state.turnIdx];
+        const isHandlingNow = (curP && (curP.id === state.me.id || (curP.isAI && (state.room.isHost || state.room.isSolo))));
+        if(!isHandlingNow) state.memoryState.isProcessingTurn = false;
         app.renderMemoryGameTable();
-        if(actionData.gameEnded) {
-          state.phase = 'ended';
-          app.endMemoryGame();
+        if(actionData.gameEnded && state.phase !== 'ended') {
+          app.endMemoryGame(true);
         }
       } else if(actionData.type === 'jack_sync') {
         if(state.phase !== 'jack_playing' && state.phase !== 'ended') {
@@ -1850,13 +1888,15 @@ const app = {
         if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
         if(state.timers.popupTimer) clearTimeout(state.timers.popupTimer);
         if(state.timers.matchTimer) clearTimeout(state.timers.matchTimer);
-        if(state.timers.quizTimer) clearTimeout(state.timers.quizTimer);
+        if(state.timers.quizTimer) clearInterval(state.timers.quizTimer);
         if(state.timers.quizAutoClose) clearTimeout(state.timers.quizAutoClose);
         if(state.timers.jackQuiz) clearInterval(state.timers.jackQuiz);
         if(state.timers.bustModal) clearTimeout(state.timers.bustModal);
         if(state.timers.karutaTypewriter) clearInterval(state.timers.karutaTypewriter);
         if(state.timers.karutaAiTouch) clearTimeout(state.timers.karutaAiTouch);
         if(state.timers.karutaNextRound) clearTimeout(state.timers.karutaNextRound);
+        if(state.timers.karutaAutoNext) clearTimeout(state.timers.karutaAutoNext);
+        if(state.timers.karutaCountdownInterval) clearInterval(state.timers.karutaCountdownInterval);
         if('speechSynthesis' in window) window.speechSynthesis.cancel();
         if(state.timers.openRoomBeacon) { clearInterval(state.timers.openRoomBeacon); state.timers.openRoomBeacon = null; }
         if(state.room?.isHost && state.room?.code) app.broadcastRoomSignal('close');
@@ -2022,6 +2062,15 @@ const app = {
 
       init: () => {
         try {
+          let rId = localStorage.getItem('ems_research_id');
+          if (!rId) {
+            rId = 'EMS-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            localStorage.setItem('ems_research_id', rId);
+          }
+          state.me.researchId = rId;
+          const rIdEl = document.getElementById('my-research-id-display');
+          if (rIdEl) rIdEl.textContent = rId;
+
           const savedName = localStorage.getItem('ems_player_name');
           if (savedName) {
             state.me.name = savedName;
@@ -2484,6 +2533,520 @@ const app = {
         else if(state.mode === 'jack') app.startJackGameSession();
         else if(state.mode === 'karuta') app.startKarutaGameSession();
         else app.startStandardCardGameSession();
+app.logResearchEvent('game_start');
+      },
+
+ // ==========================================
+      // GAME 04: 99ジャック 専用ロジック
+      // ==========================================
+      startJackGameSession: () => {
+        app.clearAllTimers();
+        state.phase = 'jack_playing';
+        state.turnIdx = 0;
+        state.ranks = [];
+
+        let deck = currentCardDB.filter(c => c.suit === 'J').map(c => ({
+          ...c,
+          internalVal: c.internalVal !== undefined ? Number(c.internalVal) : Math.round(Number(c.num) * 100)
+        }));
+        for (let i = deck.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+
+        state.jackState.deck = deck;
+        state.jackState.currentCard = null;
+        state.jackState.selectedOption = null;
+        state.jackState.quizAnswered = false;
+        state.jackState.isProcessing = false;
+
+        state.players.forEach(p => {
+          p.hand = [];
+          p.totalInternal = 0;
+          p.isStayed = false;
+          p.isBusted = false;
+          p.isCleared = false;
+          p.rank = 0;
+        });
+
+        socket.emit('game_action', {
+          roomCode: state.room.code,
+          type: 'start',
+          mode: 'jack',
+          config: state.config,
+          players: state.players,
+          turnIdx: state.turnIdx,
+          jackDeck: state.jackState.deck
+        });
+
+        app.addLogMessage('GAME 04: 99ジャックが開始されました（初期値 0 スタート）。');
+        if (state.room.isSolo) {
+          app.showScreen('view-jack-game');
+          app.renderJackTable();
+          app.processJackTurn();
+        }
+      },
+
+      renderJackTable: () => {
+        const pContainer = document.getElementById('jack-players-container');
+        const myCardsContainer = document.getElementById('jack-my-cards-container');
+        const deckCountEl = document.getElementById('jack-deck-count');
+        const turnInfoEl = document.getElementById('jack-turn-info');
+        const myTotalEl = document.getElementById('jack-my-total-display');
+        const myStatusBadge = document.getElementById('jack-my-status-badge');
+        const btnHit = document.getElementById('btn-jack-hit');
+        const btnStay = document.getElementById('btn-jack-stay');
+        const deckCardEl = document.getElementById('jack-deck-card');
+        if(!pContainer || !myCardsContainer) return;
+
+        if(deckCountEl) deckCountEl.textContent = state.jackState.deck.length;
+
+        const currentP = state.players[state.turnIdx];
+        const isMyTurn = (state.phase === 'jack_playing' && currentP && !currentP.isAI && currentP.id === state.me.id && !state.jackState.isProcessing);
+        if(turnInfoEl) turnInfoEl.textContent = `手番: ${currentP ? currentP.name : ''} ${isMyTurn ? '(あなた)' : ''}`;
+
+        const showTotal = state.config.jackShowTotal ?? true;
+
+        pContainer.innerHTML = '';
+        state.players.forEach((p, idx) => {
+          const isCur = (state.phase === 'jack_playing' && idx === state.turnIdx);
+          const pColor = p.color || '#38bdf8';
+          const statusHtml = p.isBusted
+            ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-700 font-bold">💀 CPA</span>'
+            : p.isStayed
+              ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-700 font-bold">🛡 ステイ</span>'
+              : isCur
+                ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-500 font-bold animate-pulse">▶ 手番</span>'
+                : '<span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">待機</span>';
+
+          const totalStr = showTotal ? utils.formatJackInternal(p.totalInternal) : '???';
+
+          pContainer.innerHTML += `
+            <div class="p-2.5 sm:p-3 rounded-2xl border transition-all ${isCur ? 'bg-teal-950/50 border-teal-400 ring-2 ring-teal-400/50 shadow-lg' : p.isBusted ? 'bg-rose-950/20 border-rose-900/60 opacity-75' : 'bg-slate-900/80 border-slate-800'} flex flex-col justify-between">
+              <div class="flex items-center justify-between gap-1 mb-1.5">
+                <div class="flex items-center gap-1.5 truncate">
+                  <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: ${pColor}"></span>
+                  <span class="text-xs font-bold text-white truncate">${utils.escapeHtml(p.name)}</span>
+                </div>
+                ${statusHtml}
+              </div>
+              <div class="flex items-center justify-between text-xs bg-slate-950/90 px-2.5 py-1 rounded-xl border border-slate-800/80">
+                <span class="text-slate-400 text-[10px]">手札 ${p.hand.length}/10</span>
+                <span class="font-mono font-black ${p.isBusted && showTotal ? 'text-rose-400' : 'text-teal-300'}">計: ${totalStr}</span>
+              </div>
+            </div>
+          `;
+        });
+
+        const myP = state.players.find(p => p.id === state.me.id);
+        const myDot = document.getElementById('jack-my-color-dot');
+        if(myDot && myP?.color) myDot.style.backgroundColor = myP.color;
+
+        if(myTotalEl && myP) {
+          myTotalEl.textContent = showTotal ? utils.formatJackInternal(myP.totalInternal) : '??? (暗算)';
+          myTotalEl.className = `text-base sm:text-lg font-mono font-black ${myP.isBusted && showTotal ? 'text-rose-500' : 'text-teal-400'}`;
+        }
+
+        if(myStatusBadge && myP) {
+          if(myP.isBusted) {
+            myStatusBadge.textContent = '💀 99超過 (CPA)';
+            myStatusBadge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-600 font-bold';
+          } else if(myP.isStayed) {
+            myStatusBadge.textContent = '🛡 ステイ宣言済';
+            myStatusBadge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-600 font-bold';
+          } else {
+            myStatusBadge.textContent = isMyTurn ? '🎯 あなたの手番' : 'プレイ中';
+            myStatusBadge.className = 'text-[11px] px-2.5 py-0.5 rounded-full bg-teal-950 text-teal-300 border border-teal-700 font-bold';
+          }
+        }
+
+        if(btnHit && btnStay && deckCardEl) {
+          if(isMyTurn && myP && !myP.isStayed && !myP.isBusted) {
+            btnHit.classList.remove('opacity-40', 'pointer-events-none');
+            btnStay.classList.remove('opacity-40', 'pointer-events-none');
+            deckCardEl.classList.remove('opacity-50', 'pointer-events-none');
+          } else {
+            btnHit.classList.add('opacity-40', 'pointer-events-none');
+            btnStay.classList.add('opacity-40', 'pointer-events-none');
+            deckCardEl.classList.add('opacity-50', 'pointer-events-none');
+          }
+        }
+
+        myCardsContainer.innerHTML = '';
+        if(!myP || myP.hand.length === 0) {
+          myCardsContainer.innerHTML = '<div class="w-full text-center py-8 text-slate-500 font-bold text-xs">まだ手札はありません（現在 0 スタート）</div>';
+        } else {
+          myP.hand.forEach(c => {
+            const bColorName = c.borderColor || c.title || '緑';
+            const borderCls = JACK_BORDER_STYLES[bColorName] || 'border-teal-500';
+            myCardsContainer.innerHTML += `
+              <div onclick="app.openCardDetail(${c.id})" class="flex-shrink-0 w-32 h-44 sm:w-36 sm:h-48 rounded-2xl border-4 ${borderCls} bg-slate-900 p-2.5 sm:p-3 flex flex-col justify-between cursor-pointer active:scale-95 transition shadow-xl select-none">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-1">
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-200">${utils.escapeHtml(bColorName)}</span>
+                  <span class="text-sm sm:text-base font-mono font-black text-teal-300">+${c.num}</span>
+                </div>
+                <div class="my-auto py-1 text-center overflow-y-auto custom-scrollbar">
+                  <div class="text-[11px] font-bold text-slate-100 leading-snug">${utils.escapeHtml(c.desc)}</div>
+                </div>
+                <div class="text-[10px] font-mono text-right text-slate-400 pt-1 border-t border-slate-800/80">値: ${c.num}</div>
+              </div>
+            `;
+          });
+        }
+
+        if (window.lucide) lucide.createIcons();
+      },
+
+      processJackTurn: () => {
+        if(state.phase !== 'jack_playing') return;
+        if(app.checkJackGameEnd()) return;
+
+        const currentP = state.players[state.turnIdx];
+        if(!currentP || currentP.isStayed || currentP.isBusted) {
+          app.advanceJackTurn();
+          return;
+        }
+
+        app.renderJackTable();
+        const banner = document.getElementById('jack-announcement-banner');
+
+        if(currentP.id === state.me.id && !currentP.isAI) {
+          if(banner) banner.innerHTML = `あなたの手番です。「<strong class="text-teal-300">ドロー</strong>」か「<strong class="text-amber-300">ステイ宣言</strong>」を選択してください`;
+        } else {
+          if(banner) banner.innerHTML = `<strong class="text-teal-300">${utils.escapeHtml(currentP.name)}</strong> が思考中です...`;
+          if(currentP.isAI && (state.room.isHost || state.room.isSolo) && !state.jackState.isProcessing) {
+            state.jackState.isProcessing = true;
+            if(state.timers.aiDelay) clearTimeout(state.timers.aiDelay);
+            state.timers.aiDelay = setTimeout(() => {
+              app.executeAiJackTurn(currentP);
+            }, 1400);
+          }
+        }
+      },
+
+      jackDrawCard: () => {
+        if(state.phase !== 'jack_playing' || state.jackState.isProcessing) return;
+        const currentP = state.players[state.turnIdx];
+        if(!currentP || currentP.id !== state.me.id || currentP.isStayed || currentP.isBusted) return;
+
+        if(state.jackState.deck.length === 0) {
+          utils.showToast('山札がなくなりました！ゲームを終了します');
+          app.finishJackGame();
+          return;
+        }
+
+        state.jackState.isProcessing = true;
+        const drawn = state.jackState.deck.pop();
+        state.jackState.currentCard = drawn;
+        state.jackState.selectedOption = null;
+        state.jackState.quizAnswered = false;
+
+        app.openJackQuizModal(drawn);
+      },
+
+      openJackQuizModal: (card) => {
+        const modal = document.getElementById('modal-jack-quiz');
+        const badge = document.getElementById('jack-quiz-color-badge');
+        const timerEl = document.getElementById('jack-quiz-timer');
+        const qEl = document.getElementById('jack-quiz-question');
+        const optsEl = document.getElementById('jack-quiz-options');
+        const submitBtn = document.getElementById('btn-jack-submit-answer');
+        const resultArea = document.getElementById('jack-quiz-result-area');
+        const quizBox = document.getElementById('jack-quiz-box');
+
+        const bColorName = card.borderColor || card.title || '緑';
+        if(badge) badge.textContent = `ふち色: ${bColorName}`;
+        if(quizBox) {
+          quizBox.className = `w-full max-w-lg bg-slate-900 border-4 ${JACK_BORDER_STYLES[bColorName] || 'border-teal-500'} rounded-3xl p-4 sm:p-6 flex flex-col max-h-[92vh] overflow-y-auto custom-scrollbar`;
+        }
+        if(qEl) qEl.textContent = card.desc;
+
+        const options = [card.num, card.opt1, card.opt2];
+        for(let i = options.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [options[i], options[j]] = [options[j], options[i]];
+        }
+
+        if(optsEl) {
+          optsEl.innerHTML = '';
+          options.forEach((optVal, idx) => {
+            optsEl.innerHTML += `
+              <button id="jack-opt-btn-${idx}" onclick="app.selectJackQuizOption(${idx}, '${optVal}')" class="jack-opt-btn py-3.5 sm:py-4 px-2 rounded-2xl border-2 border-slate-700 bg-slate-800 hover:border-teal-400 text-white font-mono font-black text-base sm:text-lg transition shadow-md">
+                ${utils.escapeHtml(optVal)}
+              </button>
+            `;
+          });
+        }
+
+        if(submitBtn) {
+          submitBtn.classList.remove('hidden');
+          submitBtn.classList.add('opacity-50', 'pointer-events-none');
+        }
+        resultArea?.classList.add('hidden');
+        resultArea?.classList.remove('flex');
+        modal?.classList.remove('hidden');
+
+        state.jackState.timeLeft = 60;
+        if(timerEl) timerEl.textContent = `残り ${state.jackState.timeLeft} 秒`;
+        if(state.timers.jackQuiz) clearInterval(state.timers.jackQuiz);
+        if(state.timers.bustModal) clearTimeout(state.timers.bustModal);
+
+        state.timers.jackQuiz = setInterval(() => {
+          state.jackState.timeLeft--;
+          if(timerEl) timerEl.textContent = `残り ${state.jackState.timeLeft} 秒`;
+          if(state.jackState.timeLeft <= 0) {
+            clearInterval(state.timers.jackQuiz);
+            if(!state.jackState.quizAnswered) {
+              app.evaluateJackQuiz(false, true);
+            }
+          }
+        }, 1000);
+      },
+
+      selectJackQuizOption: (idx, val) => {
+        if(state.jackState.quizAnswered) return;
+        state.jackState.selectedOption = val;
+        document.querySelectorAll('.jack-opt-btn').forEach((btn, i) => {
+          if(i === idx) {
+            btn.className = 'jack-opt-btn py-3.5 sm:py-4 px-2 rounded-2xl border-2 border-teal-400 bg-teal-900/70 text-teal-200 font-mono font-black text-base sm:text-lg transition shadow-[0_0_15px_rgba(20,184,166,0.5)] scale-105';
+          } else {
+            btn.className = 'jack-opt-btn py-3.5 sm:py-4 px-2 rounded-2xl border-2 border-slate-700 bg-slate-800 hover:border-teal-400 text-white font-mono font-black text-base sm:text-lg transition opacity-75';
+          }
+        });
+        const submitBtn = document.getElementById('btn-jack-submit-answer');
+        submitBtn?.classList.remove('opacity-50', 'pointer-events-none');
+      },
+
+      submitJackQuizAnswer: () => {
+        if(state.jackState.quizAnswered || state.jackState.selectedOption === null) return;
+        const card = state.jackState.currentCard;
+        const isCorrect = Number(state.jackState.selectedOption) === Number(card.num);
+        app.evaluateJackQuiz(isCorrect, false);
+      },
+
+      evaluateJackQuiz: (isCorrect, isTimeout) => {
+        state.jackState.quizAnswered = true;
+        if(state.timers.jackQuiz) clearInterval(state.timers.jackQuiz);
+        if(state.timers.bustModal) clearTimeout(state.timers.bustModal);
+
+        const card = state.jackState.currentCard;
+        const submitBtn = document.getElementById('btn-jack-submit-answer');
+        const resultArea = document.getElementById('jack-quiz-result-area');
+        const verdictBanner = document.getElementById('jack-quiz-verdict-banner');
+        const actionBtns = document.getElementById('jack-quiz-action-buttons');
+
+        submitBtn?.classList.add('hidden');
+        document.querySelectorAll('.jack-opt-btn').forEach(btn => btn.classList.add('pointer-events-none'));
+
+        if(resultArea) {
+          resultArea.classList.remove('hidden');
+          resultArea.classList.add('flex');
+        }
+
+        if(verdictBanner) {
+          if(isCorrect) {
+            verdictBanner.className = 'p-3.5 rounded-2xl border-2 border-emerald-500 bg-emerald-950/70 text-center shadow-[0_0_25px_rgba(16,185,129,0.3)]';
+            verdictBanner.innerHTML = `
+              <div class="text-base sm:text-lg font-black text-emerald-300 mb-1">⭕ 正解！</div>
+              <div class="inline-block bg-slate-950 border border-emerald-500/50 px-3.5 py-1 rounded-xl text-xs sm:text-sm font-mono font-black text-emerald-400">正答（カードの数値）: ${card.num}</div>
+              <div class="text-[11px] text-emerald-200 mt-1.5 font-bold">正解特典：手札に加算するか、加算せず破棄するか選べます！</div>
+            `;
+          } else {
+            verdictBanner.className = 'p-3.5 rounded-2xl border-2 border-rose-500 bg-rose-950/70 text-center shadow-[0_0_25px_rgba(244,63,94,0.3)]';
+            verdictBanner.innerHTML = `
+              <div class="text-base sm:text-lg font-black text-rose-300 mb-1">${isTimeout ? '⏱ 時間切れ（不正解）！' : '❌ 不正解！'}</div>
+              <div class="inline-block bg-slate-950 border border-rose-500/50 px-3.5 py-1 rounded-xl text-xs sm:text-sm font-mono font-black text-rose-400">正答（カードの数値）: ${card.num}</div>
+              <div class="text-[11px] text-rose-200 mt-1.5 font-bold">ペナルティ：このカード（+${card.num}）は手札へ強制加算されます！</div>
+            `;
+          }
+        }
+
+        if(actionBtns) {
+          if(isCorrect) {
+            actionBtns.innerHTML = `
+              <button onclick="app.resolveJackCardChoice(true)" class="flex-1 bg-teal-600 hover:bg-teal-500 active:scale-95 text-white font-extrabold py-3.5 px-3 rounded-xl text-xs sm:text-sm transition shadow-lg">手札に加算する (+${card.num})</button>
+              <button onclick="app.resolveJackCardChoice(false)" class="flex-1 bg-slate-700 hover:bg-slate-600 active:scale-95 text-slate-200 font-extrabold py-3.5 px-3 rounded-xl text-xs sm:text-sm transition border border-slate-500">加算せず破棄（スルー）</button>
+            `;
+          } else {
+            actionBtns.innerHTML = `
+              <button onclick="app.resolveJackCardChoice(true)" class="w-full bg-rose-600 hover:bg-rose-500 active:scale-95 text-white font-extrabold py-3.5 px-4 rounded-xl text-xs sm:text-sm transition shadow-lg">手札へ強制加算する (+${card.num})</button>
+            `;
+          }
+        }
+      },
+
+      resolveJackCardChoice: (addToHand) => {
+        document.getElementById('modal-jack-quiz')?.classList.add('hidden');
+        const currentP = state.players[state.turnIdx];
+        const card = state.jackState.currentCard;
+        if(!currentP || !card) return;
+
+        let bustedPlayerId = null;
+
+        if(addToHand) {
+          currentP.hand.push(card);
+          const addInternal = card.internalVal !== undefined ? Number(card.internalVal) : Math.round(Number(card.num) * 100);
+          currentP.totalInternal = (currentP.totalInternal || 0) + addInternal;
+
+          if(currentP.totalInternal >= 9900) {
+            currentP.isBusted = true;
+            bustedPlayerId = currentP.id;
+            app.addLogMessage(`💀 ${currentP.name} が 99.00 を超過し急変（バースト）しました！`);
+            app.showJackBustModal(currentP);
+          } else if(currentP.hand.length >= 10) {
+            currentP.isStayed = true;
+            utils.showToast('🎴 手札上限（10枚）に達したため自動ステイとなります！');
+            app.addLogMessage(`🛡 ${currentP.name} が手札上限（10枚）に達しステイとなりました。`);
+          } else {
+            app.addLogMessage(`${currentP.name} がカードを手札に加算しました（${currentP.hand.length}/10枚）。`);
+          }
+        } else {
+          state.discardPile.push(card);
+          app.addLogMessage(`${currentP.name} がカードを破棄しました。`);
+        }
+
+        state.jackState.currentCard = null;
+        state.jackState.isProcessing = false;
+        app.advanceJackTurn(bustedPlayerId);
+      },
+
+      jackDeclareStay: () => {
+        if(state.phase !== 'jack_playing' || state.jackState.isProcessing) return;
+        const currentP = state.players[state.turnIdx];
+        if(!currentP || currentP.id !== state.me.id || currentP.isStayed || currentP.isBusted) return;
+
+        currentP.isStayed = true;
+        utils.showToast('🛡 ステイアンドプレイを宣言しました！');
+        app.addLogMessage(`${currentP.name} がステイアンドプレイを宣言しました。`);
+        app.advanceJackTurn(null);
+      },
+
+      executeAiJackTurn: (aiPlayer) => {
+        if(state.phase !== 'jack_playing' || !aiPlayer) return;
+
+        if(aiPlayer.hand.length >= 10 || aiPlayer.totalInternal >= 8800 || (aiPlayer.totalInternal >= 7800 && Math.random() < 0.6) || state.jackState.deck.length === 0) {
+          aiPlayer.isStayed = true;
+          app.addLogMessage(`🛡 ${aiPlayer.name} がステイアンドプレイを宣言しました。`);
+          state.jackState.isProcessing = false;
+          app.advanceJackTurn(null);
+          return;
+        }
+
+        const drawn = state.jackState.deck.pop();
+        const addInternal = (drawn.internalVal !== undefined) ? Number(drawn.internalVal) : Math.round(Number(drawn.num) * 100);
+        const aiCorrect = Math.random() < 0.72;
+
+        let bustedPlayerId = null;
+        if(aiCorrect) {
+          if(aiPlayer.totalInternal + addInternal <= 9899) {
+            aiPlayer.hand.push(drawn);
+            aiPlayer.totalInternal += addInternal;
+            if(!aiPlayer.isBusted && aiPlayer.hand.length >= 10) aiPlayer.isStayed = true;
+            app.addLogMessage(`${aiPlayer.name} がクイズに正解し、カードを加算しました。`);
+          } else {
+            state.discardPile.push(drawn);
+            app.addLogMessage(`${aiPlayer.name} がクイズに正解し、危険カードを破棄しました。`);
+          }
+        } else {
+          aiPlayer.hand.push(drawn);
+          aiPlayer.totalInternal += addInternal;
+          if(!aiPlayer.isBusted && aiPlayer.hand.length >= 10) aiPlayer.isStayed = true;
+          if(aiPlayer.totalInternal >= 9900) {
+            aiPlayer.isBusted = true;
+            bustedPlayerId = aiPlayer.id;
+            app.addLogMessage(`💀 ${aiPlayer.name} が不正解で強制加算され、99.00超過（バースト）しました！`);
+            app.showJackBustModal(aiPlayer);
+          } else {
+            app.addLogMessage(`${aiPlayer.name} がクイズに不正解となり、カードが強制加算されました。`);
+          }
+        }
+
+        state.jackState.isProcessing = false;
+        app.advanceJackTurn(bustedPlayerId);
+      },
+
+      showJackBustModal: (player) => {
+        const modal = document.getElementById('modal-jack-bust');
+        const nameEl = document.getElementById('jack-bust-player-name');
+        const showTotal = state.config.jackShowTotal ?? true;
+        const scoreTxt = showTotal ? `（合計: ${utils.formatJackInternal(player.totalInternal)}）` : '';
+        if(nameEl) nameEl.textContent = `${player.name} さん ${scoreTxt}`;
+        modal?.classList.remove('hidden');
+        if(window.lucide) lucide.createIcons();
+        if(state.timers.bustModal) clearTimeout(state.timers.bustModal);
+        state.timers.bustModal = setTimeout(() => {
+          app.closeJackBustModal();
+        }, 3000);
+      },
+
+      closeJackBustModal: () => {
+        document.getElementById('modal-jack-bust')?.classList.add('hidden');
+      },
+
+      checkJackGameEnd: () => {
+        const active = state.players.filter(p => !p.isStayed && !p.isBusted);
+        if(active.length === 0 || state.jackState.deck.length === 0) {
+          app.finishJackGame();
+          return true;
+        }
+        return false;
+      },
+
+      advanceJackTurn: (bustedPlayerId) => {
+        const active = state.players.filter(p => !p.isStayed && !p.isBusted);
+        const isEnd = (active.length === 0 || state.jackState.deck.length === 0);
+
+        if(isEnd) {
+          app.computeJackRanks();
+        } else {
+          for(let i = 1; i <= state.players.length; i++) {
+            const nxt = (state.turnIdx + i) % state.players.length;
+            if(!state.players[nxt].isStayed && !state.players[nxt].isBusted) {
+              state.turnIdx = nxt;
+              break;
+            }
+          }
+        }
+
+        socket.emit('game_action', {
+          roomCode: state.room.code,
+          type: 'jack_sync',
+          mode: 'jack',
+          config: state.config,
+          players: state.players,
+          turnIdx: state.turnIdx,
+          jackDeck: state.jackState.deck,
+          ranks: state.ranks,
+          bustPlayerId: bustedPlayerId || null,
+          gameEnded: isEnd
+        });
+
+        if(state.room.isSolo) {
+          app.renderJackTable();
+          if(isEnd) {
+            state.phase = 'ended';
+            setTimeout(() => app.showResults(), bustedPlayerId ? 2800 : 800);
+          } else {
+            app.processJackTurn();
+          }
+        }
+      },
+
+      computeJackRanks: () => {
+        const safePlayers = state.players.filter(p => !p.isBusted).sort((a, b) => b.totalInternal - a.totalInternal);
+        const bustPlayers = state.players.filter(p => p.isBusted).sort((a, b) => a.totalInternal - b.totalInternal);
+        const ordered = [...safePlayers, ...bustPlayers];
+        state.ranks = ordered.map(p => p.id);
+        state.players.forEach(p => {
+          p.rank = state.ranks.indexOf(p.id) + 1;
+        });
+      },
+
+      finishJackGame: () => {
+        if(state.phase === 'ended') return;
+        state.phase = 'ended';
+        app.computeJackRanks();
+        setTimeout(() => app.showResults(), 1000);
       },
 // ==========================================
       // GAME 05: 救急かるた 専用ロジック（音声エンジン完全対応版）
@@ -2680,10 +3243,12 @@ const app = {
           karutaState: state.karutaState
         });
 
-        app.showScreen('view-karuta-game');
-        app.renderKarutaTable();
         app.addLogMessage('GAME 05: 救急かるた（50枚選出）が開始されました！');
-        app.playKarutaCurrentYomi();
+        if (state.room.isSolo) {
+          app.showScreen('view-karuta-game');
+          app.renderKarutaTable();
+          app.playKarutaCurrentYomi();
+        }
       },
 
       playKarutaCurrentYomi: () => {
@@ -2775,6 +3340,30 @@ const aiWaitMs = diffSec * 1000;
       }
     },
 
+    startKarutaNextCountdown: () => {
+      const badgeEl = document.getElementById('karuta-countdown-badge');
+      const numEl = document.getElementById('karuta-countdown-num');
+      if(badgeEl) badgeEl.classList.remove('hidden');
+
+      let timeLeft = 10;
+      if(numEl) numEl.textContent = timeLeft;
+
+      if(state.timers.karutaAutoNext) clearTimeout(state.timers.karutaAutoNext);
+      if(state.timers.karutaCountdownInterval) clearInterval(state.timers.karutaCountdownInterval);
+
+      state.timers.karutaCountdownInterval = setInterval(() => {
+        timeLeft--;
+        if(numEl) numEl.textContent = timeLeft;
+        if(timeLeft <= 0) clearInterval(state.timers.karutaCountdownInterval);
+      }, 1000);
+
+      state.timers.karutaAutoNext = setTimeout(() => {
+        if(state.phase === 'karuta_playing' && (state.room.isHost || state.room.isSolo)) {
+          app.executeStartNextKarutaRound();
+        }
+      }, 10000);
+    },
+
     executeStartNextKarutaRound: () => {
       if(state.phase !== 'karuta_playing') return;
       
@@ -2811,8 +3400,10 @@ const aiWaitMs = diffSec * 1000;
         karutaState: state.karutaState
       });
 
-      app.renderKarutaTable();
-      app.playKarutaCurrentYomi();
+      if (state.room.isSolo) {
+        app.renderKarutaTable();
+        app.playKarutaCurrentYomi();
+      }
     },
 
       replayKarutaVoice: () => {
@@ -2886,39 +3477,18 @@ const aiWaitMs = diffSec * 1000;
           app.renderKarutaTable();
 
           if(isEnd) {
-            state.phase = 'ended';
-            setTimeout(() => app.showResults(), 1600);
-          } else {
-            // 右上のカウントダウンバッジを表示して10秒タイマー起動
-            const badgeEl = document.getElementById('karuta-countdown-badge');
-            const numEl = document.getElementById('karuta-countdown-num');
-            if(badgeEl) badgeEl.classList.remove('hidden');
-
-            let timeLeft = 10;
-            if(numEl) numEl.textContent = timeLeft;
-
-            if(state.timers.karutaAutoNext) clearTimeout(state.timers.karutaAutoNext);
-            if(state.timers.karutaCountdownInterval) clearInterval(state.timers.karutaCountdownInterval);
-
-            state.timers.karutaCountdownInterval = setInterval(() => {
-              timeLeft--;
-              if(numEl) numEl.textContent = timeLeft;
-              if(timeLeft <= 0) {
-                clearInterval(state.timers.karutaCountdownInterval);
-              }
-            }, 1000);
-
-            state.timers.karutaAutoNext = setTimeout(() => {
-              if(state.phase === 'karuta_playing' && (state.room.isHost || state.room.isSolo)) {
-                app.executeStartNextKarutaRound();
-              }
-            }, 10000);
+            if(state.room.isSolo) {
+              state.phase = 'ended';
+              setTimeout(() => app.showResults(), 1600);
+            }
+          } else if(state.room.isSolo) {
+            app.startKarutaNextCountdown();
           }
         } else {
           if(playerId === state.me.id) {
             utils.showToast(`❌ お手つき！「${touchedCard.title}」ではありません`);
           }
-        }
+}
       }, // ← ① ここで processKarutaCardTouch 関数が閉じる
 
       startNextKarutaRound: () => {
@@ -3111,8 +3681,10 @@ const aiWaitMs = diffSec * 1000;
 
           if(state.memoryState.timeLeft <= 0) {
             clearInterval(state.timers.memoryTimer);
-            utils.showToast('⏱ 手番の制限時間切れです！');
             const curP = state.players[state.turnIdx];
+            const isMyControl = curP && (curP.id === state.me.id || (curP.isAI && (state.room.isHost || state.room.isSolo)));
+            if(!isMyControl) return;
+            utils.showToast('⏱ 手番の制限時間切れです！');
             if(curP) app.addLogMessage(`${curP.name} の手番が制限時間切れになりました。`);
             state.memoryState.cards.forEach(c => {
               if(!c.isMatched && c.isFlipped) c.isFlipped = false;
@@ -3754,9 +4326,24 @@ const aiWaitMs = diffSec * 1000;
         }
       },
 
-      endMemoryGame: () => {
+      endMemoryGame: (fromRemote = false) => {
+        if(state.phase === 'ended') return;
         if(state.timers.memoryTimer) clearInterval(state.timers.memoryTimer);
         state.phase = 'ended';
+        if(!fromRemote && !state.room.isSolo && state.room.isHost) {
+          socket.emit('game_action', {
+            roomCode: state.room.code,
+            type: 'memory_sync',
+            mode: 'memory',
+            turnIdx: state.turnIdx,
+            gameEnded: true,
+            memoryState: {
+              cards: state.memoryState.cards,
+              boardSlots: state.memoryState.boardSlots,
+              playerBoards: state.memoryState.playerBoards
+            }
+          });
+        }
         const scores = state.players.map(p => {
           const b = state.memoryState.playerBoards[p.id] || {};
           const cnt = Object.keys(b).filter(k => b[k]?.filled).length;
@@ -4098,7 +4685,10 @@ const aiWaitMs = diffSec * 1000;
                   app.addLogMessage('【除細動成功】VF＋DCペア破棄！');
                   await app.playDefibAnimation();
               }
-              app.checkClears();
+              const ended = app.checkClears();
+              if(!ended && state.phase === 'playing' && myP && myP.isCleared) {
+                  app.humanEndTurn();
+              }
           } else {
               utils.showToast('<i data-lucide="alert-triangle" class="w-4 h-4 inline mr-1 text-amber-400"></i>ペアが不一致です');
               state.selectedMyCards = [];
@@ -4579,9 +5169,100 @@ const aiWaitMs = diffSec * 1000;
           }
         }
         app.showScreen('view-result');
+const myFinalScore = state.mode === 'karuta' ? (myP?.karutaScore || 0) : state.mode === 'jack' ? utils.formatJackInternal(myP?.totalInternal) : '';
+        app.logResearchEvent('game_end', { rank: myP?.rank || '', score: myFinalScore });
         if(window.lucide) lucide.createIcons();
       },
       rematch: () => state.room.isSolo ? app.startSoloAI() : app.returnToPortal(),
+serverResearchLogs: [],
+
+      copyResearchId: () => {
+        const rId = state.me.researchId || '';
+        if (!rId) return;
+        navigator.clipboard?.writeText(rId).then(() => {
+          utils.showToast(`📋 研究ID [${rId}] をコピーしました`);
+        }).catch(() => {
+          utils.showToast(`研究ID: ${rId}`);
+        });
+      },
+
+      logResearchEvent: (eventType, extra = {}) => {
+        const entry = {
+          timestamp: new Date().toISOString(),
+          dateStr: new Date().toLocaleDateString('ja-JP'),
+          timeStr: new Date().toLocaleTimeString('ja-JP'),
+          researchId: state.me.researchId || 'UNKNOWN',
+          playerName: state.me.name || '',
+          mode: state.mode || '',
+          eventType: eventType,
+          isSolo: !!state.room?.isSolo,
+          rank: extra.rank ?? '',
+          score: extra.score ?? ''
+        };
+        try {
+          const localLogs = JSON.parse(localStorage.getItem('ems_research_logs') || '[]');
+          localLogs.push(entry);
+          localStorage.setItem('ems_research_logs', JSON.stringify(localLogs));
+        } catch (e) {}
+        socket.emit('record_research_log', entry);
+      },
+
+      downloadResearchLogsCSV: () => {
+        let logs = app.serverResearchLogs && app.serverResearchLogs.length > 0
+          ? app.serverResearchLogs
+          : JSON.parse(localStorage.getItem('ems_research_logs') || '[]');
+
+        if (!logs || logs.length === 0) {
+          return utils.showToast('出力できるプレイログがまだありません');
+        }
+
+        // 1. 個人別サマリー集計（総プレイ回数・プレイ日数・完了回数・モード別回数）
+        const summaryMap = {};
+        logs.forEach(l => {
+          if (!summaryMap[l.researchId]) {
+            summaryMap[l.researchId] = {
+              researchId: l.researchId,
+              latestName: l.playerName,
+              days: new Set(),
+              startCount: 0,
+              endCount: 0,
+              modes: { babanuki: 0, memory: 0, jinuki: 0, jack: 0, karuta: 0 }
+            };
+          }
+          const s = summaryMap[l.researchId];
+          if (l.playerName) s.latestName = l.playerName;
+          if (l.dateStr) s.days.add(l.dateStr);
+          if (l.eventType === 'game_start') {
+            s.startCount++;
+            if (s.modes[l.mode] !== undefined) s.modes[l.mode]++;
+          }
+          if (l.eventType === 'game_end') s.endCount++;
+        });
+
+        let csv = '\uFEFF'; // Excel文字化け防止BOM
+        csv += '=== 個人別集計サマリー（Teams Forms突合用） ===\n';
+        csv += '研究ID,最新コールサイン,プレイ日数(日),総開始回数,総完了回数,ババ抜き,神経衰弱,ジジ抜き,99ジャック,救急かるた\n';
+        Object.values(summaryMap).forEach(s => {
+          csv += `"${s.researchId}","${s.latestName}",${s.days.size},${s.startCount},${s.endCount},${s.modes.babanuki},${s.modes.memory},${s.modes.jinuki},${s.modes.jack},${s.modes.karuta}\n`;
+        });
+
+        csv += '\n=== 全イベント詳細ログ ===\n';
+        csv += 'タイムスタンプ,日付,時刻,研究ID,コールサイン,ゲームモード,イベント種別,ソロ演習,順位,スコア\n';
+        logs.forEach(l => {
+          csv += `"${l.timestamp}","${l.dateStr}","${l.timeStr}","${l.researchId}","${l.playerName}","${l.mode}","${l.eventType}",${l.isSolo ? 'SOLO' : 'MULTI'},"${l.rank}","${l.score}"\n`;
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `EMS_Research_Log_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        utils.showToast('📥 研究用CSVをダウンロードしました');
+      },
 
       // ==========================================
       // 管理室（CMS）ロジック
