@@ -20,7 +20,19 @@ const socketRoomMap = {}; // どのソケットがどのルームにいるかを
 let globalAccessState = { game1: true, game2: true, game3: true, game4: true, game5: true, showResearchId: true };
 let globalCardDB = null;
 let globalAnnouncements = [];
+const fs = require('fs');
+const RESEARCH_LOG_FILE = path.join(__dirname, 'research_logs.json');
 let globalResearchLogs = []; // 研究用個人プレイログ蓄積
+try {
+  if (fs.existsSync(RESEARCH_LOG_FILE)) {
+    const loaded = JSON.parse(fs.readFileSync(RESEARCH_LOG_FILE, 'utf8'));
+    if (Array.isArray(loaded)) globalResearchLogs = loaded;
+  }
+} catch (e) {}
+
+function saveResearchLogsToFile() {
+  try { fs.writeFileSync(RESEARCH_LOG_FILE, JSON.stringify(globalResearchLogs)); } catch (e) {}
+}
 
 
 const PLAYER_COLORS = [
@@ -40,22 +52,42 @@ io.on('connection', (socket) => {
   if (globalCardDB) socket.emit('update_cards', globalCardDB);
   socket.emit('init_announcements', globalAnnouncements);
 
- // クライアントからの研究用プレイログ記録
-  socket.on('record_research_log', (entry) => {
-    if (!entry || !entry.researchId) return;
+// クライアントからの研究用プレイログ記録（JST固定・重複防止・ファイル保存）
+  const appendResearchLog = (entry) => {
+    if (!entry || !entry.researchId) return false;
+    const now = entry.timestamp ? new Date(entry.timestamp) : new Date();
+    const ts = isNaN(now.getTime()) ? new Date().toISOString() : now.toISOString();
+    const rId = String(entry.researchId);
+    const ev = String(entry.eventType || '');
+    const exists = globalResearchLogs.some(l => l.timestamp === ts && l.researchId === rId && l.eventType === ev);
+    if (exists) return false;
+
     globalResearchLogs.push({
-      timestamp: new Date().toISOString(),
-      dateStr: new Date().toLocaleDateString('ja-JP'),
-      timeStr: new Date().toLocaleTimeString('ja-JP'),
-      researchId: String(entry.researchId),
+      timestamp: ts,
+      dateStr: now.toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo' }),
+      timeStr: now.toLocaleTimeString('ja-JP', { timeZone: 'Asia/Tokyo' }),
+      researchId: rId,
       playerName: String(entry.playerName || ''),
       mode: String(entry.mode || ''),
-      eventType: String(entry.eventType || ''), // 'game_start' | 'game_end'
+      eventType: ev,
       isSolo: !!entry.isSolo,
       rank: entry.rank || '',
       score: entry.score !== undefined ? entry.score : ''
     });
-    if (globalResearchLogs.length > 10000) globalResearchLogs.shift();
+    if (globalResearchLogs.length > 20000) globalResearchLogs.shift();
+    return true;
+  };
+
+  socket.on('record_research_log', (entry) => {
+    if (appendResearchLog(entry)) saveResearchLogsToFile();
+  });
+
+  // サーバー再起動後の自動復元用：端末ローカルの過去ログを一括同期
+  socket.on('sync_local_research_logs', (entries) => {
+    if (!Array.isArray(entries)) return;
+    let added = false;
+    entries.forEach(e => { if (appendResearchLog(e)) added = true; });
+    if (added) saveResearchLogsToFile();
   });
 
 socket.on('request_admin_state', () => {
