@@ -17,7 +17,7 @@ const rooms = {};
 const socketRoomMap = {}; // どのソケットがどのルームにいるかを記録するマップ
 
 // 🎴 GAME 05（救急かるた）を含めた全5ゲームのアクセス権初期値
-let globalAccessState = { game1: true, game2: true, game3: true, game4: true, game5: true };
+let globalAccessState = { game1: true, game2: true, game3: true, game4: true, game5: true, showResearchId: true };
 let globalCardDB = null;
 let globalAnnouncements = [];
 let globalResearchLogs = []; // 研究用個人プレイログ蓄積
